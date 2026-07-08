@@ -1,0 +1,73 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-white: #ffffff;
+  --color-ivory: #faf9f6;
+  --color-teal: #2dbead;
+  --color-light-teal: #d4f5f1;
+  --color-mint-strong: #bfedea;
+  --color-soft-blue: #e7f8fa;
+  --color-mid-teal: #5fa9a5;
+  --color-dark-teal: #2a7f80;
+  --color-text: #252525;
+  --color-soft-text: #6b7280;
+  --font-sans: "Noto Sans", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  font-family: 'Noto Sans', sans-serif;
+  color: var(--color-text);
+  background-color: var(--color-white);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  letter-spacing: -0.01em;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Noto Sans', sans-serif;
+  color: var(--color-text);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+p {
+  color: var(--color-soft-text);
+}
+
+#root {
+  min-height: 100vh;
+}
+
+@media (pointer: fine) and (min-width: 1024px) {
+  body.custom-cursor-enabled,
+  body.custom-cursor-enabled a,
+  body.custom-cursor-enabled button,
+  body.custom-cursor-enabled input,
+  body.custom-cursor-enabled select,
+  body.custom-cursor-enabled textarea {
+    cursor: none;
+  }
+}
+
+::-webkit-scrollbar {
+  width: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-white);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-light-teal);
+  border-radius: 3px;
+}
