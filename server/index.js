@@ -7,6 +7,7 @@ import orderRoutes from './routes/orderRoutes.js';
 import contactRoutes from './routes/contactRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
 import paymentRoutes from './routes/paymentRoutes.js';
+import { isRazorpayConfigured } from './utils/razorpayConfig.js';
 
 connectDB();
 
@@ -30,4 +31,7 @@ app.get('/api/health', (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`BLEMOUT server running on port ${PORT}`);
+  if (!isRazorpayConfigured()) {
+    console.log('Razorpay: not configured — checkout will show demo payment message.');
+  }
 });

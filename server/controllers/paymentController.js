@@ -3,6 +3,7 @@ import Razorpay from 'razorpay';
 import Order from '../models/Order.js';
 import { generateOrderId } from '../utils/orderId.js';
 import { hashPhone } from '../utils/phoneHash.js';
+import { isRazorpayConfigured, PAYMENT_UNAVAILABLE_MESSAGE } from '../utils/razorpayConfig.js';
 
 const getRazorpay = () =>
   new Razorpay({
@@ -10,7 +11,22 @@ const getRazorpay = () =>
     key_secret: process.env.RAZORPAY_KEY_SECRET,
   });
 
+export const getPaymentStatus = (req, res) => {
+  const available = isRazorpayConfigured();
+  res.json({
+    available,
+    message: available ? null : PAYMENT_UNAVAILABLE_MESSAGE,
+  });
+};
+
 export const createPaymentOrder = async (req, res) => {
+  if (!isRazorpayConfigured()) {
+    return res.status(503).json({
+      available: false,
+      message: PAYMENT_UNAVAILABLE_MESSAGE,
+    });
+  }
+
   try {
     const { amount } = req.body;
     const razorpay = getRazorpay();
@@ -24,6 +40,7 @@ export const createPaymentOrder = async (req, res) => {
     const order = await razorpay.orders.create(options);
 
     res.json({
+      available: true,
       id: order.id,
       amount: order.amount,
       currency: order.currency,
@@ -35,6 +52,13 @@ export const createPaymentOrder = async (req, res) => {
 };
 
 export const verifyPayment = async (req, res) => {
+  if (!isRazorpayConfigured()) {
+    return res.status(503).json({
+      available: false,
+      message: PAYMENT_UNAVAILABLE_MESSAGE,
+    });
+  }
+
   try {
     const {
       razorpay_order_id,

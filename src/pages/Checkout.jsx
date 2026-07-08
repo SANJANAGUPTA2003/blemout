@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import FadeUp from '../components/ui/FadeUp';
 import Button from '../components/ui/Button';
@@ -8,10 +8,14 @@ import api from '../utils/api';
 import { formatPrice } from '../utils/format';
 import { loadRazorpay } from '../utils/razorpay';
 
+const PAYMENT_UNAVAILABLE_MESSAGE = 'Payment gateway will be activated soon.';
+
 export default function Checkout() {
   const { items, cartTotal, clearCart } = useCart();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [checkingPayment, setCheckingPayment] = useState(true);
+  const [paymentAvailable, setPaymentAvailable] = useState(true);
   const [error, setError] = useState('');
   const [form, setForm] = useState({
     name: '',
@@ -26,6 +30,14 @@ export default function Checkout() {
   const shipping = cartTotal >= 499 ? 0 : 49;
   const total = cartTotal + shipping;
 
+  useEffect(() => {
+    api
+      .get('/payment/status')
+      .then(({ data }) => setPaymentAvailable(Boolean(data.available)))
+      .catch(() => setPaymentAvailable(false))
+      .finally(() => setCheckingPayment(false));
+  }, []);
+
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
@@ -33,6 +45,12 @@ export default function Checkout() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+
+    if (!paymentAvailable) {
+      setError(PAYMENT_UNAVAILABLE_MESSAGE);
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -46,6 +64,13 @@ export default function Checkout() {
       const { data: paymentOrder } = await api.post('/payment/create-order', {
         amount: total,
       });
+
+      if (!paymentOrder.available) {
+        setPaymentAvailable(false);
+        setError(paymentOrder.message || PAYMENT_UNAVAILABLE_MESSAGE);
+        setLoading(false);
+        return;
+      }
 
       const options = {
         key: paymentOrder.key,
@@ -96,7 +121,12 @@ export default function Checkout() {
       });
       rzp.open();
     } catch (err) {
-      setError(err.response?.data?.message || 'Something went wrong. Please try again.');
+      if (err.response?.status === 503) {
+        setPaymentAvailable(false);
+        setError(err.response?.data?.message || PAYMENT_UNAVAILABLE_MESSAGE);
+      } else {
+        setError(err.response?.data?.message || 'Something went wrong. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -165,12 +195,28 @@ export default function Checkout() {
                   </div>
                 </div>
 
+                {!checkingPayment && !paymentAvailable && (
+                  <div className="mt-4 rounded-xl border border-teal/20 bg-mint-strong/40 px-4 py-3 text-sm text-dark-teal">
+                    {PAYMENT_UNAVAILABLE_MESSAGE}
+                  </div>
+                )}
+
                 {error && (
                   <p className="mt-4 text-sm text-red-500">{error}</p>
                 )}
 
-                <Button type="submit" className="w-full mt-6" disabled={loading}>
-                  {loading ? 'Processing...' : 'Pay with Razorpay'}
+                <Button
+                  type="submit"
+                  className="w-full mt-6"
+                  disabled={loading || checkingPayment || !paymentAvailable}
+                >
+                  {checkingPayment
+                    ? 'Checking payment...'
+                    : !paymentAvailable
+                      ? 'Payment Coming Soon'
+                      : loading
+                        ? 'Processing...'
+                        : 'Pay with Razorpay'}
                 </Button>
               </div>
             </FadeUp>
