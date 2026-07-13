@@ -1,36 +1,61 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import ProductCard from '../ui/ProductCard';
 
-function chunk(list, size) {
-  const pages = [];
-  for (let i = 0; i < list.length; i += size) {
-    pages.push(list.slice(i, i + size));
-  }
-  return pages.length ? pages : [[]];
-}
-
 export default function BestSellersCarousel({ products = [] }) {
-  const pages = useMemo(() => chunk(products, 4), [products]);
-  const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
-  const touchStartX = useRef(null);
-
-  const go = useCallback(
-    (next) => {
-      if (!pages.length) return;
-      setIndex((current) => (next + pages.length) % pages.length);
-    },
-    [pages.length]
-  );
+  const trackRef = useRef(null);
+  const dragRef = useRef({ active: false, startX: 0, scrollLeft: 0 });
 
   useEffect(() => {
-    if (paused || pages.length <= 1) return undefined;
-    const timer = window.setInterval(() => go(index + 1), 5000);
-    return () => window.clearInterval(timer);
-  }, [paused, pages.length, index, go]);
+    const el = trackRef.current;
+    if (!el || products.length === 0) return undefined;
+
+    let raf;
+    const step = () => {
+      if (!paused && !dragRef.current.active) {
+        el.scrollLeft += 0.6;
+        if (el.scrollLeft >= el.scrollWidth / 2) {
+          el.scrollLeft = 0;
+        }
+      }
+      raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
+  }, [paused, products.length]);
+
+  const scrollByCard = useCallback((dir) => {
+    const el = trackRef.current;
+    if (!el) return;
+    el.scrollBy({ left: dir * 300, behavior: 'smooth' });
+  }, []);
+
+  const onPointerDown = (e) => {
+    const el = trackRef.current;
+    if (!el) return;
+    dragRef.current = {
+      active: true,
+      startX: e.clientX,
+      scrollLeft: el.scrollLeft,
+    };
+  };
+
+  const onPointerMove = (e) => {
+    const el = trackRef.current;
+    if (!el || !dragRef.current.active) return;
+    e.preventDefault();
+    el.scrollLeft = dragRef.current.scrollLeft - (e.clientX - dragRef.current.startX);
+  };
+
+  const endDrag = () => {
+    dragRef.current.active = false;
+  };
 
   if (!products.length) return null;
+
+  // Duplicate for seamless infinite loop
+  const looped = [...products, ...products];
 
   return (
     <section
@@ -50,74 +75,45 @@ export default function BestSellersCarousel({ products = [] }) {
             The most-loved BLEMOUT formulas and routines, curated for everyday clarity.
           </p>
         </div>
-        {pages.length > 1 && (
-          <div className="hidden sm:flex gap-2">
-            <button
-              type="button"
-              aria-label="Previous products"
-              onClick={() => go(index - 1)}
-              className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center text-soft-text hover:text-dark-teal hover:border-teal/40 transition-colors"
-            >
-              <ChevronLeft size={18} />
-            </button>
-            <button
-              type="button"
-              aria-label="Next products"
-              onClick={() => go(index + 1)}
-              className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center text-soft-text hover:text-dark-teal hover:border-teal/40 transition-colors"
-            >
-              <ChevronRight size={18} />
-            </button>
-          </div>
-        )}
+        <div className="hidden sm:flex gap-2 shrink-0">
+          <button
+            type="button"
+            aria-label="Scroll bestsellers left"
+            onClick={() => scrollByCard(-1)}
+            className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center text-soft-text hover:text-dark-teal hover:border-teal/40 transition-colors"
+          >
+            <ChevronLeft size={18} />
+          </button>
+          <button
+            type="button"
+            aria-label="Scroll bestsellers right"
+            onClick={() => scrollByCard(1)}
+            className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center text-soft-text hover:text-dark-teal hover:border-teal/40 transition-colors"
+          >
+            <ChevronRight size={18} />
+          </button>
+        </div>
       </div>
 
       <div
-        className="max-w-[1400px] mx-auto px-5 md:px-8 lg:px-10 overflow-hidden"
-        onTouchStart={(e) => {
-          touchStartX.current = e.changedTouches[0]?.clientX ?? null;
-        }}
-        onTouchEnd={(e) => {
-          const start = touchStartX.current;
-          const end = e.changedTouches[0]?.clientX;
-          if (start == null || end == null) return;
-          const delta = end - start;
-          if (Math.abs(delta) < 40) return;
-          go(delta < 0 ? index + 1 : index - 1);
-        }}
+        ref={trackRef}
+        className="flex gap-6 overflow-x-auto px-5 md:px-8 lg:px-10 pb-2 scrollbar-none cursor-grab active:cursor-grabbing select-none"
+        style={{ scrollbarWidth: 'none', touchAction: 'pan-y' }}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={endDrag}
+        onPointerLeave={endDrag}
+        onPointerCancel={endDrag}
       >
-        <div
-          className="flex transition-transform duration-500 ease-out"
-          style={{ transform: `translateX(-${index * 100}%)` }}
-        >
-          {pages.map((page, pageIndex) => (
-            <div
-              key={`page-${pageIndex}`}
-              className="w-full shrink-0 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8"
-            >
-              {page.map((product) => (
-                <ProductCard key={product._id} product={product} imageMode="promo" />
-              ))}
-            </div>
-          ))}
-        </div>
+        {looped.map((product, i) => (
+          <div
+            key={`${product._id}-${i}`}
+            className="min-w-[240px] sm:min-w-[280px] md:min-w-[300px] max-w-[300px] shrink-0"
+          >
+            <ProductCard product={product} imageMode="promo" />
+          </div>
+        ))}
       </div>
-
-      {pages.length > 1 && (
-        <div className="mt-8 flex justify-center gap-2">
-          {pages.map((_, i) => (
-            <button
-              key={`dot-${i}`}
-              type="button"
-              aria-label={`Go to slide ${i + 1}`}
-              onClick={() => setIndex(i)}
-              className={`h-1.5 rounded-full transition-all ${
-                i === index ? 'w-8 bg-teal' : 'w-1.5 bg-gray-300 hover:bg-teal/50'
-              }`}
-            />
-          ))}
-        </div>
-      )}
     </section>
   );
 }
