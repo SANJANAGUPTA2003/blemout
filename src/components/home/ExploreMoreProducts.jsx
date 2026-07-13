@@ -1,0 +1,137 @@
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import FadeUp from '../ui/FadeUp';
+import ProductCard from '../ui/ProductCard';
+import LoadingSpinner from '../ui/LoadingSpinner';
+import api from '../../utils/api';
+
+export default function ExploreMoreProducts() {
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [paused, setPaused] = useState(false);
+  const trackRef = useRef(null);
+  const dragRef = useRef({ active: false, startX: 0, scrollLeft: 0 });
+
+  useEffect(() => {
+    api
+      .get('/products')
+      .then(({ data }) => setProducts(data.filter((p) => !p.isCombo).slice(0, 8)))
+      .catch(() => setProducts([]))
+      .finally(() => setLoading(false));
+  }, []);
+
+  useEffect(() => {
+    const el = trackRef.current;
+    if (!el || products.length === 0) return undefined;
+
+    let raf;
+    const step = () => {
+      if (!paused && !dragRef.current.active) {
+        el.scrollLeft += 0.55;
+        if (el.scrollLeft >= el.scrollWidth / 2) {
+          el.scrollLeft = 0;
+        }
+      }
+      raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
+  }, [paused, products.length]);
+
+  const scrollByCard = useCallback((dir) => {
+    const el = trackRef.current;
+    if (!el) return;
+    el.scrollBy({ left: dir * 300, behavior: 'smooth' });
+  }, []);
+
+  const onPointerDown = (e) => {
+    const el = trackRef.current;
+    if (!el) return;
+    dragRef.current = {
+      active: true,
+      startX: e.clientX,
+      scrollLeft: el.scrollLeft,
+    };
+  };
+
+  const onPointerMove = (e) => {
+    const el = trackRef.current;
+    if (!el || !dragRef.current.active) return;
+    e.preventDefault();
+    el.scrollLeft = dragRef.current.scrollLeft - (e.clientX - dragRef.current.startX);
+  };
+
+  const endDrag = () => {
+    dragRef.current.active = false;
+  };
+
+  const looped = products.length ? [...products, ...products] : [];
+
+  return (
+    <section
+      className="relative py-16 md:py-24 bg-white"
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+    >
+      <div className="max-w-[1400px] mx-auto px-5 md:px-8 lg:px-10 mb-10 flex items-end justify-between gap-4">
+        <FadeUp>
+          <div className="max-w-xl">
+            <p className="text-[12px] tracking-[0.22em] uppercase text-teal font-bold mb-3">
+              Discover
+            </p>
+            <h2 className="text-[34px] md:text-[42px] font-bold text-text tracking-tight">
+              Explore More Products
+            </h2>
+            <p className="mt-4 text-[16px] text-soft-text">
+              Shop the complete BLEMOUT lineup in one smooth product row.
+            </p>
+          </div>
+        </FadeUp>
+        {!loading && products.length > 0 && (
+          <div className="hidden sm:flex gap-2 shrink-0">
+            <button
+              type="button"
+              aria-label="Scroll discover products left"
+              onClick={() => scrollByCard(-1)}
+              className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center text-soft-text hover:text-dark-teal hover:border-teal/40 transition-colors"
+            >
+              <ChevronLeft size={18} />
+            </button>
+            <button
+              type="button"
+              aria-label="Scroll discover products right"
+              onClick={() => scrollByCard(1)}
+              className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center text-soft-text hover:text-dark-teal hover:border-teal/40 transition-colors"
+            >
+              <ChevronRight size={18} />
+            </button>
+          </div>
+        )}
+      </div>
+
+      {loading ? (
+        <LoadingSpinner className="py-16" />
+      ) : (
+        <div
+          ref={trackRef}
+          className="flex gap-6 overflow-x-auto px-5 md:px-8 lg:px-10 pb-2 scrollbar-none cursor-grab active:cursor-grabbing select-none"
+          style={{ scrollbarWidth: 'none', touchAction: 'pan-y' }}
+          onPointerDown={onPointerDown}
+          onPointerMove={onPointerMove}
+          onPointerUp={endDrag}
+          onPointerLeave={endDrag}
+          onPointerCancel={endDrag}
+        >
+          {looped.map((product, i) => (
+            <div
+              key={`${product._id}-${i}`}
+              className="min-w-[240px] sm:min-w-[280px] md:min-w-[300px] max-w-[300px] shrink-0"
+            >
+              <ProductCard product={product} imageMode="promo" />
+            </div>
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}

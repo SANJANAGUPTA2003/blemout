@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 
 const CartContext = createContext(null);
 
@@ -11,12 +11,33 @@ export function CartProvider({ children }) {
       return [];
     }
   });
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [toast, setToast] = useState(null);
+  const [lastAddedId, setLastAddedId] = useState(null);
 
   useEffect(() => {
     localStorage.setItem('blemout_cart', JSON.stringify(items));
   }, [items]);
 
-  const addToCart = (product, quantity = 1) => {
+  useEffect(() => {
+    if (!toast) return undefined;
+    const timer = window.setTimeout(() => setToast(null), 2800);
+    return () => window.clearTimeout(timer);
+  }, [toast]);
+
+  useEffect(() => {
+    if (!isDrawerOpen) return undefined;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [isDrawerOpen]);
+
+  const openDrawer = useCallback(() => setIsDrawerOpen(true), []);
+  const closeDrawer = useCallback(() => setIsDrawerOpen(false), []);
+
+  const addToCart = useCallback((product, quantity = 1) => {
     setItems((prev) => {
       const existing = prev.find((item) => item._id === product._id);
       if (existing) {
@@ -28,15 +49,22 @@ export function CartProvider({ children }) {
       }
       return [...prev, { ...product, quantity }];
     });
-  };
+    setLastAddedId(product._id);
+    setToast({
+      id: Date.now(),
+      name: product.name,
+      imageUrl: product.imageUrl || product.images?.[0],
+    });
+    setIsDrawerOpen(true);
+  }, []);
 
-  const removeFromCart = (productId) => {
+  const removeFromCart = useCallback((productId) => {
     setItems((prev) => prev.filter((item) => item._id !== productId));
-  };
+  }, []);
 
-  const updateQuantity = (productId, quantity) => {
+  const updateQuantity = useCallback((productId, quantity) => {
     if (quantity < 1) {
-      removeFromCart(productId);
+      setItems((prev) => prev.filter((item) => item._id !== productId));
       return;
     }
     setItems((prev) =>
@@ -44,9 +72,11 @@ export function CartProvider({ children }) {
         item._id === productId ? { ...item, quantity } : item
       )
     );
-  };
+  }, []);
 
-  const clearCart = () => setItems([]);
+  const clearCart = useCallback(() => setItems([]), []);
+
+  const dismissToast = useCallback(() => setToast(null), []);
 
   const cartTotal = items.reduce(
     (sum, item) => sum + item.price * item.quantity,
@@ -65,6 +95,12 @@ export function CartProvider({ children }) {
         clearCart,
         cartTotal,
         cartCount,
+        isDrawerOpen,
+        openDrawer,
+        closeDrawer,
+        toast,
+        dismissToast,
+        lastAddedId,
       }}
     >
       {children}

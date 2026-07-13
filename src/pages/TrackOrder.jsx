@@ -1,14 +1,28 @@
 import { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { CheckCircle, Circle, Package, Truck } from 'lucide-react';
+import { Link, useSearchParams } from 'react-router-dom';
+import { CheckCircle, Circle, Package, Truck, ShieldCheck } from 'lucide-react';
 import FadeUp from '../components/ui/FadeUp';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
-import SectionHeading from '../components/ui/SectionHeading';
 import api from '../utils/api';
 import { formatDate } from '../utils/format';
 
 const TRACKING_ERROR = 'Order not found or details do not match.';
+
+const steps = [
+  { key: 'placed', label: 'Order Placed', icon: Package },
+  { key: 'processing', label: 'Processing', icon: Circle },
+  { key: 'shipped', label: 'Shipped', icon: Truck },
+  { key: 'delivered', label: 'Delivered', icon: CheckCircle },
+];
+
+function statusIndex(status = '') {
+  const value = status.toLowerCase();
+  if (value.includes('deliver')) return 3;
+  if (value.includes('ship')) return 2;
+  if (value.includes('process') || value.includes('confirm')) return 1;
+  return 0;
+}
 
 export default function TrackOrder() {
   const [searchParams] = useSearchParams();
@@ -25,7 +39,6 @@ export default function TrackOrder() {
 
   const trackOrder = async (e) => {
     e?.preventDefault();
-
     const trimmedId = orderId.trim().toUpperCase();
     const trimmedPhone = phone.trim();
 
@@ -51,139 +64,114 @@ export default function TrackOrder() {
     }
   };
 
+  const activeStep = order ? statusIndex(order.status) : -1;
+
   return (
-    <div className="py-12 md:py-16">
-      <div className="max-w-2xl mx-auto px-4 md:px-6">
-        <FadeUp>
-          <SectionHeading
-            title="Track Your Order"
-            subtitle="Enter your secure Order ID and the phone number used at checkout."
-          />
-        </FadeUp>
-
-        <FadeUp delay={0.1}>
-          <form onSubmit={trackOrder} className="space-y-4 mb-10">
-            <Input
-              label="Order ID"
-              placeholder="e.g. BLM-A7K9Q2"
-              value={orderId}
-              onChange={(e) => setOrderId(e.target.value.toUpperCase())}
-            />
-            <Input
-              label="Phone Number"
-              placeholder="10-digit mobile number"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              type="tel"
-            />
-            <Button type="submit" disabled={loading} className="w-full sm:w-auto">
-              {loading ? 'Verifying...' : 'Track Order'}
-            </Button>
-          </form>
-        </FadeUp>
-
-        {error && (
+    <div className="bg-white">
+      <div className="max-w-[1400px] mx-auto px-5 md:px-8 lg:px-10 py-14 md:py-20">
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-start">
           <FadeUp>
-            <div className="bg-red-50 text-red-600 text-sm p-4 rounded-xl text-center mb-6">
-              {error}
+            <div className="aspect-[4/5] overflow-hidden bg-[#f7faf9]">
+              <img
+                src="/products/facewash/2.jpg"
+                alt="BLEMOUT products"
+                className="w-full h-full object-cover"
+              />
             </div>
           </FadeUp>
-        )}
+
+          <FadeUp delay={0.06}>
+            <p className="text-[11px] tracking-[0.22em] uppercase text-teal font-semibold mb-3">
+              Customer Service
+            </p>
+            <h1 className="text-3xl md:text-4xl font-semibold text-text tracking-tight">
+              Track Your Order
+            </h1>
+            <p className="mt-4 text-soft-text leading-relaxed max-w-md">
+              Enter your secure Order ID and the phone number used at checkout.
+              We verify both before showing status — never share your full order details publicly.
+            </p>
+
+            <form onSubmit={trackOrder} className="mt-8 space-y-4 max-w-md">
+              <Input
+                label="Order ID"
+                placeholder="e.g. BLM-A7K9Q2"
+                value={orderId}
+                onChange={(e) => setOrderId(e.target.value.toUpperCase())}
+              />
+              <Input
+                label="Phone Number"
+                placeholder="10-digit mobile number"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                type="tel"
+              />
+              {error && <p className="text-sm text-red-500">{error}</p>}
+              <Button type="submit" disabled={loading} className="w-full sm:w-auto">
+                {loading ? 'Verifying...' : 'Track Order'}
+              </Button>
+            </form>
+
+            <div className="mt-8 flex items-start gap-3 text-sm text-soft-text max-w-md">
+              <ShieldCheck size={18} className="text-teal shrink-0 mt-0.5" />
+              <p>
+                Tracking is rate-limited and privacy-safe. Full customer details stay available only to authenticated admin.
+              </p>
+            </div>
+          </FadeUp>
+        </div>
 
         {order && (
-          <FadeUp delay={0.15}>
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-50 p-6 md:p-8">
-              <div className="flex items-center justify-between mb-6">
+          <FadeUp>
+            <div className="mt-16 md:mt-20 max-w-3xl">
+              <div className="flex flex-wrap items-end justify-between gap-4 mb-10">
                 <div>
-                  <p className="text-sm text-soft-text">Order ID</p>
-                  <p className="text-xl font-bold text-teal tracking-wide">{order.orderId}</p>
+                  <p className="text-xs tracking-[0.16em] uppercase text-soft-text font-semibold">Order</p>
+                  <h2 className="mt-1 text-2xl font-semibold text-text">{order.orderId || order.publicOrderId}</h2>
+                  {order.createdAt && (
+                    <p className="mt-1 text-sm text-soft-text">Placed {formatDate(order.createdAt)}</p>
+                  )}
                 </div>
-                <div className="text-right">
-                  <p className="text-sm text-soft-text">Placed on</p>
-                  <p className="text-sm font-medium text-text">{formatDate(order.createdAt)}</p>
-                </div>
+                <p className="text-sm font-semibold text-teal capitalize">{order.status || 'Placed'}</p>
               </div>
 
-              <div className="grid sm:grid-cols-2 gap-4 mb-8">
-                <div className="rounded-xl bg-soft-blue p-4">
-                  <p className="text-xs text-soft-text uppercase tracking-wide">Order Status</p>
-                  <p className="mt-1 text-sm font-semibold text-text capitalize">{order.orderStatus}</p>
-                </div>
-                <div className="rounded-xl bg-soft-blue p-4">
-                  <p className="text-xs text-soft-text uppercase tracking-wide">Payment</p>
-                  <p className="mt-1 text-sm font-semibold text-text capitalize">{order.paymentStatus}</p>
-                </div>
-              </div>
-
-              {order.orderStatus === 'cancelled' ? (
-                <div className="bg-red-50 text-red-600 text-sm p-4 rounded-xl text-center">
-                  This order has been cancelled.
-                </div>
-              ) : (
-                <div className="relative pl-8 space-y-8">
-                  {order.timeline?.map((step, i) => (
-                    <div key={step.key} className="relative">
-                      {i < (order.timeline?.length || 0) - 1 && (
-                        <div
-                          className={`absolute left-[-20px] top-6 w-0.5 h-full ${
-                            step.complete ? 'bg-teal' : 'bg-gray-200'
-                          }`}
-                        />
-                      )}
-                      <div className="flex items-center gap-3">
-                        {step.complete ? (
-                          <CheckCircle
-                            size={24}
-                            className={`absolute left-[-32px] ${step.current ? 'text-teal' : 'text-mid-teal'}`}
-                          />
-                        ) : (
-                          <Circle size={24} className="absolute left-[-32px] text-gray-300" />
-                        )}
-                        <div>
-                          <p className={`text-sm font-medium ${step.complete ? 'text-text' : 'text-gray-400'}`}>
-                            {step.label}
-                          </p>
-                          {step.current && (
-                            <p className="text-xs text-teal mt-0.5">Current status</p>
-                          )}
-                        </div>
-                      </div>
+              <div className="grid sm:grid-cols-4 gap-4">
+                {steps.map((step, i) => {
+                  const Icon = step.icon;
+                  const done = i <= activeStep;
+                  return (
+                    <div
+                      key={step.key}
+                      className={`p-4 border ${done ? 'border-teal/40 bg-[#f7faf9]' : 'border-gray-100'}`}
+                    >
+                      <Icon size={18} className={done ? 'text-teal' : 'text-soft-text'} />
+                      <p className={`mt-3 text-sm font-semibold ${done ? 'text-text' : 'text-soft-text'}`}>
+                        {step.label}
+                      </p>
                     </div>
-                  ))}
+                  );
+                })}
+              </div>
+
+              {order.items?.length > 0 && (
+                <div className="mt-10">
+                  <h3 className="text-sm font-semibold text-text mb-4">Items</h3>
+                  <ul className="space-y-3">
+                    {order.items.map((item, i) => (
+                      <li key={i} className="flex justify-between gap-4 text-sm text-soft-text border-b border-gray-50 pb-3">
+                        <span>{item.name} × {item.quantity || 1}</span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               )}
 
-              {(order.trackingNumber || order.estimatedDelivery) && (
-                <div className="mt-8 grid sm:grid-cols-2 gap-4">
-                  {order.trackingNumber && (
-                    <div className="flex items-start gap-3 rounded-xl bg-mint-strong/30 p-4">
-                      <Truck size={18} className="text-teal mt-0.5" />
-                      <div>
-                        <p className="text-xs text-soft-text">Tracking Number</p>
-                        <p className="text-sm font-medium text-text">{order.trackingNumber}</p>
-                      </div>
-                    </div>
-                  )}
-                  {order.estimatedDelivery && (
-                    <div className="rounded-xl bg-mint-strong/30 p-4">
-                      <p className="text-xs text-soft-text">Estimated Delivery</p>
-                      <p className="text-sm font-medium text-text">{formatDate(order.estimatedDelivery)}</p>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              <div className="mt-8 pt-6 border-t border-gray-100">
-                <div className="flex items-center gap-2 mb-3">
-                  <Package size={16} className="text-teal" />
-                  <span className="text-sm font-medium text-text">Order Items</span>
-                </div>
-                {order.items?.map((item, i) => (
-                  <div key={i} className="flex justify-between text-sm text-soft-text py-1.5">
-                    <span>{item.name} × {item.quantity}</span>
-                  </div>
-                ))}
-              </div>
+              <p className="mt-8 text-sm text-soft-text">
+                Need help?{' '}
+                <Link to="/contact" className="text-dark-teal font-semibold hover:text-teal">
+                  Contact support
+                </Link>
+              </p>
             </div>
           </FadeUp>
         )}

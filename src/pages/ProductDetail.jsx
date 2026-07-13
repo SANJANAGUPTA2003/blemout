@@ -1,48 +1,86 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { Star, Minus, Plus, ShoppingBag } from 'lucide-react';
+import {
+  Minus,
+  Plus,
+  ShoppingBag,
+  ShieldCheck,
+  Truck,
+  ChevronLeft,
+  ChevronRight,
+  Droplet,
+  FlaskConical,
+  Heart,
+  Leaf,
+  Shield,
+  Sparkles,
+  Sun,
+} from 'lucide-react';
 import FadeUp from '../components/ui/FadeUp';
 import Button from '../components/ui/Button';
-import ProductImage from '../components/ui/ProductImage';
+import ProductCard from '../components/ui/ProductCard';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 import ApiMessage from '../components/ui/ApiMessage';
 import { useCart } from '../context/CartContext';
-import { getProductImages } from '../data/productImages';
+import { normalizeProductContent } from '../data/productImages';
+import { calcDiscountPercent, getSellingPrice } from '../data/business';
 import api from '../utils/api';
 import { formatPrice } from '../utils/format';
 
-const tabs = ['Description', 'Ingredients', 'How To Use'];
+const ICONS = { Droplet, FlaskConical, Heart, Leaf, Shield, Sparkles, Sun };
+
+const accordionDefs = [
+  { key: 'overview', label: 'Overview' },
+  { key: 'benefits', label: 'Benefits' },
+  { key: 'highlights', label: 'Key Ingredients' },
+  { key: 'howToUse', label: 'How to Use' },
+  { key: 'ingredients', label: 'Full Ingredient List' },
+  { key: 'precautions', label: 'Precautions' },
+  { key: 'faqs', label: 'FAQs' },
+];
 
 export default function ProductDetail() {
-  const { id } = useParams();
+  const { slug } = useParams();
   const navigate = useNavigate();
   const { addToCart } = useCart();
   const [product, setProduct] = useState(null);
+  const [related, setRelated] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [quantity, setQuantity] = useState(1);
-  const [activeTab, setActiveTab] = useState('Description');
   const [activeImage, setActiveImage] = useState(0);
+  const [openAccordion, setOpenAccordion] = useState('overview');
+  const [touchX, setTouchX] = useState(null);
 
   const fetchProduct = useCallback(() => {
     setLoading(true);
     setError(null);
     api
-      .get(`/products/${id}`)
-      .then(({ data }) => {
-        setProduct(data);
+      .get(`/products/${slug}`)
+      .then(async ({ data }) => {
+        setProduct(normalizeProductContent(data));
         setActiveImage(0);
+        setQuantity(1);
+        setOpenAccordion('overview');
+        const { data: all } = await api.get('/products');
+        setRelated(
+          all
+            .filter((p) => p._id !== data._id && (p.category === data.category || p.isBestSeller))
+            .slice(0, 4)
+        );
       })
       .catch((err) => {
         setProduct(null);
         setError(err.response?.status === 404 ? 'notfound' : 'offline');
       })
       .finally(() => setLoading(false));
-  }, [id]);
+  }, [slug]);
 
   useEffect(() => {
     fetchProduct();
   }, [fetchProduct]);
+
+  const images = useMemo(() => product?.images || [], [product]);
 
   if (loading) return <LoadingSpinner className="py-32" />;
 
@@ -59,7 +97,7 @@ export default function ProductDetail() {
           onRetry={error === 'offline' ? fetchProduct : undefined}
         />
         <div className="text-center mt-4">
-          <Link to="/shop" className="text-sm text-teal hover:text-dark-teal transition-colors duration-300">
+          <Link to="/shop" className="text-sm text-teal hover:text-dark-teal transition-colors">
             ← Back to Shop
           </Link>
         </div>
@@ -67,146 +105,253 @@ export default function ProductDetail() {
     );
   }
 
-  const images = getProductImages(product);
+  const sellingPrice = getSellingPrice(product);
+  const mrp = product.mrp && product.mrp > sellingPrice ? product.mrp : null;
+  const discount =
+    product.discountPercentage > 0
+      ? product.discountPercentage
+      : calcDiscountPercent(mrp, sellingPrice);
 
-  const handleAddToCart = () => addToCart(product, quantity);
+  const goImage = (dir) => {
+    if (!images.length) return;
+    setActiveImage((i) => (i + dir + images.length) % images.length);
+  };
 
+  const handleAddToCart = () => addToCart({ ...product, price: sellingPrice }, quantity);
   const handleBuyNow = () => {
-    addToCart(product, quantity);
+    addToCart({ ...product, price: sellingPrice }, quantity);
     navigate('/checkout');
   };
 
-  const tabContent = {
-    Description: product.description,
-    Ingredients: product.ingredients || 'Ingredient list coming soon.',
-    'How To Use': product.howToUse || 'Usage instructions coming soon.',
+  const accordionContent = {
+    overview: product.summary || product.description || 'Details coming soon.',
+    benefits: product.benefits.length ? (
+      <ul className="space-y-2">
+        {product.benefits.map((b) => (
+          <li key={b} className="flex gap-2">
+            <span className="text-teal">•</span>
+            <span>{b}</span>
+          </li>
+        ))}
+      </ul>
+    ) : (
+      'Details coming soon.'
+    ),
+    highlights: product.ingredientHighlights.length ? (
+      <div className="grid sm:grid-cols-2 gap-4">
+        {product.ingredientHighlights.map((item) => {
+          const Icon = ICONS[item.icon] || Sparkles;
+          return (
+            <div key={item.name} className="flex gap-3 items-start">
+              <span className="w-10 h-10 rounded-full bg-[#f5f8f7] flex items-center justify-center text-teal shrink-0">
+                <Icon size={18} strokeWidth={1.75} />
+              </span>
+              <div>
+                <p className="text-sm font-semibold text-text">{item.name}</p>
+                <p className="mt-1 text-sm text-soft-text leading-relaxed">{item.explanation}</p>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    ) : (
+      product.ingredients || 'See packaging for key ingredients.'
+    ),
+    howToUse: product.howToUse || 'Details coming soon.',
+    ingredients: product.ingredients || 'See product packaging.',
+    precautions: product.precautions || 'For external use only. Discontinue if irritation occurs.',
+    faqs: product.faqs.length ? (
+      <div className="space-y-4">
+        {product.faqs.map((faq) => (
+          <div key={faq.question}>
+            <p className="font-semibold text-text">{faq.question}</p>
+            <p className="mt-1 text-soft-text">{faq.answer}</p>
+          </div>
+        ))}
+      </div>
+    ) : null,
   };
 
   return (
-    <div className="py-16 md:py-24">
-      <div className="max-w-7xl mx-auto px-6 md:px-10">
-        <div className="grid lg:grid-cols-2 gap-16 lg:gap-20">
-          <FadeUp>
-            <div className="bg-ivory rounded-xl overflow-hidden">
-              <ProductImage
-                src={images[activeImage]}
-                alt={product.name}
-                size="xl"
-                containerClass="rounded-xl"
-              />
-            </div>
-            {images.length > 1 && (
-              <div className="flex gap-3 mt-4 overflow-x-auto pb-1">
-                {images.map((img, i) => (
-                  <button
-                    key={img}
-                    onClick={() => setActiveImage(i)}
-                    className={`shrink-0 w-16 h-16 rounded-lg bg-ivory overflow-hidden border-2 transition-colors duration-300 ${
-                      activeImage === i ? 'border-teal' : 'border-transparent hover:border-light-teal'
-                    }`}
-                  >
-                    <img src={img} alt="" className="w-full h-full object-contain p-1" />
-                  </button>
-                ))}
+    <div className="bg-white">
+      <div className="max-w-[1400px] mx-auto px-4 md:px-6 lg:px-8 py-8 md:py-12">
+        <FadeUp>
+          <div className="grid lg:grid-cols-[1.15fr_0.85fr] gap-8 lg:gap-12 items-start">
+            <div>
+              <div
+                className="relative aspect-square bg-[#f7faf9] flex items-center justify-center overflow-hidden p-2 sm:p-3"
+                onTouchStart={(e) => setTouchX(e.changedTouches[0]?.clientX ?? null)}
+                onTouchEnd={(e) => {
+                  const end = e.changedTouches[0]?.clientX;
+                  if (touchX == null || end == null) return;
+                  const delta = end - touchX;
+                  if (Math.abs(delta) < 40) return;
+                  goImage(delta < 0 ? 1 : -1);
+                }}
+              >
+                <img
+                  src={images[activeImage] || product.imageUrl}
+                  alt={product.name}
+                  className="w-full h-full object-contain"
+                />
+                {images.length > 1 && (
+                  <>
+                    <button
+                      type="button"
+                      aria-label="Previous image"
+                      onClick={() => goImage(-1)}
+                      className="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/95 text-text flex items-center justify-center hover:bg-white shadow-sm"
+                    >
+                      <ChevronLeft size={18} />
+                    </button>
+                    <button
+                      type="button"
+                      aria-label="Next image"
+                      onClick={() => goImage(1)}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/95 text-text flex items-center justify-center hover:bg-white shadow-sm"
+                    >
+                      <ChevronRight size={18} />
+                    </button>
+                  </>
+                )}
               </div>
-            )}
-          </FadeUp>
+              {images.length > 1 && (
+                <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
+                  {images.map((img, i) => (
+                    <button
+                      key={img + i}
+                      type="button"
+                      onClick={() => setActiveImage(i)}
+                      className={`shrink-0 aspect-square w-[68px] md:w-20 bg-[#f7faf9] p-1 flex items-center justify-center border transition-colors ${
+                        activeImage === i ? 'border-teal' : 'border-transparent hover:border-gray-200'
+                      }`}
+                    >
+                      <img src={img} alt="" className="w-full h-full object-contain" />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
 
-          <FadeUp delay={0.08}>
-            <div className="lg:pt-4">
-              <p className="text-[11px] uppercase tracking-[0.2em] text-teal font-medium">
+            <div className="lg:pt-2">
+              <p className="text-[12px] tracking-[0.2em] uppercase text-teal font-bold mb-3">
                 {product.category}
               </p>
-              <h1 className="mt-3 text-2xl md:text-3xl font-medium text-text leading-snug">
+              <h1 className="text-[32px] md:text-[40px] font-bold text-text tracking-tight leading-tight">
                 {product.name}
               </h1>
+              {product.summary && (
+                <p className="mt-4 text-[16px] text-soft-text leading-relaxed">{product.summary}</p>
+              )}
 
-              <div className="flex items-center gap-2 mt-4">
-                <div className="flex">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <Star key={i} size={14} className="fill-teal text-teal" />
-                  ))}
-                </div>
-                <span className="text-xs text-soft-text">(4.8)</span>
+              <div className="mt-6 flex items-baseline gap-3 flex-wrap">
+                <span className="text-2xl font-bold text-text">{formatPrice(sellingPrice)}</span>
+                {mrp && <span className="text-soft-text line-through text-base">{formatPrice(mrp)}</span>}
+                {discount > 0 ? <span className="text-sm font-semibold text-teal">{discount}% off</span> : null}
               </div>
 
-              <div className="mt-6 flex items-center gap-3">
-                <p className="text-xl font-semibold text-text">
-                  {formatPrice(product.price)}
-                </p>
-                {product.mrp > product.price && (
-                  <p className="text-sm text-soft-text line-through">{formatPrice(product.mrp)}</p>
-                )}
-              </div>
               {product.size && (
-                <p className="mt-2 text-sm text-soft-text">{product.size}</p>
+                <p className="mt-4 text-[15px] text-soft-text">
+                  Size: <span className="text-text font-semibold">{product.size}</span>
+                </p>
+              )}
+              {product.skinType && (
+                <p className="mt-2 text-[15px] text-soft-text">
+                  Suitable for: <span className="text-text font-semibold">{product.skinType}</span>
+                </p>
               )}
 
-              {product.benefits?.length > 0 && (
-                <ul className="mt-8 space-y-2.5">
-                  {product.benefits.map((b) => (
-                    <li key={b} className="flex items-start gap-2.5 text-[13px] text-soft-text font-normal">
-                      <span className="w-1 h-1 rounded-full bg-teal mt-2 shrink-0" />
-                      {b}
-                    </li>
-                  ))}
-                </ul>
-              )}
-
-              <div className="mt-10 flex items-center gap-5">
-                <div className="flex items-center rounded-full border border-gray-100">
-                  <button
-                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="p-3 text-soft-text hover:text-teal transition-colors duration-300"
-                  >
-                    <Minus size={15} />
-                  </button>
-                  <span className="w-10 text-center text-sm font-medium">{quantity}</span>
-                  <button
-                    onClick={() => setQuantity(quantity + 1)}
-                    className="p-3 text-soft-text hover:text-teal transition-colors duration-300"
-                  >
-                    <Plus size={15} />
-                  </button>
-                </div>
-                {product.stock <= 5 && product.stock > 0 && (
-                  <span className="text-xs text-soft-text">Only {product.stock} left</span>
-                )}
+              <div className="mt-6 inline-flex items-center border border-gray-200 rounded-full">
+                <button
+                  type="button"
+                  aria-label="Decrease quantity"
+                  onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                  className="p-3 text-soft-text hover:text-dark-teal"
+                >
+                  <Minus size={16} />
+                </button>
+                <span className="w-10 text-center text-sm font-semibold">{quantity}</span>
+                <button
+                  type="button"
+                  aria-label="Increase quantity"
+                  onClick={() => setQuantity((q) => q + 1)}
+                  className="p-3 text-soft-text hover:text-dark-teal"
+                >
+                  <Plus size={16} />
+                </button>
               </div>
 
-              <div className="mt-8 flex flex-col sm:flex-row gap-3">
-                <Button onClick={handleAddToCart} className="gap-2 flex-1 sm:flex-none">
-                  <ShoppingBag size={16} />
-                  Add to Cart
+              <div className="mt-6 flex flex-col sm:flex-row gap-3">
+                <Button onClick={handleAddToCart} className="flex-1 gap-2">
+                  <ShoppingBag size={16} /> Add to Cart
                 </Button>
-                <Button variant="outline" onClick={handleBuyNow} className="flex-1 sm:flex-none">
+                <Button variant="secondary" onClick={handleBuyNow} className="flex-1">
                   Buy Now
                 </Button>
               </div>
-            </div>
-          </FadeUp>
-        </div>
 
-        <FadeUp delay={0.12} className="mt-20 md:mt-28 max-w-2xl">
-          <div className="flex gap-8 border-b border-gray-50">
-            {tabs.map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`pb-4 text-sm transition-colors duration-300 border-b -mb-px ${
-                  activeTab === tab
-                    ? 'border-teal text-teal font-medium'
-                    : 'border-transparent text-soft-text hover:text-text'
-                }`}
-              >
-                {tab}
-              </button>
-            ))}
-          </div>
-          <div className="py-8 text-[13px] text-soft-text leading-relaxed font-normal whitespace-pre-line">
-            {tabContent[activeTab]}
+              <div className="mt-8 space-y-3 text-[15px] text-soft-text">
+                <p className="flex items-center gap-2">
+                  <Truck size={16} className="text-teal" /> Secure shipping across India
+                </p>
+                <p className="flex items-center gap-2">
+                  <ShieldCheck size={16} className="text-teal" /> Dermatologically inspired formulas
+                </p>
+              </div>
+
+              {(product.includedProducts || product.comboItems)?.length > 0 && (
+                <div className="mt-8">
+                  <p className="text-xs tracking-[0.16em] uppercase font-bold text-text mb-3">Includes</p>
+                  <ul className="space-y-1.5 text-[15px] text-soft-text">
+                    {(product.includedProducts || product.comboItems).map((item) => (
+                      <li key={item}>• {item}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              <div className="mt-10 border-t border-gray-100">
+                {accordionDefs.map((item) => {
+                  if (item.key === 'faqs' && !accordionContent.faqs) return null;
+                  const open = openAccordion === item.key;
+                  return (
+                    <div key={item.key} className="border-b border-gray-100">
+                      <button
+                        type="button"
+                        onClick={() => setOpenAccordion(open ? '' : item.key)}
+                        className="w-full flex items-center justify-between py-4 text-left"
+                      >
+                        <span className="text-[15px] font-semibold text-text">{item.label}</span>
+                        <span className="text-teal text-lg leading-none">{open ? '−' : '+'}</span>
+                      </button>
+                      {open && (
+                        <div className="pb-5 text-[15px] text-soft-text leading-relaxed">
+                          {accordionContent[item.key]}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
           </div>
         </FadeUp>
+
+        {related.length > 0 && (
+          <section className="mt-20 md:mt-28">
+            <h2 className="text-[28px] md:text-[34px] font-bold text-text mb-8">Related Products</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {related.map((item) => (
+                <ProductCard key={item._id} product={item} imageMode="shop" />
+              ))}
+            </div>
+            <div className="mt-6">
+              <Link to="/shop" className="text-[15px] font-semibold text-dark-teal hover:text-teal">
+                Browse all products →
+              </Link>
+            </div>
+          </section>
+        )}
       </div>
     </div>
   );

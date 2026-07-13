@@ -1,4 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
-  <rect width="32" height="32" rx="8" fill="#2DBEAD"/>
-  <text x="16" y="21" text-anchor="middle" fill="white" font-family="system-ui,sans-serif" font-size="11" font-weight="700">B</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" role="img" aria-label="BLEMOUT">
+  <title>BLEMOUT</title>
+  <rect width="48" height="48" rx="12" fill="#2DBEAD"/>
+  <text x="24" y="32" text-anchor="middle" fill="white" font-family="Poppins,system-ui,sans-serif" font-size="22" font-weight="600">B</text>
 </svg>

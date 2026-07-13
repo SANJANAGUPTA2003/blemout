@@ -151,8 +151,8 @@ export const orderStatuses = [
 ];
 
 export const routineSuggestions = {
-  'dark-neck': ['Skin Glow & Age Defying Facewash', 'BLEMOUT Serum', 'Hydra Glow Water Moist Crème'],
-  underarms: ['Skin Glow & Age Defying Facewash', 'Advanced Blemishes Repair Cream', 'Hydra Glow Water Moist Crème'],
-  'elbows-knees': ['Skin Glow & Age Defying Facewash', 'Advanced Blemishes Repair Cream', 'Hydra Glow Water Moist Crème'],
-  pigmentation: ['BLEMOUT Serum', 'Advanced Blemishes Repair Cream', 'Enviro Shield Sunscreen'],
+  'dark-neck': ['BLEMOUT Skin Glow & Age Defying Facewash', 'BLEMOUT Advanced Blemishes Repair Serum – 30ml', 'BLEMOUT Hydra Glow Water Crème'],
+  underarms: ['BLEMOUT Skin Glow & Age Defying Facewash', 'BLEMOUT Blemishes Repair Cream', 'BLEMOUT Hydra Glow Water Crème'],
+  'elbows-knees': ['BLEMOUT Skin Glow & Age Defying Facewash', 'BLEMOUT Blemishes Repair Cream', 'BLEMOUT Hydra Glow Water Crème'],
+  pigmentation: ['BLEMOUT Advanced Blemishes Repair Serum – 30ml', 'BLEMOUT Blemishes Repair Cream', 'BLEMOUT Enviro Shield Sunscreen'],
 };

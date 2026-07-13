@@ -5,6 +5,7 @@ import Button from '../components/ui/Button';
 import ProductPlaceholder from '../components/ui/ProductPlaceholder';
 import { useCart } from '../context/CartContext';
 import { formatPrice } from '../utils/format';
+import { productPath } from '../data/productImages';
 
 export default function Cart() {
   const { items, updateQuantity, removeFromCart, cartTotal } = useCart();
@@ -39,7 +40,10 @@ export default function Cart() {
             {items.map((item, i) => (
               <FadeUp key={item._id} delay={i * 0.05}>
                 <div className="flex gap-4 bg-white rounded-2xl p-4 shadow-[0_4px_24px_rgba(0,0,0,0.04)] border border-gray-50">
-                  <div className="w-24 h-24 shrink-0 bg-mint-strong/20 rounded-xl flex items-center justify-center overflow-hidden">
+                  <Link
+                    to={productPath(item)}
+                    className="w-24 h-24 shrink-0 bg-[#f7faf9] rounded-xl flex items-center justify-center overflow-hidden"
+                  >
                     {item.imageUrl ? (
                       <img
                         src={item.imageUrl}
@@ -49,9 +53,11 @@ export default function Cart() {
                     ) : (
                       <ProductPlaceholder size="sm" className="rounded-xl" />
                     )}
-                  </div>
+                  </Link>
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-medium text-text truncate">{item.name}</h3>
+                    <Link to={productPath(item)}>
+                      <h3 className="font-medium text-text truncate hover:text-dark-teal transition-colors">{item.name}</h3>
+                    </Link>
                     <p className="text-sm text-soft-text mt-0.5">{formatPrice(item.price)}</p>
                     <div className="mt-3 flex items-center justify-between">
                       <div className="flex items-center border border-gray-100 rounded-full">

@@ -4,6 +4,7 @@ import FadeUp from '../components/ui/FadeUp';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import { useCart } from '../context/CartContext';
+import { BUSINESS } from '../data/business';
 import api from '../utils/api';
 import { formatPrice } from '../utils/format';
 import { loadRazorpay } from '../utils/razorpay';
@@ -153,7 +154,7 @@ export default function Checkout() {
             <div className="lg:col-span-2 space-y-4">
               <FadeUp>
                 <div className="bg-white rounded-2xl p-6 shadow-sm space-y-4">
-                  <h2 className="font-semibold text-text mb-2">Shipping Details</h2>
+                  <h2 className="font-bold text-text mb-2 text-lg">Shipping Details</h2>
                   <Input label="Full Name" name="name" value={form.name} onChange={handleChange} required />
                   <div className="grid sm:grid-cols-2 gap-4">
                     <Input label="Phone" name="phone" type="tel" value={form.phone} onChange={handleChange} required />
@@ -164,6 +165,11 @@ export default function Checkout() {
                     <Input label="City" name="city" value={form.city} onChange={handleChange} required />
                     <Input label="State" name="state" value={form.state} onChange={handleChange} required />
                     <Input label="Pincode" name="pincode" value={form.pincode} onChange={handleChange} required />
+                  </div>
+                  <div className="pt-4 border-t border-gray-100 text-sm text-soft-text space-y-1">
+                    <p className="font-semibold text-text">Sold by BLEMOUT</p>
+                    <p>{BUSINESS.email}</p>
+                    <p>{BUSINESS.address}</p>
                   </div>
                 </div>
               </FadeUp>
