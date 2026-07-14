@@ -39,19 +39,19 @@ export default function Cart() {
           <div className="lg:col-span-2 space-y-4">
             {items.map((item, i) => (
               <FadeUp key={item._id} delay={i * 0.05}>
-                <div className="flex gap-4 bg-white rounded-2xl p-4 shadow-[0_4px_24px_rgba(0,0,0,0.04)] border border-gray-50">
+                <div className="flex gap-4 bg-white py-4">
                   <Link
                     to={productPath(item)}
-                    className="w-24 h-24 shrink-0 bg-[#f7faf9] rounded-xl flex items-center justify-center overflow-hidden"
+                    className="w-28 h-28 shrink-0 border-0 bg-transparent flex items-center justify-center overflow-hidden"
                   >
                     {item.imageUrl ? (
                       <img
                         src={item.imageUrl}
                         alt={item.name}
-                        className="w-full h-full object-contain p-2"
+                        className="w-full h-full border-0 object-contain"
                       />
                     ) : (
-                      <ProductPlaceholder size="sm" className="rounded-xl" />
+                      <ProductPlaceholder size="sm" />
                     )}
                   </Link>
                   <div className="flex-1 min-w-0">

@@ -9,13 +9,21 @@
   --color-soft-blue: #eef7f8;
   --color-mid-teal: #5fa9a5;
   --color-dark-teal: #2a7f80;
-  --color-text: #1f2937;
-  --color-soft-text: #4b5563;
-  --font-sans: "Noto Sans", ui-sans-serif, system-ui, sans-serif;
+  --color-text: #222222;
+  --color-soft-text: #4a5560;
+  --font-sans: "Noto Sans", "Helvetica Neue", Helvetica, Arial, ui-sans-serif, system-ui, sans-serif;
 }
 
 * {
   box-sizing: border-box;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+  border: 0;
+  outline: 0;
+  box-shadow: none;
 }
 
 html {
@@ -38,7 +46,7 @@ html {
 
 body {
   margin: 0;
-  font-family: 'Noto Sans', ui-sans-serif, system-ui, sans-serif;
+  font-family: 'Noto Sans', 'Helvetica Neue', Helvetica, Arial, ui-sans-serif, system-ui, sans-serif;
   color: var(--color-text);
   background-color: var(--color-white);
   -webkit-font-smoothing: antialiased;
@@ -50,11 +58,11 @@ body {
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: 'Noto Sans', ui-sans-serif, system-ui, sans-serif;
+  font-family: 'Noto Sans', 'Helvetica Neue', Helvetica, Arial, ui-sans-serif, system-ui, sans-serif;
   color: var(--color-text);
   font-weight: 700;
-  letter-spacing: -0.025em;
-  line-height: 1.15;
+  letter-spacing: -0.03em;
+  line-height: 1.12;
 }
 
 p {

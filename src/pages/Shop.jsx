@@ -68,25 +68,29 @@ export default function Shop() {
     <div className="bg-white">
       <div className="max-w-[1400px] mx-auto px-5 md:px-8 lg:px-10 py-14 md:py-20">
         <FadeUp>
-          <p className="text-[11px] tracking-[0.22em] uppercase text-teal font-semibold mb-3">Shop</p>
-          <h1 className="text-3xl md:text-5xl font-semibold text-text tracking-tight">All Products</h1>
-          <p className="mt-4 text-soft-text max-w-xl">
+          <p className="text-[12px] tracking-[0.16em] uppercase text-teal font-bold mb-3">Shop</p>
+          <h1 className="text-[36px] md:text-[48px] font-bold text-[#222222] tracking-[-0.03em] leading-[1.1]">
+            All Products
+          </h1>
+          <p className="mt-4 text-[16px] text-[#4a5560] max-w-xl leading-relaxed">
             Explore approved BLEMOUT formulas and curated combos in a clean, spacious grid.
           </p>
         </FadeUp>
 
         <div className="mt-12 flex flex-col lg:flex-row gap-12 lg:gap-16">
-          <aside className="lg:w-56 shrink-0 space-y-8">
+          <aside className="lg:w-52 shrink-0 space-y-8">
             <div>
-              <h2 className="text-xs tracking-[0.16em] uppercase font-semibold text-text mb-4">Category</h2>
-              <div className="flex flex-wrap lg:flex-col gap-2">
+              <h2 className="text-xs tracking-[0.14em] uppercase font-bold text-[#222222] mb-4">Category</h2>
+              <div className="flex flex-wrap lg:flex-col gap-1">
                 {categories.map((cat) => (
                   <button
                     key={cat}
                     type="button"
                     onClick={() => updateCategory(cat)}
-                    className={`text-left text-sm px-0 py-1.5 transition-colors ${
-                      category === cat ? 'text-teal font-semibold' : 'text-soft-text hover:text-dark-teal'
+                    className={`text-left text-[15px] px-0 py-1.5 transition-colors ${
+                      category === cat
+                        ? 'text-teal font-semibold'
+                        : 'text-[#4a5560] hover:text-dark-teal'
                     }`}
                   >
                     {cat}
@@ -95,11 +99,11 @@ export default function Shop() {
               </div>
             </div>
             <div>
-              <h2 className="text-xs tracking-[0.16em] uppercase font-semibold text-text mb-4">Sort</h2>
+              <h2 className="text-xs tracking-[0.14em] uppercase font-bold text-[#222222] mb-4">Sort</h2>
               <select
                 value={sort}
                 onChange={(e) => setSort(e.target.value)}
-                className="w-full px-3 py-2.5 border border-gray-100 rounded-lg text-sm focus:outline-none focus:border-teal/40"
+                className="w-full px-0 py-2 border-0 border-b border-gray-200 rounded-none text-[15px] text-[#222222] focus:outline-none focus:border-teal/50 bg-transparent"
               >
                 <option value="default">Featured</option>
                 <option value="price-low">Price: Low to High</option>
@@ -108,7 +112,7 @@ export default function Shop() {
               </select>
             </div>
             <div>
-              <h2 className="text-xs tracking-[0.16em] uppercase font-semibold text-text mb-4">Search</h2>
+              <h2 className="text-xs tracking-[0.14em] uppercase font-bold text-[#222222] mb-4">Search</h2>
               <input
                 type="search"
                 value={query}
@@ -120,7 +124,7 @@ export default function Shop() {
                   setSearchParams(next);
                 }}
                 placeholder="Search..."
-                className="w-full px-3 py-2.5 border border-gray-100 rounded-lg text-sm focus:outline-none focus:border-teal/40"
+                className="w-full px-0 py-2 border-0 border-b border-gray-200 rounded-none text-[15px] text-[#222222] placeholder:text-[#6b7280] focus:outline-none focus:border-teal/50 bg-transparent"
               />
             </div>
           </aside>
@@ -133,10 +137,12 @@ export default function Shop() {
             ) : filtered.length === 0 ? (
               <ApiMessage type="empty" message="No products match your filters." />
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-8 gap-y-12">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 md:gap-x-10 gap-y-12 md:gap-y-16">
                 {filtered.map((product) => (
                   <FadeUp key={product._id}>
-                    <ProductCard product={product} />
+                    <div className="w-full max-w-[440px] mx-auto sm:mx-0 sm:max-w-none">
+                      <ProductCard product={product} />
+                    </div>
                   </FadeUp>
                 ))}
               </div>

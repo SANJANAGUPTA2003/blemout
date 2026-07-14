@@ -36,7 +36,7 @@ function FooterLink({ to, children }) {
 
 export default function Footer() {
   return (
-    <footer className="relative z-20 bg-white mt-auto border-t border-gray-100">
+    <footer className="relative z-20 bg-white mt-auto">
       <div className="max-w-[1400px] mx-auto px-5 md:px-8 lg:px-10 py-16 md:py-20">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-12 lg:gap-10">
           <div className="lg:col-span-2">
@@ -100,7 +100,7 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="mt-14 pt-8 border-t border-gray-100 text-center text-sm text-soft-text">
+        <div className="mt-14 pt-8 text-center text-sm text-[#4a5560]">
           © {new Date().getFullYear()} BLEMOUT. All rights reserved.
         </div>
       </div>

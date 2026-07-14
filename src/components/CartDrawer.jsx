@@ -101,7 +101,7 @@ export default function CartDrawer() {
                         item._id === lastAddedId ? 'bg-[#f7faf9] -mx-2 px-2 pt-2 rounded-lg' : ''
                       }`}
                     >
-                      <div className="w-20 h-20 shrink-0 bg-[#f5f8f7] flex items-center justify-center overflow-hidden p-1">
+                      <div className="w-20 h-20 shrink-0 border-0 bg-transparent flex items-center justify-center overflow-hidden">
                         {item.imageUrl ? (
                           <img src={item.imageUrl} alt="" className="w-full h-full object-contain" />
                         ) : (

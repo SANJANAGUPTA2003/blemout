@@ -36,12 +36,14 @@ export default function CollectionPage({
     <div className="bg-white">
       <div className="max-w-[1400px] mx-auto px-5 md:px-8 lg:px-10 py-14 md:py-20">
         <FadeUp>
-          <p className="text-[11px] tracking-[0.22em] uppercase text-teal font-semibold mb-3">{eyebrow}</p>
-          <h1 className="text-3xl md:text-5xl font-semibold text-text tracking-tight">{title}</h1>
-          <p className="mt-4 text-soft-text max-w-xl">{subtitle}</p>
+          <p className="text-[12px] tracking-[0.16em] uppercase text-teal font-bold mb-3">{eyebrow}</p>
+          <h1 className="text-[36px] md:text-[48px] font-bold text-[#222222] tracking-[-0.03em] leading-[1.1]">
+            {title}
+          </h1>
+          <p className="mt-4 text-[16px] text-[#4a5560] max-w-xl leading-relaxed">{subtitle}</p>
         </FadeUp>
 
-        <div className="mt-12">
+        <div className="mt-12 md:mt-14">
           {loading ? (
             <LoadingSpinner className="py-24" />
           ) : error ? (
@@ -49,10 +51,12 @@ export default function CollectionPage({
           ) : products.length === 0 ? (
             <ApiMessage type="empty" message="No products in this collection yet." />
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-8 gap-y-12">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 md:gap-x-10 gap-y-12 md:gap-y-16">
               {products.map((product) => (
                 <FadeUp key={product._id}>
-                  <ProductCard product={product} imageMode="promo" />
+                  <div className="w-full max-w-[440px] mx-auto sm:mx-0 sm:max-w-none">
+                    <ProductCard product={product} imageMode="promo" />
+                  </div>
                 </FadeUp>
               ))}
             </div>

@@ -45,11 +45,11 @@ export default function About() {
         <FadeUp>
           <div className="grid lg:grid-cols-[0.9fr_1.1fr] gap-10 items-center mb-16 md:mb-24">
             <div>
-              <p className="text-[11px] tracking-[0.22em] uppercase text-teal font-semibold mb-3">About</p>
-              <h1 className="text-3xl md:text-5xl font-semibold text-text tracking-tight leading-tight">
+              <p className="text-[12px] tracking-[0.16em] uppercase text-teal font-bold mb-3">About</p>
+              <h1 className="text-[36px] md:text-[48px] font-bold text-[#222222] tracking-[-0.03em] leading-[1.1]">
                 BLEMOUT
               </h1>
-              <p className="mt-5 text-soft-text text-lg leading-relaxed max-w-md">
+              <p className="mt-5 text-[#4a5560] text-lg leading-relaxed max-w-md">
                 Dermatologically inspired blemish care — image-led, spacious, and built around real formulas.
               </p>
             </div>
@@ -69,17 +69,17 @@ export default function About() {
                     section.reverse ? 'lg:[&>*:first-child]:order-2' : ''
                   }`}
                 >
-                  <div className="aspect-[4/5] overflow-hidden bg-[#f7faf9]">
+                  <div className="aspect-[4/5] overflow-hidden rounded-sm bg-[#f6f7f6]">
                     <img src={section.image} alt="" className="w-full h-full object-cover" />
                   </div>
                   <div className="max-w-lg">
-                    <p className="text-[11px] tracking-[0.22em] uppercase text-teal font-semibold mb-3">
+                    <p className="text-[12px] tracking-[0.16em] uppercase text-teal font-bold mb-3">
                       {section.eyebrow}
                     </p>
-                    <h2 className="text-3xl md:text-4xl font-semibold text-text tracking-tight">
+                    <h2 className="text-[32px] md:text-[40px] font-bold text-[#222222] tracking-[-0.03em] leading-[1.12]">
                       {section.title}
                     </h2>
-                    <p className="mt-5 text-soft-text leading-relaxed">{section.body}</p>
+                    <p className="mt-5 text-[#4a5560] leading-relaxed">{section.body}</p>
                   </div>
                 </div>
               </FadeUp>

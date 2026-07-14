@@ -35,33 +35,37 @@ export default function EditorialStory({
   reverse = false,
 }) {
   return (
-    <section className="py-16 md:py-24 bg-white">
+    <section className="py-14 md:py-20 bg-white">
       <div className="max-w-[1400px] mx-auto px-5 md:px-8 lg:px-10">
         <div
-          className={`grid lg:grid-cols-2 gap-10 lg:gap-16 items-center ${
+          className={`grid lg:grid-cols-2 gap-8 lg:gap-14 xl:gap-20 items-center ${
             reverse ? 'lg:[&>*:first-child]:order-2' : ''
           }`}
         >
           <FadeUp>
-            <div className="aspect-square overflow-hidden bg-[#f7faf9] p-3 md:p-4 flex items-center justify-center">
-              <img src={image} alt={imageAlt} className="w-full h-full object-contain" />
+            <div className="aspect-square overflow-hidden border-0 bg-transparent flex items-center justify-center">
+              <img
+                src={image}
+                alt={imageAlt}
+                className="w-full h-full object-contain"
+              />
             </div>
           </FadeUp>
           <FadeUp delay={0.08}>
-            <div className="max-w-lg lg:py-4">
+            <div className="max-w-lg lg:py-2">
               {eyebrow && (
-                <p className="text-[12px] tracking-[0.22em] uppercase text-teal font-bold mb-4">
+                <p className="text-[12px] tracking-[0.16em] uppercase text-teal font-bold mb-4">
                   {eyebrow}
                 </p>
               )}
-              <h2 className="text-[34px] md:text-[42px] font-bold text-text tracking-tight leading-tight">
+              <h2 className="text-[34px] md:text-[42px] lg:text-[46px] font-bold text-[#222222] tracking-[-0.03em] leading-[1.12]">
                 {title}
               </h2>
-              <p className="mt-5 text-[16px] md:text-[17px] text-soft-text leading-relaxed">{body}</p>
+              <p className="mt-5 text-[16px] md:text-[17px] text-[#4a5560] leading-relaxed">{body}</p>
               {bullets.length > 0 && (
                 <ul className="mt-6 space-y-2.5">
                   {bullets.map((item) => (
-                    <li key={item} className="text-[15px] text-text flex gap-2">
+                    <li key={item} className="text-[15px] text-[#26313D] flex gap-2">
                       <span className="text-teal mt-0.5 font-bold">•</span>
                       <span>{item}</span>
                     </li>
@@ -69,20 +73,17 @@ export default function EditorialStory({
                 </ul>
               )}
               {ingredients.length > 0 && (
-                <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {ingredients.map((item) => {
                     const Icon = ICONS[item.icon] || Sparkles;
                     return (
-                      <div
-                        key={item.name}
-                        className="flex gap-3 items-start p-3 bg-[#f7faf9] border border-transparent hover:border-teal/20 transition-colors"
-                      >
-                        <span className="w-9 h-9 rounded-full bg-white flex items-center justify-center shrink-0 text-teal">
+                      <div key={item.name} className="flex gap-3 items-start">
+                        <span className="w-9 h-9 rounded-full bg-[#f6f7f6] flex items-center justify-center shrink-0 text-teal">
                           <Icon size={18} strokeWidth={1.75} />
                         </span>
                         <div>
-                          <p className="text-sm font-semibold text-text">{item.name}</p>
-                          <p className="mt-0.5 text-[13px] text-soft-text leading-snug">{item.explanation}</p>
+                          <p className="text-sm font-semibold text-[#222222]">{item.name}</p>
+                          <p className="mt-0.5 text-[13px] text-[#4a5560] leading-snug">{item.explanation}</p>
                         </div>
                       </div>
                     );
@@ -90,8 +91,8 @@ export default function EditorialStory({
                 </div>
               )}
               {howToUse && (
-                <p className="mt-6 text-[15px] text-soft-text leading-relaxed">
-                  <span className="font-semibold text-text">How to use: </span>
+                <p className="mt-6 text-[15px] text-[#4a5560] leading-relaxed">
+                  <span className="font-semibold text-[#222222]">How to use: </span>
                   {howToUse}
                 </p>
               )}

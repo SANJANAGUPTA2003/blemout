@@ -8,20 +8,17 @@ export default function ProductImage({
   className = '',
   containerClass = '',
   size = 'md',
-  compact = false,
+  fit = 'contain',
 }) {
   const [failed, setFailed] = useState(false);
   const [hoverFailed, setHoverFailed] = useState(false);
 
-  const pads = compact
-    ? { sm: 'p-2', md: 'p-3', lg: 'p-3 md:p-4', xl: 'p-4' }
-    : { sm: 'p-3', md: 'p-5', lg: 'p-6 md:p-8', xl: 'p-8' };
   const canSwapOnHover = Boolean(hoverSrc && hoverSrc !== src && !hoverFailed);
-  const padClass = pads[size] || pads.md;
+  const fitClass = fit === 'cover' ? 'object-cover' : 'object-contain';
 
   if (!src || failed) {
     return (
-      <div className={`aspect-square w-full bg-[#f5f8f7] ${containerClass}`}>
+      <div className={`aspect-square w-full overflow-hidden border-0 bg-transparent ${containerClass}`}>
         <ProductPlaceholder size={size} className="h-full rounded-none" />
       </div>
     );
@@ -29,16 +26,16 @@ export default function ProductImage({
 
   return (
     <div
-      className={`aspect-square w-full relative bg-[#f5f8f7] flex items-center justify-center overflow-hidden transition-colors duration-500 [@media(hover:hover)]:group-hover:bg-[#e8f4f2] ${padClass} ${containerClass}`}
+      className={`aspect-square w-full relative overflow-hidden border-0 bg-transparent ${containerClass}`}
     >
       <img
         src={src}
         alt={alt}
         onError={() => setFailed(true)}
-        className={`w-full h-full object-contain transition-all duration-500 ease-out ${
+        className={`relative z-0 block w-full h-full ${fitClass} transition-all duration-500 ease-out ${
           canSwapOnHover
-            ? '[@media(hover:hover)]:group-hover:opacity-0 [@media(hover:hover)]:group-hover:scale-[1.04]'
-            : '[@media(hover:hover)]:group-hover:scale-[1.04]'
+            ? '[@media(hover:hover)]:group-hover:opacity-0 [@media(hover:hover)]:group-hover:scale-[1.03]'
+            : '[@media(hover:hover)]:group-hover:scale-[1.03]'
         } ${className}`}
       />
       {canSwapOnHover && (
@@ -47,7 +44,7 @@ export default function ProductImage({
           alt=""
           aria-hidden="true"
           onError={() => setHoverFailed(true)}
-          className={`absolute inset-0 m-auto ${compact ? 'w-[calc(100%-1.5rem)] h-[calc(100%-1.5rem)]' : 'w-[calc(100%-2.5rem)] h-[calc(100%-2.5rem)]'} object-contain opacity-0 transition-all duration-500 ease-out [@media(hover:hover)]:group-hover:opacity-100 [@media(hover:hover)]:group-hover:scale-[1.04] ${className}`}
+          className={`absolute z-10 left-0 top-0 w-full h-full border-0 ${fitClass} opacity-0 transition-all duration-500 ease-out [@media(hover:hover)]:group-hover:opacity-100 [@media(hover:hover)]:group-hover:scale-[1.03] ${className}`}
         />
       )}
     </div>

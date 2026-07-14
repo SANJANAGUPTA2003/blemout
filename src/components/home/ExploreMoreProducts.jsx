@@ -27,7 +27,7 @@ export default function ExploreMoreProducts() {
     let raf;
     const step = () => {
       if (!paused && !dragRef.current.active) {
-        el.scrollLeft += 0.55;
+        el.scrollLeft += 0.5;
         if (el.scrollLeft >= el.scrollWidth / 2) {
           el.scrollLeft = 0;
         }
@@ -41,7 +41,9 @@ export default function ExploreMoreProducts() {
   const scrollByCard = useCallback((dir) => {
     const el = trackRef.current;
     if (!el) return;
-    el.scrollBy({ left: dir * 300, behavior: 'smooth' });
+    const card = el.querySelector('[data-carousel-item]');
+    const amount = card ? card.getBoundingClientRect().width + 32 : 360;
+    el.scrollBy({ left: dir * amount, behavior: 'smooth' });
   }, []);
 
   const onPointerDown = (e) => {
@@ -73,16 +75,16 @@ export default function ExploreMoreProducts() {
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
-      <div className="max-w-[1400px] mx-auto px-5 md:px-8 lg:px-10 mb-10 flex items-end justify-between gap-4">
+      <div className="max-w-[1400px] mx-auto px-5 md:px-8 lg:px-10 mb-10 md:mb-12 flex items-end justify-between gap-4">
         <FadeUp>
           <div className="max-w-xl">
-            <p className="text-[12px] tracking-[0.22em] uppercase text-teal font-bold mb-3">
+            <p className="text-[12px] tracking-[0.16em] uppercase text-teal font-bold mb-3">
               Discover
             </p>
-            <h2 className="text-[34px] md:text-[42px] font-bold text-text tracking-tight">
+            <h2 className="text-[36px] md:text-[44px] lg:text-[48px] font-bold text-[#222222] tracking-[-0.03em] leading-[1.1]">
               Explore More Products
             </h2>
-            <p className="mt-4 text-[16px] text-soft-text">
+            <p className="mt-4 text-[16px] text-[#4a5560] leading-relaxed">
               Shop the complete BLEMOUT lineup in one smooth product row.
             </p>
           </div>
@@ -93,7 +95,7 @@ export default function ExploreMoreProducts() {
               type="button"
               aria-label="Scroll discover products left"
               onClick={() => scrollByCard(-1)}
-              className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center text-soft-text hover:text-dark-teal hover:border-teal/40 transition-colors"
+              className="w-10 h-10 rounded-full bg-[#f6f7f6] flex items-center justify-center text-[#26313D] hover:text-dark-teal hover:bg-[#eef1f0] transition-colors"
             >
               <ChevronLeft size={18} />
             </button>
@@ -101,7 +103,7 @@ export default function ExploreMoreProducts() {
               type="button"
               aria-label="Scroll discover products right"
               onClick={() => scrollByCard(1)}
-              className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center text-soft-text hover:text-dark-teal hover:border-teal/40 transition-colors"
+              className="w-10 h-10 rounded-full bg-[#f6f7f6] flex items-center justify-center text-[#26313D] hover:text-dark-teal hover:bg-[#eef1f0] transition-colors"
             >
               <ChevronRight size={18} />
             </button>
@@ -114,7 +116,7 @@ export default function ExploreMoreProducts() {
       ) : (
         <div
           ref={trackRef}
-          className="flex gap-6 overflow-x-auto px-5 md:px-8 lg:px-10 pb-2 scrollbar-none cursor-grab active:cursor-grabbing select-none"
+          className="flex gap-6 md:gap-8 overflow-x-auto px-5 md:px-8 lg:px-10 pb-2 scrollbar-none cursor-grab active:cursor-grabbing select-none"
           style={{ scrollbarWidth: 'none', touchAction: 'pan-y' }}
           onPointerDown={onPointerDown}
           onPointerMove={onPointerMove}
@@ -125,7 +127,8 @@ export default function ExploreMoreProducts() {
           {looped.map((product, i) => (
             <div
               key={`${product._id}-${i}`}
-              className="min-w-[240px] sm:min-w-[280px] md:min-w-[300px] max-w-[300px] shrink-0"
+              data-carousel-item
+              className="shrink-0 w-[82vw] sm:w-[46vw] lg:w-[min(420px,calc((100vw-6rem)/3))] xl:w-[min(430px,420px)]"
             >
               <ProductCard product={product} imageMode="promo" />
             </div>

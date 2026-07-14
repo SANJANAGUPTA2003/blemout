@@ -45,32 +45,34 @@ export default function DiscoveryGallery() {
       <div className="max-w-[1400px] mx-auto px-5 md:px-8 lg:px-10">
         <FadeUp>
           <div className="mb-10 md:mb-14 max-w-xl">
-            <p className="text-[11px] tracking-[0.22em] uppercase text-teal font-semibold mb-3">
+            <p className="text-[12px] tracking-[0.16em] uppercase text-teal font-bold mb-3">
               Discover
             </p>
-            <h2 className="text-3xl md:text-4xl font-semibold text-text tracking-tight">
+            <h2 className="text-[36px] md:text-[44px] font-bold text-[#222222] tracking-[-0.03em] leading-[1.1]">
               Explore the collection
             </h2>
           </div>
         </FadeUp>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 md:gap-3">
           {items.map((item, index) => (
             <FadeUp key={item.to + item.label} delay={index * 0.04}>
               <Link
                 to={item.to}
-                className={`group relative block overflow-hidden bg-[#f7faf9] ${
-                  index === 0 || index === 5 ? 'md:col-span-2 md:row-span-2 aspect-square md:aspect-auto md:min-h-[420px]' : 'aspect-square'
+                className={`group relative block overflow-hidden rounded-sm bg-[#f6f7f6] ${
+                  index === 0 || index === 5
+                    ? 'md:col-span-2 md:row-span-2 aspect-square md:aspect-auto md:min-h-[440px]'
+                    : 'aspect-square'
                 }`}
               >
                 <img
                   src={item.image}
                   alt={item.label}
-                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
+                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
                 />
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/35 transition-colors duration-400" />
-                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-400">
-                  <span className="text-white text-[12px] tracking-[0.2em] uppercase font-semibold">
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/25 transition-colors duration-400" />
+                <div className="absolute inset-0 flex items-end justify-center pb-5 opacity-0 group-hover:opacity-100 transition-opacity duration-400">
+                  <span className="text-white text-[12px] tracking-[0.14em] uppercase font-semibold">
                     See More
                   </span>
                 </div>

@@ -179,7 +179,7 @@ export default function ProductDetail() {
           <div className="grid lg:grid-cols-[1.15fr_0.85fr] gap-8 lg:gap-12 items-start">
             <div>
               <div
-                className="relative aspect-square bg-[#f7faf9] flex items-center justify-center overflow-hidden p-2 sm:p-3"
+                className="relative aspect-square border-0 bg-transparent flex items-center justify-center overflow-hidden"
                 onTouchStart={(e) => setTouchX(e.changedTouches[0]?.clientX ?? null)}
                 onTouchEnd={(e) => {
                   const end = e.changedTouches[0]?.clientX;
@@ -200,7 +200,7 @@ export default function ProductDetail() {
                       type="button"
                       aria-label="Previous image"
                       onClick={() => goImage(-1)}
-                      className="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/95 text-text flex items-center justify-center hover:bg-white shadow-sm"
+                      className="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/95 text-[#222222] flex items-center justify-center hover:bg-white"
                     >
                       <ChevronLeft size={18} />
                     </button>
@@ -208,7 +208,7 @@ export default function ProductDetail() {
                       type="button"
                       aria-label="Next image"
                       onClick={() => goImage(1)}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/95 text-text flex items-center justify-center hover:bg-white shadow-sm"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/95 text-[#222222] flex items-center justify-center hover:bg-white"
                     >
                       <ChevronRight size={18} />
                     </button>
@@ -216,14 +216,14 @@ export default function ProductDetail() {
                 )}
               </div>
               {images.length > 1 && (
-                <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
+                <div className="mt-3 flex gap-2.5 overflow-x-auto pb-1">
                   {images.map((img, i) => (
                     <button
                       key={img + i}
                       type="button"
                       onClick={() => setActiveImage(i)}
-                      className={`shrink-0 aspect-square w-[68px] md:w-20 bg-[#f7faf9] p-1 flex items-center justify-center border transition-colors ${
-                        activeImage === i ? 'border-teal' : 'border-transparent hover:border-gray-200'
+                      className={`shrink-0 aspect-square w-[72px] md:w-20 border-0 bg-transparent p-0 flex items-center justify-center overflow-hidden transition-opacity ${
+                        activeImage === i ? 'opacity-100' : 'opacity-45 hover:opacity-80'
                       }`}
                     >
                       <img src={img} alt="" className="w-full h-full object-contain" />
@@ -339,9 +339,11 @@ export default function ProductDetail() {
 
         {related.length > 0 && (
           <section className="mt-20 md:mt-28">
-            <h2 className="text-[28px] md:text-[34px] font-bold text-text mb-8">Related Products</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {related.map((item) => (
+            <h2 className="text-[32px] md:text-[40px] font-bold text-[#222222] tracking-[-0.03em] mb-8 md:mb-10">
+              Related Products
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 md:gap-x-10 gap-y-12">
+              {related.slice(0, 3).map((item) => (
                 <ProductCard key={item._id} product={item} imageMode="shop" />
               ))}
             </div>

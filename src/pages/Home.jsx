@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Shield, Truck, RotateCcw, Headphones } from 'lucide-react';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 import ApiMessage from '../components/ui/ApiMessage';
 import HeroCarousel from '../components/home/HeroCarousel';

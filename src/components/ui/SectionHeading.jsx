@@ -8,12 +8,12 @@ export default function SectionHeading({
     align === 'center' ? 'text-center mx-auto' : 'text-left';
 
   return (
-    <div className={`max-w-xl mb-14 md:mb-16 ${alignClass} ${className}`}>
-      <h2 className="text-2xl md:text-[1.75rem] font-medium text-text tracking-tight leading-tight">
+    <div className={`max-w-2xl mb-12 md:mb-16 ${alignClass} ${className}`}>
+      <h2 className="text-[32px] md:text-[40px] lg:text-[44px] font-bold text-[#222222] tracking-[-0.03em] leading-[1.12]">
         {title}
       </h2>
       {subtitle && (
-        <p className="mt-4 text-soft-text text-sm md:text-[15px] leading-relaxed font-normal">
+        <p className="mt-4 text-[#4a5560] text-[15px] md:text-[16px] leading-relaxed font-normal">
           {subtitle}
         </p>
       )}

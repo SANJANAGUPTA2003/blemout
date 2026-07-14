@@ -34,37 +34,36 @@ export default function ProductCard({ product, imageMode = 'shop' }) {
   const path = productPath(product);
 
   return (
-    <article className="group flex flex-col h-full bg-white">
-      <Link to={path} className="relative block overflow-hidden">
+    <article className="group flex flex-col h-full bg-white w-full">
+      <Link to={path} className="relative block overflow-hidden rounded-sm">
         <ProductImage
           src={primaryImage}
           hoverSrc={hoverImage}
           alt={product.name}
           size="lg"
           compact
-          containerClass="rounded-none"
+          containerClass="rounded-sm"
         />
-        <div className="pointer-events-none absolute inset-0 bg-teal/0 transition-colors duration-500 [@media(hover:hover)]:group-hover:bg-teal/5" />
-        <span className="pointer-events-none absolute inset-x-0 bottom-5 mx-auto w-fit opacity-0 translate-y-2 transition-all duration-500 text-[11px] tracking-[0.18em] uppercase font-semibold text-dark-teal [@media(hover:hover)]:group-hover:opacity-100 [@media(hover:hover)]:group-hover:translate-y-0">
+        <span className="pointer-events-none absolute inset-x-0 bottom-4 mx-auto w-fit opacity-0 translate-y-1.5 transition-all duration-400 text-[11px] tracking-[0.14em] uppercase font-semibold text-[#222222] [@media(hover:hover)]:group-hover:opacity-100 [@media(hover:hover)]:group-hover:translate-y-0">
           View Product
         </span>
       </Link>
 
-      <div className="flex flex-col flex-1 pt-5 pb-2 text-center px-1">
-        <Link to={path}>
-          <h3 className="text-[18px] md:text-[19px] font-semibold text-text group-hover:text-dark-teal transition-colors duration-300 leading-snug">
+      <div className="flex flex-col flex-1 pt-4 pb-1 text-center bg-white">
+        <Link to={path} className="group/title">
+          <h3 className="text-[17px] md:text-[18px] font-semibold text-[#222222] leading-snug tracking-[-0.01em] transition-colors duration-300 [@media(hover:hover)]:group-hover:underline [@media(hover:hover)]:group-hover:decoration-1 [@media(hover:hover)]:group-hover:underline-offset-4 [@media(hover:hover)]:group-hover:text-dark-teal">
             {product.name}
           </h3>
         </Link>
         {(product.summary || product.benefits?.[0]) && (
-          <p className="mt-2 text-sm text-soft-text line-clamp-2 font-normal leading-relaxed">
+          <p className="mt-2 text-[14px] text-[#4a5560] line-clamp-2 font-normal leading-relaxed">
             {product.summary || product.benefits[0]}
           </p>
         )}
         <div className="mt-3 flex items-center justify-center gap-2 flex-wrap">
-          <p className="text-base font-bold text-text">{formatPrice(sellingPrice)}</p>
+          <p className="text-[15px] md:text-base font-bold text-[#222222]">{formatPrice(sellingPrice)}</p>
           {mrp && (
-            <p className="text-sm text-soft-text line-through">{formatPrice(mrp)}</p>
+            <p className="text-sm text-[#6b7280] line-through">{formatPrice(mrp)}</p>
           )}
           {discount > 0 ? (
             <p className="text-xs font-semibold text-teal">{discount}% off</p>
@@ -72,7 +71,7 @@ export default function ProductCard({ product, imageMode = 'shop' }) {
         </div>
         <Link
           to={path}
-          className="mt-4 inline-flex justify-center text-[13px] font-semibold tracking-wide text-dark-teal hover:text-teal transition-colors"
+          className="mt-3 inline-flex justify-center text-[13px] font-semibold tracking-[0.02em] text-dark-teal opacity-80 transition-all duration-300 [@media(hover:hover)]:group-hover:opacity-100 hover:underline underline-offset-4"
         >
           Shop Now
         </Link>

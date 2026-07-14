@@ -66,21 +66,20 @@ export default function ShopByConcern() {
           {concerns.map((concern, index) => (
             <FadeUp key={concern.id} delay={index * 0.04}>
               <Link to={concern.to} className="group block">
-                <div className="aspect-square overflow-hidden bg-[#f5f8f7] relative p-6 flex items-center justify-center">
+                <div className="aspect-square overflow-hidden border-0 bg-transparent relative flex items-center justify-center">
                   <img
                     src={concern.image}
                     alt={concern.name}
-                    className="w-full h-full object-contain transition-transform duration-700 group-hover:scale-[1.04]"
+                    className="w-full h-full object-contain transition-transform duration-700 group-hover:scale-[1.03]"
                   />
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-400" />
-                  <span className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-white text-[12px] tracking-[0.18em] uppercase font-semibold">
+                  <span className="absolute inset-x-0 bottom-4 mx-auto w-fit opacity-0 translate-y-1 transition-all duration-400 text-[11px] tracking-[0.14em] uppercase font-semibold text-[#222222] group-hover:opacity-100 group-hover:translate-y-0">
                     See More
                   </span>
                 </div>
-                <h2 className="mt-4 text-[18px] md:text-[20px] font-semibold text-text group-hover:text-dark-teal transition-colors">
+                <h2 className="mt-4 text-[18px] md:text-[20px] font-bold text-[#222222] tracking-[-0.02em] group-hover:underline underline-offset-4 decoration-1 transition-[text-decoration,color] duration-300 group-hover:text-dark-teal">
                   {concern.name}
                 </h2>
-                <p className="mt-2 text-[15px] text-soft-text leading-relaxed">{concern.description}</p>
+                <p className="mt-2 text-[15px] text-[#4a5560] leading-relaxed">{concern.description}</p>
               </Link>
             </FadeUp>
           ))}

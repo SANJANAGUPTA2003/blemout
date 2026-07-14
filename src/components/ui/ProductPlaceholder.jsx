@@ -10,7 +10,7 @@ export default function ProductPlaceholder({ className = '', size = 'md' }) {
 
   return (
     <div
-      className={`${sizes[size]} w-full bg-ivory flex items-center justify-center ${className}`}
+      className={`${sizes[size]} w-full border-0 bg-transparent flex items-center justify-center ${className}`}
     >
       <div className="flex flex-col items-center gap-2 text-mid-teal/40">
         <Droplets size={size === 'sm' ? 20 : 28} strokeWidth={1.5} />
