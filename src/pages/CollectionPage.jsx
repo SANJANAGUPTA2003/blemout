@@ -1,9 +1,9 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useMemo } from 'react';
 import FadeUp from '../components/ui/FadeUp';
 import ProductCard from '../components/ui/ProductCard';
-import LoadingSpinner from '../components/ui/LoadingSpinner';
+import ProductSkeleton from '../components/ui/ProductSkeleton';
 import ApiMessage from '../components/ui/ApiMessage';
-import api from '../utils/api';
+import { useProducts } from '../context/ProductContext';
 
 export default function CollectionPage({
   collection,
@@ -11,26 +11,8 @@ export default function CollectionPage({
   subtitle,
   eyebrow = 'Collection',
 }) {
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
-
-  const fetchProducts = useCallback(() => {
-    setLoading(true);
-    setError(false);
-    api
-      .get('/products', { params: { collection } })
-      .then(({ data }) => setProducts(data))
-      .catch(() => {
-        setProducts([]);
-        setError(true);
-      })
-      .finally(() => setLoading(false));
-  }, [collection]);
-
-  useEffect(() => {
-    fetchProducts();
-  }, [fetchProducts]);
+  const { loading, error, slow, retry, getByCollection } = useProducts();
+  const products = useMemo(() => getByCollection(collection), [getByCollection, collection]);
 
   return (
     <div className="bg-white">
@@ -45,9 +27,17 @@ export default function CollectionPage({
 
         <div className="mt-12 md:mt-14">
           {loading ? (
-            <LoadingSpinner className="py-24" />
+            <ProductSkeleton count={6} />
           ) : error ? (
-            <ApiMessage type="offline" message="Unable to load this collection." onRetry={fetchProducts} />
+            <ApiMessage
+              type="offline"
+              message={
+                slow
+                  ? 'Products are taking a little longer to load. Please wait or retry.'
+                  : 'Unable to load this collection.'
+              }
+              onRetry={retry}
+            />
           ) : products.length === 0 ? (
             <ApiMessage type="empty" message="No products in this collection yet." />
           ) : (

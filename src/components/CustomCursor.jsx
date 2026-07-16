@@ -1,12 +1,16 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 export default function CustomCursor() {
   const [enabled, setEnabled] = useState(false);
-  const [pos, setPos] = useState({ x: -100, y: -100 });
-  const [visible, setVisible] = useState(false);
+  const cursorRef = useRef(null);
+  const rafRef = useRef(0);
+  const posRef = useRef({ x: -100, y: -100 });
+  const visibleRef = useRef(false);
 
   useEffect(() => {
-    const mq = window.matchMedia('(pointer: fine) and (min-width: 1024px)');
+    const mq = window.matchMedia(
+      '(pointer: fine) and (hover: hover) and (min-width: 1024px) and (prefers-reduced-motion: no-preference)'
+    );
     const updateEnabled = () => {
       const next = mq.matches;
       setEnabled(next);
@@ -23,13 +27,34 @@ export default function CustomCursor() {
   useEffect(() => {
     if (!enabled) return undefined;
 
-    const onMove = (e) => {
-      setPos({ x: e.clientX, y: e.clientY });
-      setVisible(true);
+    const paint = () => {
+      const el = cursorRef.current;
+      if (!el) return;
+      const { x, y } = posRef.current;
+      el.style.transform = `translate3d(${x}px, ${y}px, 0) translate(-50%, -50%)`;
+      el.style.opacity = visibleRef.current ? '1' : '0';
     };
 
-    const onLeave = () => setVisible(false);
-    const onEnter = () => setVisible(true);
+    const onMove = (e) => {
+      posRef.current = { x: e.clientX, y: e.clientY };
+      visibleRef.current = true;
+      if (!rafRef.current) {
+        rafRef.current = window.requestAnimationFrame(() => {
+          rafRef.current = 0;
+          paint();
+        });
+      }
+    };
+
+    const onLeave = () => {
+      visibleRef.current = false;
+      paint();
+    };
+
+    const onEnter = () => {
+      visibleRef.current = true;
+      paint();
+    };
 
     window.addEventListener('mousemove', onMove, { passive: true });
     document.documentElement.addEventListener('mouseleave', onLeave);
@@ -39,6 +64,7 @@ export default function CustomCursor() {
       window.removeEventListener('mousemove', onMove);
       document.documentElement.removeEventListener('mouseleave', onLeave);
       document.documentElement.removeEventListener('mouseenter', onEnter);
+      if (rafRef.current) window.cancelAnimationFrame(rafRef.current);
     };
   }, [enabled]);
 
@@ -46,16 +72,12 @@ export default function CustomCursor() {
 
   return (
     <div
+      ref={cursorRef}
       aria-hidden
-      className="pointer-events-none fixed z-[9999] transition-opacity duration-300"
-      style={{
-        left: pos.x,
-        top: pos.y,
-        opacity: visible ? 1 : 0,
-        transform: 'translate(-50%, -50%)',
-      }}
+      className="pointer-events-none fixed left-0 top-0 z-[9999] transition-opacity duration-300"
+      style={{ opacity: 0, willChange: 'transform' }}
     >
-      <div className="w-9 h-9 rounded-full border border-teal/25 bg-teal/10 backdrop-blur-[1px]" />
+      <div className="w-9 h-9 rounded-full border border-teal/25 bg-teal/10" />
       <div className="absolute left-1/2 top-1/2 w-1.5 h-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-teal/40" />
     </div>
   );

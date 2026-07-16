@@ -8,6 +8,7 @@ import ScrollToTop from '../ScrollToTop';
 import CustomCursor from '../CustomCursor';
 import CartDrawer from '../CartDrawer';
 import CartToast from '../CartToast';
+import { ProductProvider } from '../../context/ProductContext';
 
 export default function Layout() {
   return (
@@ -16,9 +17,11 @@ export default function Layout() {
       <CustomCursor />
       <AnnouncementBar />
       <Navbar />
-      <main className="flex-1">
-        <Outlet />
-      </main>
+      <ProductProvider>
+        <main className="flex-1">
+          <Outlet />
+        </main>
+      </ProductProvider>
       <BrandWordmark />
       <ServiceStrip />
       <Footer />

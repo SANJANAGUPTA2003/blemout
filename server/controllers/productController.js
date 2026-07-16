@@ -1,6 +1,31 @@
 import mongoose from 'mongoose';
 import Product from '../models/Product.js';
 
+const SUMMARY_FIELDS = [
+  '_id',
+  'slug',
+  'name',
+  'category',
+  'mrp',
+  'price',
+  'sellingPrice',
+  'discountPercentage',
+  'summary',
+  'imageUrl',
+  'hoverImage',
+  'images',
+  'stock',
+  'size',
+  'isFeatured',
+  'isBestSeller',
+  'isNewArrival',
+  'isLimitedPick',
+  'isCombo',
+  'benefits',
+  'howToUse',
+  'ingredientHighlights',
+].join(' ');
+
 function slugify(text = '') {
   return text
     .toString()
@@ -23,6 +48,39 @@ async function ensureUniqueSlug(base, excludeId) {
   }
 }
 
+function toSummary(product) {
+  const images = Array.isArray(product.images) ? product.images.filter(Boolean) : [];
+  const imageUrl = product.imageUrl || images[0] || '';
+  const hoverImage = product.hoverImage || images[1] || '';
+  return {
+    _id: product._id,
+    slug: product.slug,
+    name: product.name,
+    category: product.category,
+    mrp: product.mrp,
+    price: product.price,
+    sellingPrice: product.sellingPrice || product.price,
+    discountPercentage: product.discountPercentage || 0,
+    summary: product.summary || '',
+    imageUrl,
+    hoverImage,
+    // Keep only the first two slots for list/card surfaces
+    images: [imageUrl, hoverImage].filter(Boolean),
+    stock: product.stock,
+    size: product.size || '',
+    isFeatured: Boolean(product.isFeatured),
+    isBestSeller: Boolean(product.isBestSeller),
+    isNewArrival: Boolean(product.isNewArrival),
+    isLimitedPick: Boolean(product.isLimitedPick),
+    isCombo: Boolean(product.isCombo),
+    benefits: Array.isArray(product.benefits) ? product.benefits.slice(0, 4) : [],
+    howToUse: product.howToUse || '',
+    ingredientHighlights: Array.isArray(product.ingredientHighlights)
+      ? product.ingredientHighlights.slice(0, 5)
+      : [],
+  };
+}
+
 export const getProducts = async (req, res) => {
   try {
     const filter = {};
@@ -32,7 +90,17 @@ export const getProducts = async (req, res) => {
     if (req.query.category) filter.category = req.query.category;
     if (req.query.featured === 'true') filter.isFeatured = true;
 
-    const products = await Product.find(filter).sort({ createdAt: -1 });
+    const summary = req.query.view === 'summary';
+    const query = Product.find(filter).sort({ createdAt: -1 });
+
+    if (summary) {
+      const products = await query.select(SUMMARY_FIELDS).lean();
+      res.set('Cache-Control', 'public, max-age=60, stale-while-revalidate=300');
+      return res.json(products.map(toSummary));
+    }
+
+    const products = await query;
+    res.set('Cache-Control', 'public, max-age=30, stale-while-revalidate=120');
     res.json(products);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -52,6 +120,7 @@ export const getProduct = async (req, res) => {
     }
 
     if (!product) return res.status(404).json({ message: 'Product not found' });
+    res.set('Cache-Control', 'public, max-age=60, stale-while-revalidate=300');
     res.json(product);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -69,6 +138,7 @@ export const createProduct = async (req, res) => {
     const base = slugify(body.slug || body.name);
     body.slug = await ensureUniqueSlug(base);
     const product = await Product.create(body);
+    res.set('Cache-Control', 'no-store');
     res.status(201).json(product);
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -93,6 +163,7 @@ export const updateProduct = async (req, res) => {
       runValidators: true,
     });
     if (!product) return res.status(404).json({ message: 'Product not found' });
+    res.set('Cache-Control', 'no-store');
     res.json(product);
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -103,6 +174,7 @@ export const deleteProduct = async (req, res) => {
   try {
     const product = await Product.findByIdAndDelete(req.params.id);
     if (!product) return res.status(404).json({ message: 'Product not found' });
+    res.set('Cache-Control', 'no-store');
     res.json({ message: 'Product deleted' });
   } catch (error) {
     res.status(500).json({ message: error.message });

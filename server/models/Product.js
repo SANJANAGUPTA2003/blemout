@@ -56,6 +56,12 @@ const productSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+productSchema.index({ isFeatured: 1, createdAt: -1 });
+productSchema.index({ isBestSeller: 1, createdAt: -1 });
+productSchema.index({ isNewArrival: 1, createdAt: -1 });
+productSchema.index({ isLimitedPick: 1, createdAt: -1 });
+productSchema.index({ category: 1, createdAt: -1 });
+
 productSchema.pre('validate', function syncPricing(next) {
   if (!this.sellingPrice && this.price) this.sellingPrice = this.price;
   if (this.sellingPrice && !this.price) this.price = this.sellingPrice;

@@ -5,22 +5,22 @@ import { BUSINESS } from '../../data/business';
 
 const aboutLinks = [
   { label: 'Our Story', to: '/about#story' },
-  { label: 'Our Formula', to: '/about#formula' },
+  { label: 'Our Philosophy', to: '/about#philosophy' },
   { label: 'Sustainability', to: '/about#sustainability' },
 ];
 
 const serviceLinks = [
-  { label: 'Contact', to: '/contact' },
+  { label: 'Contact Us', to: '/contact' },
   { label: 'Track Order', to: '/track-order' },
   { label: 'Affiliate', to: '/affiliate' },
   { label: 'FAQs', to: '/faq' },
 ];
 
 const policyLinks = [
-  { label: 'Shipping', to: '/shipping-policy' },
-  { label: 'Returns', to: '/return-policy' },
-  { label: 'Privacy', to: '/privacy-policy' },
-  { label: 'Terms', to: '/terms' },
+  { label: 'Shipping Policy', to: '/shipping-policy' },
+  { label: 'Return & Refund Policy', to: '/return-refund-policy' },
+  { label: 'Privacy Policy', to: '/privacy-policy' },
+  { label: 'Terms & Conditions', to: '/terms-and-conditions' },
 ];
 
 function FooterLink({ to, children }) {
@@ -42,8 +42,8 @@ export default function Footer() {
           <div className="lg:col-span-2">
             <Logo variant="footer" />
             <p className="mt-5 text-[15px] text-soft-text leading-relaxed max-w-sm">
-              Dermatologically inspired formulas for pigmentation, uneven tone,
-              and blemish-prone areas.
+              Since {BUSINESS.foundedYear}, dermatologically inspired formulas for
+              pigmentation, uneven tone, and blemish-prone areas.
             </p>
             <ul className="mt-6 space-y-3 text-[14px] text-soft-text">
               <li className="flex items-start gap-2.5">
@@ -101,7 +101,7 @@ export default function Footer() {
         </div>
 
         <div className="mt-14 pt-8 text-center text-sm text-[#4a5560]">
-          © {new Date().getFullYear()} BLEMOUT. All rights reserved.
+          © {new Date().getFullYear()} BLEMOUT. Since {BUSINESS.foundedYear}. All rights reserved.
         </div>
       </div>
     </footer>

@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Link } from 'react-router-dom';
 import ProductImage from './ProductImage';
 import { formatPrice } from '../../utils/format';
@@ -15,7 +16,7 @@ import {
  * - "shop" (default): image 1 main, image 2 hover — Shop / PDP related
  * - "promo": image 2 main — Home, collections, Explore More
  */
-export default function ProductCard({ product, imageMode = 'shop' }) {
+function ProductCard({ product, imageMode = 'shop' }) {
   const sellingPrice = getSellingPrice(product);
   const mrp = product.mrp && product.mrp > sellingPrice ? product.mrp : null;
   const discount =
@@ -41,7 +42,8 @@ export default function ProductCard({ product, imageMode = 'shop' }) {
           hoverSrc={hoverImage}
           alt={product.name}
           size="lg"
-          compact
+          role="card"
+          loading="lazy"
           containerClass="rounded-sm"
         />
         <span className="pointer-events-none absolute inset-x-0 bottom-4 mx-auto w-fit opacity-0 translate-y-1.5 transition-all duration-400 text-[11px] tracking-[0.14em] uppercase font-semibold text-[#222222] [@media(hover:hover)]:group-hover:opacity-100 [@media(hover:hover)]:group-hover:translate-y-0">
@@ -79,3 +81,5 @@ export default function ProductCard({ product, imageMode = 'shop' }) {
     </article>
   );
 }
+
+export default memo(ProductCard);

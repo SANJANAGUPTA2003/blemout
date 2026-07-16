@@ -121,7 +121,7 @@ export const faqs = [
   },
   {
     question: 'What is your shipping policy?',
-    answer: 'We offer free shipping on all prepaid orders across India. Orders are typically dispatched within 1–2 business days.',
+    answer: 'Orders are processed within 1–3 business days and usually arrive within 7–15 business days. Shipping is free when you purchase 3 or more products.',
   },
   {
     question: 'How do I track my order?',
@@ -129,7 +129,7 @@ export const faqs = [
   },
   {
     question: 'What is your return policy?',
-    answer: 'Unopened products can be returned within 7 days of delivery. Contact our support team to initiate a return.',
+    answer: 'Eligible unused, unopened products with the original seal intact can be returned within 7 days of delivery. Report damaged or incorrect orders within 48 hours.',
   },
 ];
 

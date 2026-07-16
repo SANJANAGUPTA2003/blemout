@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Mail, MapPin } from 'lucide-react';
 import FadeUp from '../components/ui/FadeUp';
 import Button from '../components/ui/Button';
@@ -14,31 +14,37 @@ const infoSections = [
     id: 'affiliate',
     title: 'Affiliate',
     body: 'Interested in partnering with BLEMOUT? Email us to learn about affiliate opportunities.',
+    to: '/affiliate',
   },
   {
     id: 'faqs',
     title: 'FAQs',
     body: 'For order tracking, use your Order ID and checkout phone number on the Track Order page. For product questions, message us with your concern and skin type.',
+    to: '/faq',
   },
   {
     id: 'shipping',
-    title: 'Shipping',
-    body: 'Orders are typically prepared within 1–2 business days. Shipping timelines vary by location across India.',
+    title: 'Shipping Policy',
+    body: 'Shiprocket orders are processed in 1–3 business days and usually arrive within 7–15 business days. Shipping is free on 3+ products.',
+    to: '/shipping-policy',
   },
   {
     id: 'returns',
-    title: 'Returns',
-    body: 'Unopened products may be eligible for return within 7 days of delivery. Contact us with your Order ID to begin a return request.',
+    title: 'Return & Refund Policy',
+    body: 'Eligible unused and unopened products with their original seal intact may be returned within 7 days.',
+    to: '/return-refund-policy',
   },
   {
     id: 'privacy',
-    title: 'Privacy',
-    body: 'We use your contact and shipping details only to fulfill orders and respond to support requests. Customer details are never exposed publicly on tracking pages.',
+    title: 'Privacy Policy',
+    body: 'Learn how we handle customer information and work with service providers such as Razorpay.',
+    to: '/privacy-policy',
   },
   {
     id: 'terms',
-    title: 'Terms',
-    body: 'By placing an order you agree to our checkout terms, product usage guidance, and support policies. Reach out if you need clarification before purchase.',
+    title: 'Terms & Conditions',
+    body: 'Review the terms that apply when using our website and placing an order.',
+    to: '/terms-and-conditions',
   },
   {
     id: 'accessibility',
@@ -95,7 +101,7 @@ export default function Contact() {
 
           <div className="grid lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
             <FadeUp delay={0.1} className="lg:col-span-2">
-              <form onSubmit={handleSubmit} className="bg-white rounded-2xl p-6 md:p-8 border border-gray-100 space-y-4">
+              <form onSubmit={handleSubmit} className="bg-white p-6 md:p-8 space-y-4">
                 {success && (
                   <div className="bg-light-teal/50 text-dark-teal text-sm p-4 rounded-xl">
                     Thank you! Your message has been sent successfully.
@@ -118,7 +124,7 @@ export default function Contact() {
 
             <FadeUp delay={0.15}>
               <div className="space-y-4">
-                <div className="bg-[#f7faf9] rounded-2xl p-6">
+                <div className="bg-[#f7faf9] p-6">
                   <h3 className="font-bold text-text mb-4 text-[17px]">Get in Touch</h3>
                   <div className="space-y-4 text-[15px] text-soft-text">
                     <div className="flex items-start gap-3">
@@ -152,8 +158,24 @@ export default function Contact() {
           <div className="max-w-5xl mx-auto mt-16 md:mt-20 grid md:grid-cols-2 gap-8">
             {infoSections.map((section) => (
               <section key={section.id} id={section.id} className="scroll-mt-28">
-                <h2 className="text-lg font-bold text-text">{section.title}</h2>
+                <h2 className="text-lg font-bold text-text">
+                  {section.to ? (
+                    <Link to={section.to} className="hover:text-dark-teal transition-colors">
+                      {section.title}
+                    </Link>
+                  ) : (
+                    section.title
+                  )}
+                </h2>
                 <p className="mt-2 text-[15px] text-soft-text leading-relaxed">{section.body}</p>
+                {section.to && (
+                  <Link
+                    to={section.to}
+                    className="mt-3 inline-flex text-[13px] font-semibold text-dark-teal hover:text-teal"
+                  >
+                    Read more →
+                  </Link>
+                )}
               </section>
             ))}
           </div>

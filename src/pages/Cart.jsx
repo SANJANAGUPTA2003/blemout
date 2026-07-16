@@ -6,6 +6,7 @@ import ProductPlaceholder from '../components/ui/ProductPlaceholder';
 import { useCart } from '../context/CartContext';
 import { formatPrice } from '../utils/format';
 import { productPath } from '../data/productImages';
+import { getShippingCharge } from '../data/business';
 
 export default function Cart() {
   const { items, updateQuantity, removeFromCart, cartTotal } = useCart();
@@ -25,7 +26,7 @@ export default function Cart() {
     );
   }
 
-  const shipping = cartTotal >= 499 ? 0 : 49;
+  const shipping = getShippingCharge(items);
   const total = cartTotal + shipping;
 
   return (
@@ -106,7 +107,7 @@ export default function Cart() {
                   <span>{shipping === 0 ? 'Free' : formatPrice(shipping)}</span>
                 </div>
                 {shipping === 0 && (
-                  <p className="text-xs text-teal">Free shipping on prepaid orders!</p>
+                  <p className="text-xs text-teal">Free shipping on orders with 3 or more products.</p>
                 )}
                 <div className="border-t border-gray-200 pt-3 flex justify-between font-semibold text-text">
                   <span>Total</span>

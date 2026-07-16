@@ -1,42 +1,18 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import FadeUp from '../ui/FadeUp';
 import ProductCard from '../ui/ProductCard';
-import LoadingSpinner from '../ui/LoadingSpinner';
-import api from '../../utils/api';
+import ApiMessage from '../ui/ApiMessage';
+import { useProducts } from '../../context/ProductContext';
 
 export default function ExploreMoreProducts() {
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [paused, setPaused] = useState(false);
+  const { products: allProducts, loading, error, slow, retry } = useProducts();
+  const products = useMemo(
+    () => allProducts.filter((p) => !p.isCombo).slice(0, 8),
+    [allProducts]
+  );
   const trackRef = useRef(null);
   const dragRef = useRef({ active: false, startX: 0, scrollLeft: 0 });
-
-  useEffect(() => {
-    api
-      .get('/products')
-      .then(({ data }) => setProducts(data.filter((p) => !p.isCombo).slice(0, 8)))
-      .catch(() => setProducts([]))
-      .finally(() => setLoading(false));
-  }, []);
-
-  useEffect(() => {
-    const el = trackRef.current;
-    if (!el || products.length === 0) return undefined;
-
-    let raf;
-    const step = () => {
-      if (!paused && !dragRef.current.active) {
-        el.scrollLeft += 0.5;
-        if (el.scrollLeft >= el.scrollWidth / 2) {
-          el.scrollLeft = 0;
-        }
-      }
-      raf = requestAnimationFrame(step);
-    };
-    raf = requestAnimationFrame(step);
-    return () => cancelAnimationFrame(raf);
-  }, [paused, products.length]);
 
   const scrollByCard = useCallback((dir) => {
     const el = trackRef.current;
@@ -67,14 +43,8 @@ export default function ExploreMoreProducts() {
     dragRef.current.active = false;
   };
 
-  const looped = products.length ? [...products, ...products] : [];
-
   return (
-    <section
-      className="relative py-16 md:py-24 bg-white"
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
-    >
+    <section className="relative py-16 md:py-24 bg-white">
       <div className="max-w-[1400px] mx-auto px-5 md:px-8 lg:px-10 mb-10 md:mb-12 flex items-end justify-between gap-4">
         <FadeUp>
           <div className="max-w-xl">
@@ -112,7 +82,30 @@ export default function ExploreMoreProducts() {
       </div>
 
       {loading ? (
-        <LoadingSpinner className="py-16" />
+        <div className="flex gap-6 md:gap-8 overflow-hidden px-5 md:px-8 lg:px-10">
+          {[0, 1, 2].map((index) => (
+            <div
+              key={`explore-skeleton-${index}`}
+              className="shrink-0 w-[82vw] sm:w-[46vw] lg:w-[min(420px,calc((100vw-6rem)/3))] animate-pulse"
+            >
+              <div className="aspect-square w-full rounded-sm bg-[#eef2f1]" />
+              <div className="mt-4 mx-auto h-4 w-3/4 rounded bg-[#e8eceb]" />
+              <div className="mt-3 mx-auto h-3 w-1/2 rounded bg-[#eef2f1]" />
+            </div>
+          ))}
+        </div>
+      ) : error ? (
+        <div className="px-5 md:px-8 lg:px-10">
+          <ApiMessage
+            type="offline"
+            message={
+              slow
+                ? 'Products are taking a little longer to load. Please wait or retry.'
+                : 'Unable to load products.'
+            }
+            onRetry={retry}
+          />
+        </div>
       ) : (
         <div
           ref={trackRef}
@@ -124,9 +117,9 @@ export default function ExploreMoreProducts() {
           onPointerLeave={endDrag}
           onPointerCancel={endDrag}
         >
-          {looped.map((product, i) => (
+          {products.map((product) => (
             <div
-              key={`${product._id}-${i}`}
+              key={product._id}
               data-carousel-item
               className="shrink-0 w-[82vw] sm:w-[46vw] lg:w-[min(420px,calc((100vw-6rem)/3))] xl:w-[min(430px,420px)]"
             >

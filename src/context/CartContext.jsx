@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 
 const CartContext = createContext(null);
 
@@ -78,36 +78,53 @@ export function CartProvider({ children }) {
 
   const dismissToast = useCallback(() => setToast(null), []);
 
-  const cartTotal = items.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0
+  const cartTotal = useMemo(
+    () => items.reduce((sum, item) => sum + item.price * item.quantity, 0),
+    [items]
   );
 
-  const cartCount = items.reduce((sum, item) => sum + item.quantity, 0);
-
-  return (
-    <CartContext.Provider
-      value={{
-        items,
-        addToCart,
-        removeFromCart,
-        updateQuantity,
-        clearCart,
-        cartTotal,
-        cartCount,
-        isDrawerOpen,
-        openDrawer,
-        closeDrawer,
-        toast,
-        dismissToast,
-        lastAddedId,
-      }}
-    >
-      {children}
-    </CartContext.Provider>
+  const cartCount = useMemo(
+    () => items.reduce((sum, item) => sum + item.quantity, 0),
+    [items]
   );
+
+  const value = useMemo(
+    () => ({
+      items,
+      addToCart,
+      removeFromCart,
+      updateQuantity,
+      clearCart,
+      cartTotal,
+      cartCount,
+      isDrawerOpen,
+      openDrawer,
+      closeDrawer,
+      toast,
+      dismissToast,
+      lastAddedId,
+    }),
+    [
+      items,
+      addToCart,
+      removeFromCart,
+      updateQuantity,
+      clearCart,
+      cartTotal,
+      cartCount,
+      isDrawerOpen,
+      openDrawer,
+      closeDrawer,
+      toast,
+      dismissToast,
+      lastAddedId,
+    ]
+  );
+
+  return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useCart = () => {
   const context = useContext(CartContext);
   if (!context) throw new Error('useCart must be used within CartProvider');

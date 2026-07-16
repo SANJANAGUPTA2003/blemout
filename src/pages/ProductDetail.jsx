@@ -19,12 +19,11 @@ import {
 import FadeUp from '../components/ui/FadeUp';
 import Button from '../components/ui/Button';
 import ProductCard from '../components/ui/ProductCard';
-import LoadingSpinner from '../components/ui/LoadingSpinner';
 import ApiMessage from '../components/ui/ApiMessage';
 import { useCart } from '../context/CartContext';
-import { normalizeProductContent } from '../data/productImages';
+import { useProducts } from '../context/ProductContext';
+import { getResponsiveImage, normalizeProductContent } from '../data/productImages';
 import { calcDiscountPercent, getSellingPrice } from '../data/business';
-import api from '../utils/api';
 import { formatPrice } from '../utils/format';
 
 const ICONS = { Droplet, FlaskConical, Heart, Leaf, Shield, Sparkles, Sun };
@@ -39,12 +38,55 @@ const accordionDefs = [
   { key: 'faqs', label: 'FAQs' },
 ];
 
+function PdpMainImage({ src, alt, priority }) {
+  const image = getResponsiveImage(src, 'main');
+  return (
+    <picture>
+      {image.srcSet && (
+        <source
+          type="image/webp"
+          srcSet={image.srcSet}
+          sizes="(max-width: 1024px) 100vw, 55vw"
+        />
+      )}
+      <img
+        src={image.src || src}
+        alt={alt}
+        width={1200}
+        height={1200}
+        loading={priority ? 'eager' : 'lazy'}
+        decoding="async"
+        fetchPriority={priority ? 'high' : 'auto'}
+        className="w-full h-full object-contain"
+      />
+    </picture>
+  );
+}
+
+function PdpThumbImage({ src }) {
+  const image = getResponsiveImage(src, 'thumb');
+  return (
+    <picture>
+      {image.webpSrc && <source type="image/webp" srcSet={image.srcSet || image.webpSrc} />}
+      <img
+        src={image.src || src}
+        alt=""
+        width={160}
+        height={160}
+        loading="lazy"
+        decoding="async"
+        className="w-full h-full object-contain"
+      />
+    </picture>
+  );
+}
+
 export default function ProductDetail() {
   const { slug } = useParams();
   const navigate = useNavigate();
   const { addToCart } = useCart();
+  const { products: summaryProducts, getProductBySlug, slow } = useProducts();
   const [product, setProduct] = useState(null);
-  const [related, setRelated] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [quantity, setQuantity] = useState(1);
@@ -52,37 +94,93 @@ export default function ProductDetail() {
   const [openAccordion, setOpenAccordion] = useState('overview');
   const [touchX, setTouchX] = useState(null);
 
+  useEffect(() => {
+    let active = true;
+
+    Promise.resolve().then(() => {
+      if (!active) return;
+      setLoading(true);
+      setError(null);
+
+      getProductBySlug(slug)
+        .then((data) => {
+          if (!active) return;
+          if (!data) {
+            setProduct(null);
+            setError('notfound');
+            return;
+          }
+          setProduct(normalizeProductContent(data));
+          setActiveImage(0);
+          setQuantity(1);
+          setOpenAccordion('overview');
+        })
+        .catch((err) => {
+          if (!active) return;
+          setProduct(null);
+          setError(err.response?.status === 404 ? 'notfound' : 'offline');
+        })
+        .finally(() => {
+          if (active) setLoading(false);
+        });
+    });
+
+    return () => {
+      active = false;
+    };
+  }, [slug, getProductBySlug]);
+
   const fetchProduct = useCallback(() => {
     setLoading(true);
     setError(null);
-    api
-      .get(`/products/${slug}`)
-      .then(async ({ data }) => {
+    return getProductBySlug(slug)
+      .then((data) => {
+        if (!data) {
+          setProduct(null);
+          setError('notfound');
+          return;
+        }
         setProduct(normalizeProductContent(data));
         setActiveImage(0);
         setQuantity(1);
         setOpenAccordion('overview');
-        const { data: all } = await api.get('/products');
-        setRelated(
-          all
-            .filter((p) => p._id !== data._id && (p.category === data.category || p.isBestSeller))
-            .slice(0, 4)
-        );
       })
       .catch((err) => {
         setProduct(null);
         setError(err.response?.status === 404 ? 'notfound' : 'offline');
       })
       .finally(() => setLoading(false));
-  }, [slug]);
-
-  useEffect(() => {
-    fetchProduct();
-  }, [fetchProduct]);
+  }, [slug, getProductBySlug]);
 
   const images = useMemo(() => product?.images || [], [product]);
 
-  if (loading) return <LoadingSpinner className="py-32" />;
+  const related = useMemo(() => {
+    if (!product) return [];
+    return summaryProducts
+      .filter((p) => p._id !== product._id && (p.category === product.category || p.isBestSeller))
+      .slice(0, 4);
+  }, [product, summaryProducts]);
+
+  if (loading) {
+    return (
+      <div className="max-w-[1400px] mx-auto px-4 md:px-6 lg:px-8 py-8 md:py-12">
+        <div className="grid lg:grid-cols-[1.15fr_0.85fr] gap-8 lg:gap-12">
+          <div className="aspect-square rounded-sm bg-[#eef2f1] animate-pulse" />
+          <div className="space-y-4 pt-2">
+            <div className="h-4 w-24 rounded bg-[#eef2f1] animate-pulse" />
+            <div className="h-10 w-3/4 rounded bg-[#e8eceb] animate-pulse" />
+            <div className="h-20 w-full rounded bg-[#eef2f1] animate-pulse" />
+            <div className="h-8 w-32 rounded bg-[#e8eceb] animate-pulse" />
+          </div>
+        </div>
+        {slow && (
+          <p className="mt-8 text-center text-sm text-[#4a5560]">
+            Products are taking a little longer to load. Please wait or retry.
+          </p>
+        )}
+      </div>
+    );
+  }
 
   if (error || !product) {
     return (
@@ -91,7 +189,9 @@ export default function ProductDetail() {
           type={error === 'offline' ? 'offline' : 'empty'}
           message={
             error === 'offline'
-              ? 'Unable to load this product. Check that the backend and MongoDB are running.'
+              ? slow
+                ? 'Products are taking a little longer to load. Please wait or retry.'
+                : 'Unable to load this product. Check that the backend and MongoDB are running.'
               : 'Product not found.'
           }
           onRetry={error === 'offline' ? fetchProduct : undefined}
@@ -189,10 +289,10 @@ export default function ProductDetail() {
                   goImage(delta < 0 ? 1 : -1);
                 }}
               >
-                <img
+                <PdpMainImage
                   src={images[activeImage] || product.imageUrl}
                   alt={product.name}
-                  className="w-full h-full object-contain"
+                  priority={activeImage === 0}
                 />
                 {images.length > 1 && (
                   <>
@@ -226,7 +326,7 @@ export default function ProductDetail() {
                         activeImage === i ? 'opacity-100' : 'opacity-45 hover:opacity-80'
                       }`}
                     >
-                      <img src={img} alt="" className="w-full h-full object-contain" />
+                      <PdpThumbImage src={img} />
                     </button>
                   ))}
                 </div>

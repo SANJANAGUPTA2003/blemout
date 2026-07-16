@@ -51,6 +51,41 @@ export function getHoverImage(product) {
   return images[1] && images[1] !== primary ? images[1] : '';
 }
 
+function derivative(src, role) {
+  if (!/^\/products\/.+\/\d+\.jpg$/i.test(src || '')) return '';
+  return src.replace(/\.jpg$/i, `-${role}.webp`);
+}
+
+export function getResponsiveImage(src, role = 'card') {
+  if (!src) return { src: '', webpSrc: '', srcSet: '' };
+  if (!derivative(src, role)) return { src, webpSrc: '', srcSet: '' };
+
+  if (role === 'thumb') {
+    const webpSrc = derivative(src, 'thumb');
+    return { src, webpSrc, srcSet: `${webpSrc} 160w` };
+  }
+
+  const card = derivative(src, 'card');
+  const main = derivative(src, 'main');
+  return {
+    src,
+    webpSrc: role === 'main' ? main : card,
+    srcSet: `${card} 640w, ${main} 1200w`,
+  };
+}
+
+export function getCardImage(product) {
+  return getMainImage(product);
+}
+
+export function getPdpMainImage(product, index = 0) {
+  return getProductImages(product)[index] || getMainImage(product);
+}
+
+export function getThumbnailImage(product, index = 0) {
+  return getProductImages(product)[index] || getMainImage(product);
+}
+
 export function productPath(product) {
   if (!product) return '/shop';
   return `/shop/${product.slug || product._id}`;

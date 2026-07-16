@@ -1,42 +1,18 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import FadeUp from '../components/ui/FadeUp';
 import ProductCard from '../components/ui/ProductCard';
-import LoadingSpinner from '../components/ui/LoadingSpinner';
+import ProductSkeleton from '../components/ui/ProductSkeleton';
 import ApiMessage from '../components/ui/ApiMessage';
 import { categories } from '../data/constants';
-import api from '../utils/api';
+import { useProducts } from '../context/ProductContext';
 
 export default function Shop() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
-  const [category, setCategory] = useState(searchParams.get('category') || 'All');
-  const [query, setQuery] = useState(searchParams.get('q') || '');
+  const { products, loading, error, slow, retry } = useProducts();
+  const category = searchParams.get('category') || 'All';
+  const query = searchParams.get('q') || '';
   const [sort, setSort] = useState('default');
-
-  const fetchProducts = useCallback(() => {
-    setLoading(true);
-    setError(false);
-    api
-      .get('/products')
-      .then(({ data }) => setProducts(data))
-      .catch(() => {
-        setProducts([]);
-        setError(true);
-      })
-      .finally(() => setLoading(false));
-  }, []);
-
-  useEffect(() => {
-    fetchProducts();
-  }, [fetchProducts]);
-
-  useEffect(() => {
-    setCategory(searchParams.get('category') || 'All');
-    setQuery(searchParams.get('q') || '');
-  }, [searchParams]);
 
   const filtered = useMemo(() => {
     let result = [...products];
@@ -47,17 +23,17 @@ export default function Shop() {
         (p) =>
           p.name.toLowerCase().includes(q) ||
           p.category?.toLowerCase().includes(q) ||
+          p.summary?.toLowerCase().includes(q) ||
           p.description?.toLowerCase().includes(q)
       );
     }
-    if (sort === 'price-low') result.sort((a, b) => a.price - b.price);
-    if (sort === 'price-high') result.sort((a, b) => b.price - a.price);
+    if (sort === 'price-low') result.sort((a, b) => (a.sellingPrice || a.price) - (b.sellingPrice || b.price));
+    if (sort === 'price-high') result.sort((a, b) => (b.sellingPrice || b.price) - (a.sellingPrice || a.price));
     if (sort === 'name') result.sort((a, b) => a.name.localeCompare(b.name));
     return result;
   }, [products, category, query, sort]);
 
   const updateCategory = (value) => {
-    setCategory(value);
     const next = new URLSearchParams(searchParams);
     if (value === 'All') next.delete('category');
     else next.set('category', value);
@@ -117,7 +93,6 @@ export default function Shop() {
                 type="search"
                 value={query}
                 onChange={(e) => {
-                  setQuery(e.target.value);
                   const next = new URLSearchParams(searchParams);
                   if (e.target.value) next.set('q', e.target.value);
                   else next.delete('q');
@@ -131,9 +106,17 @@ export default function Shop() {
 
           <div className="flex-1 min-w-0">
             {loading ? (
-              <LoadingSpinner className="py-24" />
+              <ProductSkeleton count={6} />
             ) : error ? (
-              <ApiMessage type="offline" message="Unable to load products." onRetry={fetchProducts} />
+              <ApiMessage
+                type="offline"
+                message={
+                  slow
+                    ? 'Products are taking a little longer to load. Please wait or retry.'
+                    : 'Unable to load products.'
+                }
+                onRetry={retry}
+              />
             ) : filtered.length === 0 ? (
               <ApiMessage type="empty" message="No products match your filters." />
             ) : (

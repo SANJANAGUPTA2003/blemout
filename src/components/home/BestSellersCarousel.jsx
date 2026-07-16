@@ -2,52 +2,117 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import ProductCard from '../ui/ProductCard';
 
+function prefersConstrainedMotion() {
+  if (typeof window === 'undefined') return true;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return true;
+  const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+  if (connection?.saveData) return true;
+  if (/(^|-)2g$/i.test(connection?.effectiveType || '')) return true;
+  return false;
+}
+
 export default function BestSellersCarousel({ products = [] }) {
-  const [paused, setPaused] = useState(false);
+  const sectionRef = useRef(null);
   const trackRef = useRef(null);
-  const dragRef = useRef({ active: false, startX: 0, scrollLeft: 0 });
+  const offsetRef = useRef(0);
+  const dragRef = useRef({ active: false, startX: 0, origin: 0 });
+  const [paused, setPaused] = useState(false);
+  const [inView, setInView] = useState(true);
+  const [tabVisible, setTabVisible] = useState(true);
+  const [allowAutoplay, setAllowAutoplay] = useState(() =>
+    typeof window === 'undefined' ? true : !prefersConstrainedMotion()
+  );
 
   useEffect(() => {
-    const el = trackRef.current;
-    if (!el || products.length === 0) return undefined;
-
-    let raf;
-    const step = () => {
-      if (!paused && !dragRef.current.active) {
-        el.scrollLeft += 0.55;
-        if (el.scrollLeft >= el.scrollWidth / 2) {
-          el.scrollLeft = 0;
-        }
-      }
-      raf = requestAnimationFrame(step);
-    };
-    raf = requestAnimationFrame(step);
-    return () => cancelAnimationFrame(raf);
-  }, [paused, products.length]);
-
-  const scrollByCard = useCallback((dir) => {
-    const el = trackRef.current;
-    if (!el) return;
-    const card = el.querySelector('[data-carousel-item]');
-    const amount = card ? card.getBoundingClientRect().width + 32 : 360;
-    el.scrollBy({ left: dir * amount, behavior: 'smooth' });
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const onChange = () => setAllowAutoplay(!prefersConstrainedMotion());
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
   }, []);
 
+  useEffect(() => {
+    const onVisibility = () => setTabVisible(document.visibilityState === 'visible');
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => document.removeEventListener('visibilitychange', onVisibility);
+  }, []);
+
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el || typeof IntersectionObserver === 'undefined') return undefined;
+    const io = new IntersectionObserver(
+      ([entry]) => setInView(entry.isIntersecting),
+      { threshold: 0.12, rootMargin: '80px' }
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  const applyTransform = useCallback(() => {
+    const track = trackRef.current;
+    if (!track) return;
+    track.style.transform = `translate3d(${-offsetRef.current}px, 0, 0)`;
+  }, []);
+
+  const wrapOffset = useCallback(() => {
+    const track = trackRef.current;
+    if (!track) return;
+    const half = track.scrollWidth / 2;
+    if (half <= 0) return;
+    while (offsetRef.current >= half) offsetRef.current -= half;
+    while (offsetRef.current < 0) offsetRef.current += half;
+  }, []);
+
+  useEffect(() => {
+    const shouldRun =
+      allowAutoplay && inView && tabVisible && !paused && products.length > 0;
+    if (!shouldRun) return undefined;
+
+    let raf = 0;
+    let last = performance.now();
+    const SPEED_PX_PER_SEC = 26;
+
+    const tick = (now) => {
+      const dt = Math.min(64, now - last);
+      last = now;
+      if (!dragRef.current.active) {
+        offsetRef.current += (SPEED_PX_PER_SEC * dt) / 1000;
+        wrapOffset();
+        applyTransform();
+      }
+      raf = window.requestAnimationFrame(tick);
+    };
+
+    raf = window.requestAnimationFrame(tick);
+    return () => window.cancelAnimationFrame(raf);
+  }, [allowAutoplay, inView, tabVisible, paused, products.length, applyTransform, wrapOffset]);
+
+  const scrollByCard = useCallback(
+    (dir) => {
+      const track = trackRef.current;
+      if (!track) return;
+      const card = track.querySelector('[data-carousel-item]');
+      const amount = card ? card.getBoundingClientRect().width + 32 : 360;
+      offsetRef.current += dir * amount;
+      wrapOffset();
+      applyTransform();
+    },
+    [applyTransform, wrapOffset]
+  );
+
   const onPointerDown = (e) => {
-    const el = trackRef.current;
-    if (!el) return;
     dragRef.current = {
       active: true,
       startX: e.clientX,
-      scrollLeft: el.scrollLeft,
+      origin: offsetRef.current,
     };
   };
 
   const onPointerMove = (e) => {
-    const el = trackRef.current;
-    if (!el || !dragRef.current.active) return;
+    if (!dragRef.current.active) return;
     e.preventDefault();
-    el.scrollLeft = dragRef.current.scrollLeft - (e.clientX - dragRef.current.startX);
+    offsetRef.current = dragRef.current.origin - (e.clientX - dragRef.current.startX);
+    wrapOffset();
+    applyTransform();
   };
 
   const endDrag = () => {
@@ -56,19 +121,20 @@ export default function BestSellersCarousel({ products = [] }) {
 
   if (!products.length) return null;
 
-  const looped = [...products, ...products];
+  const looped = [
+    ...products.map((p) => ({ product: p, key: `a-${p._id}` })),
+    ...products.map((p) => ({ product: p, key: `b-${p._id}` })),
+  ];
 
   return (
     <section
+      ref={sectionRef}
       className="relative py-16 md:py-24 bg-white"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
       <div className="max-w-[1400px] mx-auto px-5 md:px-8 lg:px-10 mb-10 md:mb-12 flex items-end justify-between gap-4">
         <div>
-          <p className="text-[12px] tracking-[0.16em] uppercase text-teal font-bold mb-3">
-            Bestsellers
-          </p>
           <h2 className="text-[36px] md:text-[44px] lg:text-[48px] font-bold text-[#222222] tracking-[-0.03em] leading-[1.1]">
             Best Sellers
           </h2>
@@ -96,25 +162,27 @@ export default function BestSellersCarousel({ products = [] }) {
         </div>
       </div>
 
-      <div
-        ref={trackRef}
-        className="flex gap-6 md:gap-8 overflow-x-auto px-5 md:px-8 lg:px-10 pb-2 scrollbar-none cursor-grab active:cursor-grabbing select-none"
-        style={{ scrollbarWidth: 'none', touchAction: 'pan-y' }}
-        onPointerDown={onPointerDown}
-        onPointerMove={onPointerMove}
-        onPointerUp={endDrag}
-        onPointerLeave={endDrag}
-        onPointerCancel={endDrag}
-      >
-        {looped.map((product, i) => (
-          <div
-            key={`${product._id}-${i}`}
-            data-carousel-item
-            className="shrink-0 w-[82vw] sm:w-[46vw] lg:w-[min(420px,calc((100vw-6rem)/3))] xl:w-[min(430px,420px)]"
-          >
-            <ProductCard product={product} imageMode="promo" />
-          </div>
-        ))}
+      <div className="overflow-hidden px-5 md:px-8 lg:px-10">
+        <div
+          ref={trackRef}
+          className="flex gap-6 md:gap-8 will-change-transform cursor-grab active:cursor-grabbing select-none"
+          style={{ touchAction: 'pan-y' }}
+          onPointerDown={onPointerDown}
+          onPointerMove={onPointerMove}
+          onPointerUp={endDrag}
+          onPointerLeave={endDrag}
+          onPointerCancel={endDrag}
+        >
+          {looped.map(({ product, key }) => (
+            <div
+              key={key}
+              data-carousel-item
+              className="shrink-0 w-[82vw] sm:w-[46vw] lg:w-[min(420px,calc((100vw-6rem)/3))] xl:w-[min(430px,420px)]"
+            >
+              <ProductCard product={product} imageMode="promo" />
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   );

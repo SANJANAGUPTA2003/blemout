@@ -1,58 +1,48 @@
-import { useState, useEffect, useCallback } from 'react';
-import LoadingSpinner from '../components/ui/LoadingSpinner';
-import ApiMessage from '../components/ui/ApiMessage';
+import { useMemo } from 'react';
 import HeroCarousel from '../components/home/HeroCarousel';
 import BestSellersCarousel from '../components/home/BestSellersCarousel';
 import EditorialStory from '../components/home/EditorialStory';
 import ExploreMoreProducts from '../components/home/ExploreMoreProducts';
+import ApiMessage from '../components/ui/ApiMessage';
+import { CarouselSkeleton } from '../components/ui/ProductSkeleton';
 import { getPromoImage } from '../data/productImages';
-import api from '../utils/api';
+import { useProducts } from '../context/ProductContext';
 
 export default function Home() {
-  const [products, setProducts] = useState([]);
-  const [featured, setFeatured] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
+  const { loading, error, slow, retry, getByCollection, getFeatured, getBySlug } = useProducts();
 
-  const fetchProducts = useCallback(() => {
-    setLoading(true);
-    setError(false);
-    Promise.all([
-      api.get('/products', { params: { collection: 'best-sellers' } }),
-      api.get('/products', { params: { featured: 'true' } }),
-    ])
-      .then(([best, feat]) => {
-        setProducts(best.data.slice(0, 8));
-        setFeatured(feat.data.filter((p) => !p.isCombo));
-      })
-      .catch(() => setError(true))
-      .finally(() => setLoading(false));
-  }, []);
+  const products = useMemo(() => getByCollection('best-sellers').slice(0, 8), [getByCollection]);
+  const featured = useMemo(() => getFeatured(), [getFeatured]);
 
-  useEffect(() => {
-    fetchProducts();
-  }, [fetchProducts]);
-
-  const bySlug = (slug) => featured.find((p) => p.slug === slug);
-
-  const repair = bySlug('blemout-blemishes-repair-cream');
-  const sunscreen = bySlug('blemout-enviro-shield-sunscreen');
-  const serum = bySlug('blemout-advanced-blemishes-repair-serum-30ml');
-  const facewash = bySlug('blemout-skin-glow-age-defying-facewash');
-  const moist = bySlug('blemout-hydra-glow-water-creme');
+  const repair = getBySlug('blemout-blemishes-repair-cream') || featured.find((p) => p.slug === 'blemout-blemishes-repair-cream');
+  const sunscreen = getBySlug('blemout-enviro-shield-sunscreen');
+  const serum = getBySlug('blemout-advanced-blemishes-repair-serum-30ml');
+  const facewash = getBySlug('blemout-skin-glow-age-defying-facewash');
+  const moist = getBySlug('blemout-hydra-glow-water-creme');
 
   return (
     <div>
       <HeroCarousel />
 
       {loading ? (
-        <LoadingSpinner className="py-24" />
+        <div>
+          <CarouselSkeleton />
+          {slow && (
+            <p className="pb-8 text-center text-sm text-[#4a5560]">
+              Products are taking a little longer to load. Please wait or retry.
+            </p>
+          )}
+        </div>
       ) : error ? (
         <div className="py-20">
           <ApiMessage
             type="offline"
-            message="Unable to load bestsellers. Check that the backend and MongoDB are running."
-            onRetry={fetchProducts}
+            message={
+              slow
+                ? 'Products are taking a little longer to load. Please wait or retry.'
+                : 'Unable to load bestsellers. Check that the backend and MongoDB are running.'
+            }
+            onRetry={retry}
           />
         </div>
       ) : (

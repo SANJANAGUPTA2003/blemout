@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import FadeUp from '../ui/FadeUp';
 import Button from '../ui/Button';
+import { getResponsiveImage } from '../../data/productImages';
 
 const ICONS = {
   Droplet,
@@ -34,6 +35,8 @@ export default function EditorialStory({
   ctaLabel = 'Learn More',
   reverse = false,
 }) {
+  const responsiveImage = getResponsiveImage(image, 'main');
+
   return (
     <section className="py-14 md:py-20 bg-white">
       <div className="max-w-[1400px] mx-auto px-5 md:px-8 lg:px-10">
@@ -44,11 +47,24 @@ export default function EditorialStory({
         >
           <FadeUp>
             <div className="aspect-square overflow-hidden border-0 bg-transparent flex items-center justify-center">
-              <img
-                src={image}
-                alt={imageAlt}
-                className="w-full h-full object-contain"
-              />
+              <picture className="block h-full w-full">
+                {responsiveImage.srcSet && (
+                  <source
+                    type="image/webp"
+                    srcSet={responsiveImage.srcSet}
+                    sizes="(max-width: 1024px) 100vw, 50vw"
+                  />
+                )}
+                <img
+                  src={responsiveImage.src}
+                  alt={imageAlt}
+                  width="1200"
+                  height="1200"
+                  loading="lazy"
+                  decoding="async"
+                  className="w-full h-full object-contain"
+                />
+              </picture>
             </div>
           </FadeUp>
           <FadeUp delay={0.08}>

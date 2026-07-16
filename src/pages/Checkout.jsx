@@ -4,7 +4,7 @@ import FadeUp from '../components/ui/FadeUp';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import { useCart } from '../context/CartContext';
-import { BUSINESS } from '../data/business';
+import { BUSINESS, getShippingCharge } from '../data/business';
 import api from '../utils/api';
 import { formatPrice } from '../utils/format';
 import { loadRazorpay } from '../utils/razorpay';
@@ -18,6 +18,7 @@ export default function Checkout() {
   const [checkingPayment, setCheckingPayment] = useState(true);
   const [paymentAvailable, setPaymentAvailable] = useState(true);
   const [error, setError] = useState('');
+  const [agreedToPolicies, setAgreedToPolicies] = useState(false);
   const [form, setForm] = useState({
     name: '',
     phone: '',
@@ -28,7 +29,7 @@ export default function Checkout() {
     pincode: '',
   });
 
-  const shipping = cartTotal >= 499 ? 0 : 49;
+  const shipping = getShippingCharge(items);
   const total = cartTotal + shipping;
 
   useEffect(() => {
@@ -46,6 +47,11 @@ export default function Checkout() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+
+    if (!agreedToPolicies) {
+      setError('Please agree to the Terms & Conditions and policies before placing your order.');
+      return;
+    }
 
     if (!paymentAvailable) {
       setError(PAYMENT_UNAVAILABLE_MESSAGE);
@@ -211,10 +217,53 @@ export default function Checkout() {
                   <p className="mt-4 text-sm text-red-500">{error}</p>
                 )}
 
+                <div className="mt-5 flex items-start gap-3">
+                  <input
+                    id="checkout-policy-consent"
+                    type="checkbox"
+                    checked={agreedToPolicies}
+                    onChange={(event) => setAgreedToPolicies(event.target.checked)}
+                    className="mt-1 h-4 w-4 shrink-0 accent-[#2DBEAD]"
+                    aria-describedby="checkout-policy-copy"
+                    required
+                  />
+                  <p id="checkout-policy-copy" className="text-[12px] leading-relaxed text-[#4a5560]">
+                    By placing your order, you agree to our{' '}
+                    <Link
+                      to="/terms-and-conditions"
+                      className="font-semibold text-dark-teal underline decoration-teal/40 underline-offset-2"
+                    >
+                      Terms &amp; Conditions
+                    </Link>
+                    ,{' '}
+                    <Link
+                      to="/privacy-policy"
+                      className="font-semibold text-dark-teal underline decoration-teal/40 underline-offset-2"
+                    >
+                      Privacy Policy
+                    </Link>
+                    ,{' '}
+                    <Link
+                      to="/shipping-policy"
+                      className="font-semibold text-dark-teal underline decoration-teal/40 underline-offset-2"
+                    >
+                      Shipping Policy
+                    </Link>{' '}
+                    and{' '}
+                    <Link
+                      to="/return-refund-policy"
+                      className="font-semibold text-dark-teal underline decoration-teal/40 underline-offset-2"
+                    >
+                      Return &amp; Refund Policy
+                    </Link>
+                    .
+                  </p>
+                </div>
+
                 <Button
                   type="submit"
                   className="w-full mt-6"
-                  disabled={loading || checkingPayment || !paymentAvailable}
+                  disabled={loading || checkingPayment || !paymentAvailable || !agreedToPolicies}
                 >
                   {checkingPayment
                     ? 'Checking payment...'
