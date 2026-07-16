@@ -17,17 +17,34 @@ const PORT = process.env.PORT || 5000;
 
 app.set('trust proxy', 1);
 
-const allowedOrigins = (process.env.CORS_ORIGINS || 'http://localhost:5173,http://127.0.0.1:5173')
+// Configurable via CORS_ORIGINS (comma-separated). Default stays open for the
+// public storefront so Vercel + Render keep working; restrict in env when needed.
+const corsOriginsEnv = (process.env.CORS_ORIGINS || '*').trim();
+const allowedOrigins = corsOriginsEnv
   .split(',')
   .map((origin) => origin.trim())
   .filter(Boolean);
 
+const defaultLocalOrigins = [
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+  'http://localhost:4173',
+  'http://127.0.0.1:4173',
+];
+
+function isAllowedOrigin(origin) {
+  if (!origin) return true;
+  if (allowedOrigins.includes('*')) return true;
+  if (allowedOrigins.includes(origin) || defaultLocalOrigins.includes(origin)) return true;
+  // Vercel production + preview URLs
+  if (/^https:\/\/([\w-]+\.)*vercel\.app$/i.test(origin)) return true;
+  return false;
+}
+
 app.use(
   cors({
     origin(origin, callback) {
-      if (!origin || allowedOrigins.includes('*') || allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      }
+      if (isAllowedOrigin(origin)) return callback(null, true);
       return callback(null, false);
     },
   })
