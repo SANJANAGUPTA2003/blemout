@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
-import Button from '../ui/Button';
 import { formatPrice } from '../../utils/format';
 
+/**
+ * Sticky PDP purchase bar — matches the teal “Added to cart” confirmation style.
+ */
 export default function StickyPurchaseBar({
   targetRef,
   productName,
@@ -25,17 +27,23 @@ export default function StickyPurchaseBar({
   if (!show || hidden) return null;
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-[60] border-t border-[#eef1f0] bg-white/95 backdrop-blur-sm">
-      <div className="mx-auto flex max-w-[1400px] items-center justify-between gap-4 px-4 py-3 md:px-8">
+    <div className="fixed inset-x-3 bottom-3 z-[60] mx-auto max-w-[1400px] rounded-2xl bg-teal shadow-[0_16px_48px_rgba(42,127,128,0.35)] sm:inset-x-5 md:inset-x-8 md:bottom-5 lg:inset-x-10">
+      <div className="flex min-h-[72px] items-center justify-between gap-4 px-4 py-3.5 md:min-h-[80px] md:gap-8 md:px-7 md:py-4">
         <div className="min-w-0">
-          <p className="truncate text-[14px] font-semibold text-[#222222] md:text-[15px]">
+          <p className="truncate text-[15px] font-semibold text-white md:text-[17px]">
             {productName}
           </p>
-          <p className="text-[14px] font-bold text-[#222222]">{formatPrice(price)}</p>
+          <p className="mt-0.5 text-[15px] font-bold text-white md:text-[16px]">
+            {formatPrice(price)}
+          </p>
         </div>
-        <Button type="button" size="sm" onClick={onAdd} className="shrink-0">
+        <button
+          type="button"
+          onClick={onAdd}
+          className="shrink-0 rounded-full bg-white px-6 py-2.5 text-[14px] font-bold text-teal shadow-sm transition-all hover:bg-[#e8f7f5] hover:shadow-[0_6px_18px_rgba(255,255,255,0.25)] md:px-8 md:text-[15px]"
+        >
           Add to Cart
-        </Button>
+        </button>
       </div>
     </div>
   );

@@ -2,7 +2,6 @@ import { Outlet } from 'react-router-dom';
 import AnnouncementBar from './AnnouncementBar';
 import Navbar from './Navbar';
 import Footer from './Footer';
-import ServiceStrip from './ServiceStrip';
 import BrandWordmark from '../home/BrandWordmark';
 import ScrollToTop from '../ScrollToTop';
 import CustomCursor from '../CustomCursor';
@@ -30,7 +29,6 @@ export default function Layout() {
         </main>
       </ProductProvider>
       <BrandWordmark />
-      <ServiceStrip />
       <Footer />
       <CartDrawer />
       <CartToast />
