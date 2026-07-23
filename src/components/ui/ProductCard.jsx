@@ -44,7 +44,8 @@ function ProductCard({ product }) {
             role="card"
             loading="lazy"
             fit="contain"
-            containerClass="bg-[#fafafa]"
+            containerClass="aspect-[5/6] bg-[#f7faf9]"
+            className="scale-[1.04]"
           />
           {badge && (
             <span className="absolute left-3 top-3 z-10 rounded-[2px] bg-white/95 px-2.5 py-1.5 text-[11px] font-bold tracking-[0.12em] text-[#222222]">
@@ -54,27 +55,27 @@ function ProductCard({ product }) {
         </div>
       </Link>
 
-      <div className="flex flex-1 flex-col pt-5 text-left">
+      <div className="flex flex-1 flex-col pt-4 text-left md:pt-5">
         <Link to={path}>
-          <h3 className="min-h-[3.4em] text-[clamp(1.05rem,1.4vw,1.35rem)] font-semibold leading-snug tracking-[-0.01em] text-[#222222] line-clamp-2 [@media(hover:hover)]:group-hover:text-dark-teal">
+          <h3 className="min-h-[2.8em] text-[clamp(1.1rem,1.45vw,1.4rem)] font-semibold leading-snug tracking-[-0.01em] text-[#222222] line-clamp-2 [@media(hover:hover)]:group-hover:text-dark-teal">
             {product.name}
           </h3>
         </Link>
 
         <div className="mt-2.5 flex items-center gap-1 text-teal" aria-label="Rated 5 out of 5 stars">
           {Array.from({ length: 5 }).map((_, i) => (
-            <Star key={i} size={16} fill="currentColor" strokeWidth={0} aria-hidden="true" />
+            <Star key={i} size={15} fill="currentColor" strokeWidth={0} aria-hidden="true" />
           ))}
         </div>
 
         {benefit && (
-          <p className="mt-2.5 min-h-[2.8em] text-[15px] leading-relaxed text-[#4a5560] line-clamp-2 md:text-[16px]">
+          <p className="mt-2.5 min-h-[2.6em] text-[15px] leading-relaxed text-[#4a5560] line-clamp-2 md:text-[16px]">
             {benefit}
           </p>
         )}
 
         <div className="mt-3.5 flex flex-wrap items-baseline gap-2.5">
-          <p className="text-[clamp(1.1rem,1.5vw,1.35rem)] font-bold text-[#222222]">
+          <p className="text-[clamp(1.2rem,1.55vw,1.45rem)] font-bold text-[#222222]">
             {formatPrice(sellingPrice)}
           </p>
           {mrp && <p className="text-[15px] text-[#6b7280] line-through md:text-[16px]">{formatPrice(mrp)}</p>}
@@ -84,7 +85,7 @@ function ProductCard({ product }) {
         </div>
 
         <div className="mt-auto pt-5">
-          <Button type="button" size="md" className="w-full text-[15px] md:text-[16px] py-3" onClick={handleAdd}>
+          <Button type="button" size="lg" className="w-full" onClick={handleAdd}>
             Add to Cart
           </Button>
         </div>

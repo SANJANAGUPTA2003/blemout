@@ -27,7 +27,11 @@ function ProductImage({
 
   if (!src || failed) {
     return (
-      <div className={`aspect-square w-full overflow-hidden border-0 bg-transparent ${containerClass}`}>
+      <div
+        className={`relative w-full overflow-hidden border-0 bg-transparent ${
+          containerClass.includes('aspect-') ? '' : 'aspect-square'
+        } ${containerClass}`}
+      >
         <ProductPlaceholder size={size} className="h-full rounded-none" />
       </div>
     );
@@ -35,7 +39,9 @@ function ProductImage({
 
   return (
     <div
-      className={`aspect-square w-full relative overflow-hidden border-0 bg-transparent ${containerClass}`}
+      className={`relative w-full overflow-hidden border-0 bg-transparent ${
+        containerClass.includes('aspect-') ? '' : 'aspect-square'
+      } ${containerClass}`}
     >
       {/* Hover layer is mounted immediately so the colourful image is cached before first hover */}
       <picture>

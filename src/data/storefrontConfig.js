@@ -151,6 +151,124 @@ export const BADGE_BY_SLUG = {
   [COMBO_SLUGS.creamSs]: 'New',
 };
 
+/**
+ * Explicit ranking for sorts that lack Mongo orderCount/popularity fields.
+ * Used only for approved storefront display order — not invented sales metrics.
+ */
+export const RANK_SLUGS = {
+  mostLoved: [
+    PRODUCT_SLUGS.serum,
+    PRODUCT_SLUGS.facewash,
+    PRODUCT_SLUGS.repairCream,
+    PRODUCT_SLUGS.sunscreen,
+    PRODUCT_SLUGS.moisturizer,
+  ],
+  mostReordered: [
+    PRODUCT_SLUGS.moisturizer,
+    PRODUCT_SLUGS.facewash,
+    PRODUCT_SLUGS.serum,
+    PRODUCT_SLUGS.sunscreen,
+    PRODUCT_SLUGS.repairCream,
+  ],
+};
+
+/** Campaign / promotional graphics for mega-menu cards (complete designed visuals). */
+export const MEGA_CAMPAIGN = {
+  sunscreen: '/home/hero/hero-sunscreen-creative.jpg',
+  serum: '/home/product-details/serum-feature.jpg',
+  facewash: '/home/product-details/facewash-feature.jpg',
+  repairCream: '/home/product-details/repair-cream-feature.jpg',
+};
+
+export const MEGA_MENUS = {
+  shop: {
+    label: 'SHOP',
+    to: '/shop',
+    links: [
+      { label: 'View All', to: '/shop' },
+      { label: 'Individual Products', to: '/shop?type=individual' },
+      { label: 'Combos', to: '/shop?type=combo' },
+      { label: 'Shop by Concern', to: '/shop-by-concern' },
+      { label: 'Face Wash', to: '/shop?category=face-wash' },
+      { label: 'Serum', to: '/shop?category=serum' },
+      { label: 'Moisturizer', to: '/shop?category=moisturizer' },
+      { label: 'Sunscreen', to: '/shop?category=sunscreen' },
+      { label: 'Blemish Cream', to: '/shop?category=blemish-cream' },
+    ],
+    cards: [],
+  },
+  new: {
+    label: 'NEW',
+    to: '/new',
+    links: [{ label: 'View All New', to: '/new' }],
+    cards: [
+      {
+        label: 'Sunscreen',
+        to: `/shop/${PRODUCT_SLUGS.sunscreen}`,
+        image: MEGA_CAMPAIGN.sunscreen,
+        fit: 'cover',
+        position: 'center',
+      },
+      {
+        label: 'Serum',
+        to: `/shop/${PRODUCT_SLUGS.serum}`,
+        image: MEGA_CAMPAIGN.serum,
+        fit: 'cover',
+        position: 'center',
+      },
+    ],
+  },
+  bestSellers: {
+    label: 'BEST SELLERS',
+    to: '/best-sellers',
+    links: [{ label: 'View All Best Sellers', to: '/best-sellers' }],
+    cards: [
+      {
+        label: 'Face Wash',
+        to: `/shop/${PRODUCT_SLUGS.facewash}`,
+        image: MEGA_CAMPAIGN.facewash,
+        fit: 'cover',
+        position: 'center',
+      },
+      {
+        label: 'Blemish Cream',
+        to: `/shop/${PRODUCT_SLUGS.repairCream}`,
+        image: MEGA_CAMPAIGN.repairCream,
+        fit: 'cover',
+        position: 'center top',
+      },
+      {
+        label: 'Facewash + Cream + Sunscreen',
+        to: `/shop/${COMBO_SLUGS.fwCreamSs}`,
+        image: '/products/combos/facewash-blemish-cream-sunscreen-combo-creative.jpg',
+        fit: 'cover',
+        position: 'center',
+      },
+    ],
+  },
+  limitedPicks: {
+    label: 'LIMITED PICKS',
+    to: '/limited-picks',
+    links: [{ label: 'View All Limited Picks', to: '/limited-picks' }],
+    cards: [
+      {
+        label: 'Face Wash + Serum + Moisturizer',
+        to: `/shop/${COMBO_SLUGS.fwSerumMoist}`,
+        image: '/products/combos/face-wash-serum-moisturizer-combo-creative.jpg',
+        fit: 'cover',
+        position: 'center',
+      },
+      {
+        label: 'Complete Daily Routine',
+        to: `/shop/${COMBO_SLUGS.complete}`,
+        image: '/products/combos/complete-routine-combo-creative.jpg',
+        fit: 'cover',
+        position: 'center',
+      },
+    ],
+  },
+};
+
 export const CONCERNS = [
   {
     id: 'blemishes-acne',
@@ -219,73 +337,3 @@ export const CONCERNS = [
     ],
   },
 ];
-
-export const MEGA_MENUS = {
-  shop: {
-    label: 'SHOP',
-    to: '/shop',
-    links: [
-      { label: 'Shop All', to: '/shop' },
-      { label: 'Individual Products', to: '/shop?filter=individual' },
-      { label: 'Combos', to: '/shop?filter=combos' },
-      { label: 'Shop by Concern', to: '/shop-by-concern' },
-    ],
-    cards: [],
-  },
-  new: {
-    label: 'NEW',
-    to: '/new',
-    links: [{ label: 'View All New', to: '/new' }],
-    cards: [
-      {
-        label: 'Sunscreen',
-        to: `/shop/${PRODUCT_SLUGS.sunscreen}`,
-        image: '/products/sunscreen/1.jpg',
-      },
-      {
-        label: 'Serum',
-        to: `/shop/${PRODUCT_SLUGS.serum}`,
-        image: '/products/serum/1.jpg',
-      },
-    ],
-  },
-  bestSellers: {
-    label: 'BEST SELLERS',
-    to: '/best-sellers',
-    links: [{ label: 'View All Best Sellers', to: '/best-sellers' }],
-    cards: [
-      {
-        label: 'Face Wash',
-        to: `/shop/${PRODUCT_SLUGS.facewash}`,
-        image: '/products/facewash/1.jpg',
-      },
-      {
-        label: 'Blemish Cream',
-        to: `/shop/${PRODUCT_SLUGS.repairCream}`,
-        image: '/products/repair-cream/1.jpg',
-      },
-      {
-        label: 'Facewash + Cream + Sunscreen',
-        to: `/shop/${COMBO_SLUGS.fwCreamSs}`,
-        image: '/products/combos/facewash-blemish-cream-sunscreen-combo-creative.jpg',
-      },
-    ],
-  },
-  limitedPicks: {
-    label: 'LIMITED PICKS',
-    to: '/limited-picks',
-    links: [{ label: 'View All Limited Picks', to: '/limited-picks' }],
-    cards: [
-      {
-        label: 'Face Wash + Serum + Moisturizer',
-        to: `/shop/${COMBO_SLUGS.fwSerumMoist}`,
-        image: '/products/combos/face-wash-serum-moisturizer-combo-creative.jpg',
-      },
-      {
-        label: 'Complete Daily Routine',
-        to: `/shop/${COMBO_SLUGS.complete}`,
-        image: '/products/combos/complete-routine-combo-creative.jpg',
-      },
-    ],
-  },
-};

@@ -103,6 +103,17 @@ p {
   }
 }
 
+@keyframes pagerFade {
+  from {
+    opacity: 0.35;
+    transform: translate3d(18px, 0, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
 .announcement-bar .announcement-marquee {
   animation: announcement-marquee 38s linear infinite;
 }

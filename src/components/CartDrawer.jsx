@@ -154,25 +154,25 @@ export default function CartDrawer() {
               )}
             </div>
 
-            <div className="border-t border-gray-100 px-5 py-4 space-y-3">
+            <div className="space-y-3 border-t border-gray-100 px-5 py-4">
               <div className="flex justify-between text-sm">
                 <span className="text-soft-text">Subtotal</span>
                 <span className="font-bold text-text">{formatPrice(cartTotal)}</span>
               </div>
-              <Link to="/cart" onClick={closeDrawer} className="block">
-                <Button variant="secondary" className="w-full">
-                  View Cart
-                </Button>
-              </Link>
               <Link to="/checkout" onClick={closeDrawer} className="block">
                 <Button className="w-full" disabled={items.length === 0}>
                   Proceed to Checkout
                 </Button>
               </Link>
+              <Link to="/cart" onClick={closeDrawer} className="block">
+                <Button variant="outline" className="w-full">
+                  View Cart
+                </Button>
+              </Link>
               <button
                 type="button"
                 onClick={closeDrawer}
-                className="w-full text-center text-sm font-semibold text-dark-teal hover:text-teal transition-colors py-1"
+                className="w-full rounded-full border border-teal bg-white py-3 text-center text-[15px] font-semibold text-teal transition-colors hover:bg-[#e8f7f5]"
               >
                 Continue Shopping
               </button>

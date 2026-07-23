@@ -1,9 +1,10 @@
 import { useMemo } from 'react';
 import FadeUp from '../ui/FadeUp';
 import HomeProductCard from '../ui/HomeProductCard';
-import HomeProductMarquee from './HomeProductMarquee';
+import HomeProductPager from './HomeProductPager';
 import ApiMessage from '../ui/ApiMessage';
 import { HOMEPAGE_EXPLORE_SLUGS } from '../../data/homepageConfig';
+import { COLLECTION_SLUGS } from '../../data/storefrontConfig';
 import { useProducts } from '../../context/ProductContext';
 
 export default function ExploreMoreProducts() {
@@ -11,7 +12,9 @@ export default function ExploreMoreProducts() {
 
   const products = useMemo(() => {
     const seen = new Set();
-    return HOMEPAGE_EXPLORE_SLUGS.map((slug) => getBySlug(slug))
+    const ordered = [...HOMEPAGE_EXPLORE_SLUGS, ...COLLECTION_SLUGS.shopAll];
+    return ordered
+      .map((slug) => getBySlug(slug))
       .filter(Boolean)
       .filter((p) => {
         if (seen.has(p.slug)) return false;
@@ -22,9 +25,9 @@ export default function ExploreMoreProducts() {
 
   return (
     <section className="relative bg-white py-16 md:py-24">
-      <div className="mx-auto mb-10 max-w-[1400px] px-5 md:px-8 lg:px-10 md:mb-12">
+      <div className="mx-auto max-w-[1400px] px-5 md:px-8 lg:px-10">
         <FadeUp>
-          <div className="max-w-xl">
+          <div className="mb-10 max-w-xl md:mb-12">
             <p className="mb-3 text-[12px] font-bold uppercase tracking-[0.16em] text-teal">
               Discover
             </p>
@@ -32,27 +35,22 @@ export default function ExploreMoreProducts() {
               Explore More Products
             </h2>
             <p className="mt-4 text-[16px] leading-relaxed text-[#4a5560]">
-              The complete BLEMOUT lineup — five individual formulas.
+              The BLEMOUT lineup — five products per view, with more one click away.
             </p>
           </div>
         </FadeUp>
-      </div>
 
-      {loading ? (
-        <div className="flex gap-4 overflow-hidden px-5 md:px-8 lg:px-10">
-          {Array.from({ length: 5 }).map((_, index) => (
-            <div
-              key={`explore-skeleton-${index}`}
-              className="w-[46vw] shrink-0 animate-pulse sm:w-[30vw] lg:w-[240px]"
-            >
-              <div className="aspect-square w-full rounded-sm bg-[#eef2f1]" />
-              <div className="mt-4 h-4 w-3/4 rounded bg-[#e8eceb]" />
-              <div className="mt-3 h-10 w-full rounded-full bg-[#eef2f1]" />
-            </div>
-          ))}
-        </div>
-      ) : error ? (
-        <div className="px-5 md:px-8 lg:px-10">
+        {loading ? (
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+            {Array.from({ length: 5 }).map((_, index) => (
+              <div key={`explore-skeleton-${index}`} className="animate-pulse">
+                <div className="aspect-[5/6] w-full rounded-sm bg-[#eef2f1]" />
+                <div className="mt-4 h-4 w-3/4 rounded bg-[#e8eceb]" />
+                <div className="mt-3 h-10 w-full rounded-full bg-[#eef2f1]" />
+              </div>
+            ))}
+          </div>
+        ) : error ? (
           <ApiMessage
             type="offline"
             message={
@@ -62,14 +60,14 @@ export default function ExploreMoreProducts() {
             }
             onRetry={retry}
           />
-        </div>
-      ) : (
-        <HomeProductMarquee className="px-5 md:px-8 lg:px-10" speed={28}>
-          {products.map((product) => (
-            <HomeProductCard key={product._id || product.slug} product={product} />
-          ))}
-        </HomeProductMarquee>
-      )}
+        ) : (
+          <HomeProductPager>
+            {products.map((product) => (
+              <HomeProductCard key={product._id || product.slug} product={product} />
+            ))}
+          </HomeProductPager>
+        )}
+      </div>
     </section>
   );
 }

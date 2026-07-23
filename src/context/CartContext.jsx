@@ -21,7 +21,7 @@ export function CartProvider({ children }) {
 
   useEffect(() => {
     if (!toast) return undefined;
-    const timer = window.setTimeout(() => setToast(null), 2800);
+    const timer = window.setTimeout(() => setToast(null), 6500);
     return () => window.clearTimeout(timer);
   }, [toast]);
 
@@ -53,9 +53,10 @@ export function CartProvider({ children }) {
     setToast({
       id: Date.now(),
       name: product.name,
-      imageUrl: product.imageUrl || product.images?.[0],
+      imageUrl: product.imageUrl || product.images?.[0] || product.hoverImage || '',
+      price: product.price,
     });
-    setIsDrawerOpen(true);
+    // Sticky confirmation bar shows instead of auto-opening the drawer
   }, []);
 
   const removeFromCart = useCallback((productId) => {
