@@ -513,6 +513,7 @@ export default function ProductDetail() {
         targetRef={purchaseRef}
         productName={product.name}
         price={sellingPrice}
+        imageUrl={images[0] || product.imageUrl}
         onAdd={handleAddToCart}
         hidden={zoomOpen || isDrawerOpen || quickAddOpen}
       />
