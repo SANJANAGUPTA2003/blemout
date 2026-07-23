@@ -18,8 +18,8 @@ import { BUSINESS } from '../data/business';
 
 const founderStories = [
   {
-    image: '/about/blemout-repair-cream-editorial.png',
-    alt: 'BLEMOUT advanced blemish repair cream displayed in a teal clinical studio',
+    image: '/about/about-repair-cream.jpg',
+    alt: 'BLEMOUT Blemishes Repair Cream with model',
     chapters: [
       {
         id: 'story',
@@ -40,8 +40,8 @@ const founderStories = [
     ],
   },
   {
-    image: '/about/blemout-sunscreen-editorial.png',
-    alt: 'BLEMOUT SPF 50 sunscreen presented in a warm golden studio setting',
+    image: '/about/about-sunscreen.jpg',
+    alt: 'BLEMOUT Enviro Shield Sunscreen product creative',
     reverse: true,
     chapters: [
       {
@@ -148,7 +148,7 @@ export default function About() {
 
       <section className="px-5 py-14 md:px-8 md:py-20 lg:px-10">
         <FadeUp>
-          <div className="mx-auto grid max-w-[1400px] items-center gap-10 lg:grid-cols-[0.82fr_1.18fr] lg:gap-16">
+          <div className="mx-auto grid max-w-[1400px] items-center gap-10 lg:grid-cols-[0.48fr_0.52fr] lg:gap-14">
             <div>
               <p className="mb-4 text-[12px] font-bold uppercase tracking-[0.16em] text-teal">
                 Our Story · Since {BUSINESS.foundedYear}
@@ -161,17 +161,17 @@ export default function About() {
                 trusted since {BUSINESS.foundedYear}.
               </p>
             </div>
-            <div className="aspect-[3/2] overflow-hidden bg-[#f5f8f7]">
-              <picture>
-                <source srcSet="/about/blemout-facewash-editorial.webp" type="image/webp" />
+            <div className="flex min-h-[320px] items-center justify-center overflow-hidden bg-[#f5f8f7] p-6 sm:min-h-[400px] sm:p-8 md:min-h-[480px] md:p-10 lg:min-h-[520px]">
+              <picture className="flex h-full w-full items-center justify-center">
+                <source srcSet="/about/about-facewash.jpg" type="image/jpeg" />
                 <img
-                  src="/about/blemout-facewash-editorial.png"
-                  alt="BLEMOUT acne facewash surrounded by water and glass in a clinical studio"
+                  src="/about/about-facewash.jpg"
+                  alt="BLEMOUT Skin Glow Facewash tube"
                   width="1400"
                   height="933"
                   decoding="async"
                   fetchPriority="high"
-                  className="h-full w-full object-cover object-center"
+                  className="h-full max-h-[min(70vh,560px)] w-full object-contain object-center"
                 />
               </picture>
             </div>
@@ -197,12 +197,12 @@ export default function About() {
               <section key={story.image}>
                 <FadeUp>
                   <div
-                    className={`grid items-center gap-10 lg:grid-cols-2 lg:gap-20 ${
-                      story.reverse ? 'lg:[&>*:first-child]:order-2' : ''
+                    className={`flex flex-col items-center gap-10 lg:flex-row lg:gap-16 ${
+                      story.reverse ? 'lg:flex-row-reverse' : ''
                     }`}
                   >
-                    <div className="aspect-[4/5] overflow-hidden bg-[#f6f7f6]">
-                      <picture>
+                    <div className="flex min-h-[360px] items-center justify-center overflow-hidden bg-[#f6f7f6] p-6 sm:min-h-[440px] sm:p-8 md:min-h-[520px] md:p-10 lg:w-[48%]">
+                      <picture className="flex h-full w-full items-center justify-center">
                         <source srcSet={story.image.replace(/\.png$/, '.webp')} type="image/webp" />
                         <img
                           src={story.image}
@@ -211,24 +211,24 @@ export default function About() {
                           height="1400"
                           loading="lazy"
                           decoding="async"
-                          className="h-full w-full object-cover object-center"
+                          className="h-full max-h-[min(72vh,580px)] w-full object-contain object-center"
                         />
                       </picture>
                     </div>
-                    <div className="max-w-lg space-y-12">
+                    <div className="max-w-lg space-y-12 lg:w-[52%]">
                       {story.chapters.map((chapter) => (
                         <article key={chapter.id} id={chapter.id} className="scroll-mt-28">
                           <p className="mb-4 text-[12px] font-bold uppercase tracking-[0.16em] text-teal">
                             Founder Story
                           </p>
-                          <h2 className="text-[32px] font-bold leading-[1.1] tracking-[-0.03em] text-[#222222] md:text-[42px]">
+                          <h2 className="text-[clamp(1.85rem,3vw,2.65rem)] font-bold leading-[1.1] tracking-[-0.03em] text-[#222222]">
                             {chapter.title}
                           </h2>
                           <div className="mt-6 space-y-4">
                             {chapter.paragraphs.map((paragraph) => (
                               <p
                                 key={paragraph}
-                                className="text-[16px] leading-[1.8] text-[#4a5560] md:text-[17px]"
+                                className="text-[17px] leading-[1.8] text-[#4a5560] md:text-[18px]"
                               >
                                 {paragraph}
                               </p>

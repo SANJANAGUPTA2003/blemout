@@ -68,31 +68,26 @@ export default function TrackOrder() {
 
   return (
     <div className="bg-white">
-      <div className="max-w-[1400px] mx-auto px-5 md:px-8 lg:px-10 py-14 md:py-20">
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-start">
+      <div className="mx-auto max-w-[1400px] px-5 py-14 md:px-8 md:py-20 lg:px-10">
+        <div className="grid items-center gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-14 xl:gap-16">
           <FadeUp>
-            <div className="aspect-[4/5] overflow-hidden bg-[#f7faf9]">
-              <img
-                src="/products/facewash/2.jpg"
-                alt="BLEMOUT products"
-                className="w-full h-full object-cover"
-              />
-            </div>
-          </FadeUp>
-
-          <FadeUp delay={0.06}>
-            <p className="text-[11px] tracking-[0.22em] uppercase text-teal font-semibold mb-3">
+            <p className="mb-3 text-[13px] font-semibold uppercase tracking-[0.2em] text-teal">
               Customer Service
             </p>
-            <h1 className="text-3xl md:text-4xl font-semibold text-text tracking-tight">
+            <h1 className="text-[clamp(2.25rem,4vw,3.5rem)] font-bold tracking-[-0.03em] text-[#222222]">
               Track Your Order
             </h1>
-            <p className="mt-4 text-soft-text leading-relaxed max-w-md">
-              Enter your secure Order ID and the phone number used at checkout.
-              We verify both before showing status — never share your full order details publicly.
+            <p className="mt-5 max-w-md text-[17px] leading-relaxed text-[#4a5560] md:text-[18px]">
+              Stay updated on your BLEMOUT order from dispatch to delivery.
+            </p>
+            <p className="mt-2 max-w-md text-[16px] leading-relaxed text-[#4a5560]">
+              Enter your Order ID to check the latest status.
+            </p>
+            <p className="mt-5 text-[13px] font-semibold uppercase tracking-[0.08em] text-[#6b7280]">
+              Secure Tracking · Quick Updates · Hassle-Free Experience
             </p>
 
-            <form onSubmit={trackOrder} className="mt-8 space-y-4 max-w-md">
+            <form onSubmit={trackOrder} className="mt-9 space-y-5 max-w-md">
               <Input
                 label="Order ID"
                 placeholder="e.g. BLM-A7K9Q2"
@@ -106,36 +101,59 @@ export default function TrackOrder() {
                 onChange={(e) => setPhone(e.target.value)}
                 type="tel"
               />
-              {error && <p className="text-sm text-red-500">{error}</p>}
+              {error && <p className="text-[15px] text-red-500">{error}</p>}
               <Button type="submit" disabled={loading} className="w-full sm:w-auto">
                 {loading ? 'Verifying...' : 'Track Order'}
               </Button>
             </form>
 
-            <div className="mt-8 flex items-start gap-3 text-sm text-soft-text max-w-md">
-              <ShieldCheck size={18} className="text-teal shrink-0 mt-0.5" />
+            <div className="mt-8 flex max-w-md items-start gap-3 text-[15px] text-[#4a5560]">
+              <ShieldCheck size={20} className="mt-0.5 shrink-0 text-teal" />
               <p>
-                Tracking is rate-limited and privacy-safe. Full customer details stay available only to authenticated admin.
+                Tracking is rate-limited and privacy-safe. Full customer details stay available
+                only to authenticated admin.
               </p>
+            </div>
+          </FadeUp>
+
+          <FadeUp delay={0.06}>
+            <div className="overflow-hidden rounded-2xl bg-[#f4f7f6] p-3 md:p-5">
+              <img
+                src="/track/track-order-banner.png"
+                alt="Customer relaxing outdoors while waiting for a BLEMOUT order"
+                width="1200"
+                height="900"
+                className="h-auto w-full object-contain object-center"
+                loading="eager"
+                decoding="async"
+              />
             </div>
           </FadeUp>
         </div>
 
         {order && (
           <FadeUp>
-            <div className="mt-16 md:mt-20 max-w-3xl">
-              <div className="flex flex-wrap items-end justify-between gap-4 mb-10">
+            <div className="mt-16 max-w-3xl md:mt-20">
+              <div className="mb-10 flex flex-wrap items-end justify-between gap-4">
                 <div>
-                  <p className="text-xs tracking-[0.16em] uppercase text-soft-text font-semibold">Order</p>
-                  <h2 className="mt-1 text-2xl font-semibold text-text">{order.orderId || order.publicOrderId}</h2>
+                  <p className="text-[13px] font-semibold uppercase tracking-[0.16em] text-[#6b7280]">
+                    Order
+                  </p>
+                  <h2 className="mt-1 text-[28px] font-semibold text-[#222222]">
+                    {order.orderId || order.publicOrderId}
+                  </h2>
                   {order.createdAt && (
-                    <p className="mt-1 text-sm text-soft-text">Placed {formatDate(order.createdAt)}</p>
+                    <p className="mt-1 text-[15px] text-[#4a5560]">
+                      Placed {formatDate(order.createdAt)}
+                    </p>
                   )}
                 </div>
-                <p className="text-sm font-semibold text-teal capitalize">{order.status || 'Placed'}</p>
+                <p className="text-[15px] font-semibold capitalize text-teal">
+                  {order.status || 'Placed'}
+                </p>
               </div>
 
-              <div className="grid sm:grid-cols-4 gap-4">
+              <div className="grid gap-4 sm:grid-cols-4">
                 {steps.map((step, i) => {
                   const Icon = step.icon;
                   const done = i <= activeStep;
@@ -145,7 +163,9 @@ export default function TrackOrder() {
                       className={`p-4 border ${done ? 'border-teal/40 bg-[#f7faf9]' : 'border-gray-100'}`}
                     >
                       <Icon size={18} className={done ? 'text-teal' : 'text-soft-text'} />
-                      <p className={`mt-3 text-sm font-semibold ${done ? 'text-text' : 'text-soft-text'}`}>
+                      <p
+                        className={`mt-3 text-[15px] font-semibold ${done ? 'text-text' : 'text-soft-text'}`}
+                      >
                         {step.label}
                       </p>
                     </div>
@@ -155,21 +175,26 @@ export default function TrackOrder() {
 
               {order.items?.length > 0 && (
                 <div className="mt-10">
-                  <h3 className="text-sm font-semibold text-text mb-4">Items</h3>
+                  <h3 className="mb-4 text-[16px] font-semibold text-[#222222]">Items</h3>
                   <ul className="space-y-3">
                     {order.items.map((item, i) => (
-                      <li key={i} className="flex justify-between gap-4 text-sm text-soft-text border-b border-gray-50 pb-3">
-                        <span>{item.name} × {item.quantity || 1}</span>
+                      <li
+                        key={i}
+                        className="flex justify-between gap-4 border-b border-gray-50 pb-3 text-[15px] text-[#4a5560]"
+                      >
+                        <span>
+                          {item.name} × {item.quantity || 1}
+                        </span>
                       </li>
                     ))}
                   </ul>
                 </div>
               )}
 
-              <p className="mt-8 text-sm text-soft-text">
+              <p className="mt-8 text-[15px] text-[#4a5560]">
                 Need help?{' '}
-                <Link to="/contact" className="text-dark-teal font-semibold hover:text-teal">
-                  Contact support
+                <Link to="/contact" className="font-semibold text-dark-teal hover:text-teal">
+                  Contact us
                 </Link>
               </p>
             </div>

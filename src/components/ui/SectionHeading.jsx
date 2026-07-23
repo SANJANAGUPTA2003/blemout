@@ -9,11 +9,11 @@ export default function SectionHeading({
 
   return (
     <div className={`max-w-2xl mb-12 md:mb-16 ${alignClass} ${className}`}>
-      <h2 className="text-[32px] md:text-[40px] lg:text-[44px] font-bold text-[#222222] tracking-[-0.03em] leading-[1.12]">
+      <h2 className="text-[clamp(2rem,3.5vw,3rem)] font-bold text-[#222222] tracking-[-0.03em] leading-[1.12]">
         {title}
       </h2>
       {subtitle && (
-        <p className="mt-4 text-[#4a5560] text-[15px] md:text-[16px] leading-relaxed font-normal">
+        <p className="mt-4 text-[#4a5560] text-[16px] md:text-[18px] leading-relaxed font-normal">
           {subtitle}
         </p>
       )}

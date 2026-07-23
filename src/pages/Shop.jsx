@@ -1,136 +1,125 @@
-import { useState, useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import FadeUp from '../components/ui/FadeUp';
 import ProductCard from '../components/ui/ProductCard';
 import ProductSkeleton from '../components/ui/ProductSkeleton';
 import ApiMessage from '../components/ui/ApiMessage';
-import { categories } from '../data/constants';
 import { useProducts } from '../context/ProductContext';
+import { COLLECTION_SLUGS } from '../data/storefrontConfig';
+import { resolveBySlugs } from '../data/productDisplay';
+
+const FILTERS = [
+  { id: 'all', label: 'All' },
+  { id: 'individual', label: 'Individual Products' },
+  { id: 'combos', label: 'Combos' },
+  { id: 'best', label: 'Best Sellers' },
+];
 
 export default function Shop() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { products, loading, error, slow, retry } = useProducts();
-  const category = searchParams.get('category') || 'All';
+  const filter = searchParams.get('filter') || 'all';
   const query = searchParams.get('q') || '';
   const [sort, setSort] = useState('default');
 
+  const catalog = useMemo(
+    () => resolveBySlugs(products, COLLECTION_SLUGS.shopAll),
+    [products]
+  );
+
   const filtered = useMemo(() => {
-    let result = [...products];
-    if (category !== 'All') result = result.filter((p) => p.category === category);
+    let result = [...catalog];
+    if (filter === 'individual') result = result.filter((p) => !p.isCombo);
+    if (filter === 'combos') result = result.filter((p) => p.isCombo || p.category === 'Combo');
+    if (filter === 'best') result = result.filter((p) => p.isBestSeller);
     if (query.trim()) {
       const q = query.trim().toLowerCase();
       result = result.filter(
         (p) =>
           p.name.toLowerCase().includes(q) ||
           p.category?.toLowerCase().includes(q) ||
-          p.summary?.toLowerCase().includes(q) ||
-          p.description?.toLowerCase().includes(q)
+          p.summary?.toLowerCase().includes(q)
       );
     }
-    if (sort === 'price-low') result.sort((a, b) => (a.sellingPrice || a.price) - (b.sellingPrice || b.price));
-    if (sort === 'price-high') result.sort((a, b) => (b.sellingPrice || b.price) - (a.sellingPrice || a.price));
+    if (sort === 'price-low') {
+      result.sort((a, b) => (a.sellingPrice || a.price) - (b.sellingPrice || b.price));
+    }
+    if (sort === 'price-high') {
+      result.sort((a, b) => (b.sellingPrice || b.price) - (a.sellingPrice || a.price));
+    }
     if (sort === 'name') result.sort((a, b) => a.name.localeCompare(b.name));
     return result;
-  }, [products, category, query, sort]);
+  }, [catalog, filter, query, sort]);
 
-  const updateCategory = (value) => {
+  const setFilter = (id) => {
     const next = new URLSearchParams(searchParams);
-    if (value === 'All') next.delete('category');
-    else next.set('category', value);
+    if (id === 'all') next.delete('filter');
+    else next.set('filter', id);
     setSearchParams(next);
   };
 
   return (
     <div className="bg-white">
-      <div className="max-w-[1400px] mx-auto px-5 md:px-8 lg:px-10 py-14 md:py-20">
+      <div className="mx-auto max-w-[1400px] px-5 py-14 md:px-8 md:py-20 lg:px-10">
         <FadeUp>
-          <p className="text-[12px] tracking-[0.16em] uppercase text-teal font-bold mb-3">Shop</p>
-          <h1 className="text-[36px] md:text-[48px] font-bold text-[#222222] tracking-[-0.03em] leading-[1.1]">
+          <p className="mb-3 text-[13px] font-bold uppercase tracking-[0.16em] text-teal">Shop</p>
+          <h1 className="text-[clamp(2.25rem,4vw,3.5rem)] font-bold leading-[1.1] tracking-[-0.03em] text-[#222222]">
             All Products
           </h1>
-          <p className="mt-4 text-[16px] text-[#4a5560] max-w-xl leading-relaxed">
-            Explore approved BLEMOUT formulas and curated combos in a clean, spacious grid.
+          <p className="mt-4 max-w-xl text-[17px] leading-relaxed text-[#4a5560] md:text-[18px]">
+            Five individual formulas and six curated combos — eleven essentials in one place.
           </p>
         </FadeUp>
 
-        <div className="mt-12 flex flex-col lg:flex-row gap-12 lg:gap-16">
-          <aside className="lg:w-52 shrink-0 space-y-8">
-            <div>
-              <h2 className="text-xs tracking-[0.14em] uppercase font-bold text-[#222222] mb-4">Category</h2>
-              <div className="flex flex-wrap lg:flex-col gap-1">
-                {categories.map((cat) => (
-                  <button
-                    key={cat}
-                    type="button"
-                    onClick={() => updateCategory(cat)}
-                    className={`text-left text-[15px] px-0 py-1.5 transition-colors ${
-                      category === cat
-                        ? 'text-teal font-semibold'
-                        : 'text-[#4a5560] hover:text-dark-teal'
-                    }`}
-                  >
-                    {cat}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div>
-              <h2 className="text-xs tracking-[0.14em] uppercase font-bold text-[#222222] mb-4">Sort</h2>
-              <select
-                value={sort}
-                onChange={(e) => setSort(e.target.value)}
-                className="w-full px-0 py-2 border-0 border-b border-gray-200 rounded-none text-[15px] text-[#222222] focus:outline-none focus:border-teal/50 bg-transparent"
-              >
-                <option value="default">Featured</option>
-                <option value="price-low">Price: Low to High</option>
-                <option value="price-high">Price: High to Low</option>
-                <option value="name">Name</option>
-              </select>
-            </div>
-            <div>
-              <h2 className="text-xs tracking-[0.14em] uppercase font-bold text-[#222222] mb-4">Search</h2>
-              <input
-                type="search"
-                value={query}
-                onChange={(e) => {
-                  const next = new URLSearchParams(searchParams);
-                  if (e.target.value) next.set('q', e.target.value);
-                  else next.delete('q');
-                  setSearchParams(next);
-                }}
-                placeholder="Search..."
-                className="w-full px-0 py-2 border-0 border-b border-gray-200 rounded-none text-[15px] text-[#222222] placeholder:text-[#6b7280] focus:outline-none focus:border-teal/50 bg-transparent"
-              />
-            </div>
-          </aside>
+        <div className="mt-10 flex flex-wrap gap-2 md:gap-3">
+          {FILTERS.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => setFilter(item.id)}
+              className={`rounded-full px-5 py-2.5 text-[14px] font-semibold transition-colors md:text-[15px] ${
+                filter === item.id
+                  ? 'bg-teal text-white'
+                  : 'bg-[#f6f7f6] text-[#26313D] hover:bg-[#eef1f0]'
+              }`}
+            >
+              {item.label}
+            </button>
+          ))}
+          <select
+            value={sort}
+            onChange={(e) => setSort(e.target.value)}
+            className="ml-auto rounded-full border-0 bg-[#f6f7f6] px-5 py-2.5 text-[14px] text-[#222222] md:text-[15px]"
+          >
+            <option value="default">Featured order</option>
+            <option value="price-low">Price: Low to High</option>
+            <option value="price-high">Price: High to Low</option>
+            <option value="name">Name</option>
+          </select>
+        </div>
 
-          <div className="flex-1 min-w-0">
-            {loading ? (
-              <ProductSkeleton count={6} />
-            ) : error ? (
-              <ApiMessage
-                type="offline"
-                message={
-                  slow
-                    ? 'Products are taking a little longer to load. Please wait or retry.'
-                    : 'Unable to load products.'
-                }
-                onRetry={retry}
-              />
-            ) : filtered.length === 0 ? (
-              <ApiMessage type="empty" message="No products match your filters." />
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 md:gap-x-10 gap-y-12 md:gap-y-16">
-                {filtered.map((product) => (
-                  <FadeUp key={product._id}>
-                    <div className="w-full max-w-[440px] mx-auto sm:mx-0 sm:max-w-none">
-                      <ProductCard product={product} />
-                    </div>
-                  </FadeUp>
-                ))}
-              </div>
-            )}
-          </div>
+        <div className="mt-10 md:mt-12">
+          {loading ? (
+            <ProductSkeleton count={8} />
+          ) : error ? (
+            <ApiMessage
+              type="offline"
+              message={
+                slow
+                  ? 'Products are taking a little longer to load. Please wait or retry.'
+                  : 'Unable to load products.'
+              }
+              onRetry={retry}
+            />
+          ) : filtered.length === 0 ? (
+            <ApiMessage type="empty" message="No products match your filters." />
+          ) : (
+            <div className="grid grid-cols-1 gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3 md:gap-x-8 md:gap-y-16">
+              {filtered.map((product) => (
+                <ProductCard key={product._id || product.slug} product={product} />
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>

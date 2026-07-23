@@ -8,7 +8,14 @@ import ScrollToTop from '../ScrollToTop';
 import CustomCursor from '../CustomCursor';
 import CartDrawer from '../CartDrawer';
 import CartToast from '../CartToast';
+import PromoCampaignPopup from '../PromoCampaignPopup';
 import { ProductProvider } from '../../context/ProductContext';
+import { useCart } from '../../context/CartContext';
+
+function PromoHost() {
+  const { isDrawerOpen } = useCart();
+  return <PromoCampaignPopup blockedByOther={isDrawerOpen} />;
+}
 
 export default function Layout() {
   return (
@@ -27,6 +34,7 @@ export default function Layout() {
       <Footer />
       <CartDrawer />
       <CartToast />
+      <PromoHost />
     </div>
   );
 }

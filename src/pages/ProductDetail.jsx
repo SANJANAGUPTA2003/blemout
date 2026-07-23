@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
   Minus,
@@ -15,14 +15,20 @@ import {
   Shield,
   Sparkles,
   Sun,
+  ZoomIn,
+  Star,
 } from 'lucide-react';
 import FadeUp from '../components/ui/FadeUp';
 import Button from '../components/ui/Button';
 import ProductCard from '../components/ui/ProductCard';
 import ApiMessage from '../components/ui/ApiMessage';
+import ImageZoomLightbox from '../components/product/ImageZoomLightbox';
+import StickyPurchaseBar from '../components/product/StickyPurchaseBar';
+import ProductQuickAdd from '../components/product/ProductQuickAdd';
 import { useCart } from '../context/CartContext';
 import { useProducts } from '../context/ProductContext';
 import { getResponsiveImage, normalizeProductContent } from '../data/productImages';
+import { getDetailGallery, getProductBadge } from '../data/productDisplay';
 import { calcDiscountPercent, getSellingPrice } from '../data/business';
 import { formatPrice } from '../utils/format';
 
@@ -84,7 +90,7 @@ function PdpThumbImage({ src }) {
 export default function ProductDetail() {
   const { slug } = useParams();
   const navigate = useNavigate();
-  const { addToCart } = useCart();
+  const { addToCart, isDrawerOpen } = useCart();
   const { products: summaryProducts, getProductBySlug, slow } = useProducts();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -93,6 +99,9 @@ export default function ProductDetail() {
   const [activeImage, setActiveImage] = useState(0);
   const [openAccordion, setOpenAccordion] = useState('overview');
   const [touchX, setTouchX] = useState(null);
+  const [zoomOpen, setZoomOpen] = useState(false);
+  const [quickAddOpen, setQuickAddOpen] = useState(false);
+  const purchaseRef = useRef(null);
 
   useEffect(() => {
     let active = true;
@@ -152,13 +161,26 @@ export default function ProductDetail() {
       .finally(() => setLoading(false));
   }, [slug, getProductBySlug]);
 
-  const images = useMemo(() => product?.images || [], [product]);
+  const images = useMemo(() => (product ? getDetailGallery(product) : []), [product]);
 
   const related = useMemo(() => {
     if (!product) return [];
-    return summaryProducts
-      .filter((p) => p._id !== product._id && (p.category === product.category || p.isBestSeller))
-      .slice(0, 4);
+    const others = summaryProducts.filter((p) => p._id !== product._id);
+    const same = others.filter((p) => p.category === product.category);
+    const combos = others.filter((p) => p.isCombo);
+    const best = others.filter((p) => p.isBestSeller);
+    const merged = [];
+    const seen = new Set();
+    for (const list of [same, combos, best]) {
+      for (const item of list) {
+        const key = String(item._id);
+        if (seen.has(key)) continue;
+        seen.add(key);
+        merged.push(item);
+        if (merged.length >= 4) return merged;
+      }
+    }
+    return merged;
   }, [product, summaryProducts]);
 
   if (loading) {
@@ -211,6 +233,8 @@ export default function ProductDetail() {
     product.discountPercentage > 0
       ? product.discountPercentage
       : calcDiscountPercent(mrp, sellingPrice);
+  const badge = getProductBadge(product);
+  const maxQty = product.stock > 0 ? product.stock : 99;
 
   const goImage = (dir) => {
     if (!images.length) return;
@@ -279,7 +303,7 @@ export default function ProductDetail() {
           <div className="grid lg:grid-cols-[1.15fr_0.85fr] gap-8 lg:gap-12 items-start">
             <div>
               <div
-                className="relative aspect-square border-0 bg-transparent flex items-center justify-center overflow-hidden"
+                className="relative aspect-square border-0 bg-[#fafafa] flex items-center justify-center overflow-hidden"
                 onTouchStart={(e) => setTouchX(e.changedTouches[0]?.clientX ?? null)}
                 onTouchEnd={(e) => {
                   const end = e.changedTouches[0]?.clientX;
@@ -294,6 +318,14 @@ export default function ProductDetail() {
                   alt={product.name}
                   priority={activeImage === 0}
                 />
+                <button
+                  type="button"
+                  aria-label="Zoom image"
+                  onClick={() => setZoomOpen(true)}
+                  className="absolute right-3 top-3 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/95 text-[#222222]"
+                >
+                  <ZoomIn size={18} />
+                </button>
                 {images.length > 1 && (
                   <>
                     <button
@@ -322,8 +354,8 @@ export default function ProductDetail() {
                       key={img + i}
                       type="button"
                       onClick={() => setActiveImage(i)}
-                      className={`shrink-0 aspect-square w-[72px] md:w-20 border-0 bg-transparent p-0 flex items-center justify-center overflow-hidden transition-opacity ${
-                        activeImage === i ? 'opacity-100' : 'opacity-45 hover:opacity-80'
+                      className={`shrink-0 aspect-square w-[72px] md:w-20 border-0 bg-[#fafafa] p-0 flex items-center justify-center overflow-hidden transition-opacity ${
+                        activeImage === i ? 'opacity-100 ring-1 ring-teal' : 'opacity-45 hover:opacity-80'
                       }`}
                     >
                       <PdpThumbImage src={img} />
@@ -334,12 +366,22 @@ export default function ProductDetail() {
             </div>
 
             <div className="lg:pt-2">
+              {badge && (
+                <p className="mb-3 inline-block rounded-[2px] bg-[#f6f7f6] px-2.5 py-1 text-[11px] font-bold tracking-[0.12em] text-[#222222]">
+                  {badge}
+                </p>
+              )}
               <p className="text-[12px] tracking-[0.2em] uppercase text-teal font-bold mb-3">
                 {product.category}
               </p>
               <h1 className="text-[32px] md:text-[40px] font-bold text-text tracking-tight leading-tight">
                 {product.name}
               </h1>
+              <div className="mt-3 flex items-center gap-1 text-teal" aria-label="Rated 5 out of 5 stars">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <Star key={i} size={14} fill="currentColor" strokeWidth={0} aria-hidden="true" />
+                ))}
+              </div>
               {product.summary && (
                 <p className="mt-4 text-[16px] text-soft-text leading-relaxed">{product.summary}</p>
               )}
@@ -360,8 +402,13 @@ export default function ProductDetail() {
                   Suitable for: <span className="text-text font-semibold">{product.skinType}</span>
                 </p>
               )}
+              {typeof product.stock === 'number' && (
+                <p className="mt-2 text-[14px] text-soft-text">
+                  {product.stock > 0 ? `In stock (${product.stock})` : 'Currently out of stock'}
+                </p>
+              )}
 
-              <div className="mt-6 inline-flex items-center border border-gray-200 rounded-full">
+              <div ref={purchaseRef} className="mt-6 inline-flex items-center border border-gray-200 rounded-full">
                 <button
                   type="button"
                   aria-label="Decrease quantity"
@@ -374,7 +421,7 @@ export default function ProductDetail() {
                 <button
                   type="button"
                   aria-label="Increase quantity"
-                  onClick={() => setQuantity((q) => q + 1)}
+                  onClick={() => setQuantity((q) => Math.min(maxQty, q + 1))}
                   className="p-3 text-soft-text hover:text-dark-teal"
                 >
                   <Plus size={16} />
@@ -382,10 +429,10 @@ export default function ProductDetail() {
               </div>
 
               <div className="mt-6 flex flex-col sm:flex-row gap-3">
-                <Button onClick={handleAddToCart} className="flex-1 gap-2">
+                <Button onClick={handleAddToCart} className="flex-1 gap-2" disabled={product.stock === 0}>
                   <ShoppingBag size={16} /> Add to Cart
                 </Button>
-                <Button variant="secondary" onClick={handleBuyNow} className="flex-1">
+                <Button variant="secondary" onClick={handleBuyNow} className="flex-1" disabled={product.stock === 0}>
                   Buy Now
                 </Button>
               </div>
@@ -442,9 +489,9 @@ export default function ProductDetail() {
             <h2 className="text-[32px] md:text-[40px] font-bold text-[#222222] tracking-[-0.03em] mb-8 md:mb-10">
               Related Products
             </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 md:gap-x-10 gap-y-12">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-6 md:gap-x-8 gap-y-10">
               {related.slice(0, 3).map((item) => (
-                <ProductCard key={item._id} product={item} imageMode="shop" />
+                <ProductCard key={item._id} product={item} />
               ))}
             </div>
             <div className="mt-6">
@@ -455,6 +502,25 @@ export default function ProductDetail() {
           </section>
         )}
       </div>
+
+      <ImageZoomLightbox
+        open={zoomOpen}
+        src={images[activeImage] || product.imageUrl}
+        alt={product.name}
+        onClose={() => setZoomOpen(false)}
+      />
+      <StickyPurchaseBar
+        targetRef={purchaseRef}
+        productName={product.name}
+        price={sellingPrice}
+        onAdd={handleAddToCart}
+        hidden={zoomOpen || isDrawerOpen || quickAddOpen}
+      />
+      <ProductQuickAdd
+        product={product}
+        disabled={zoomOpen || isDrawerOpen}
+        onOpenChange={setQuickAddOpen}
+      />
     </div>
   );
 }

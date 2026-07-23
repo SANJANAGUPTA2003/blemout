@@ -41,11 +41,11 @@ export default function Footer() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-12 lg:gap-10">
           <div className="lg:col-span-2">
             <Logo variant="footer" />
-            <p className="mt-5 text-[15px] text-soft-text leading-relaxed max-w-sm">
+            <p className="mt-5 text-[16px] text-soft-text leading-relaxed max-w-sm md:text-[17px]">
               Since {BUSINESS.foundedYear}, dermatologically inspired formulas for
               pigmentation, uneven tone, and blemish-prone areas.
             </p>
-            <ul className="mt-6 space-y-3 text-[14px] text-soft-text">
+            <ul className="mt-6 space-y-3 text-[15px] text-soft-text md:text-[16px]">
               <li className="flex items-start gap-2.5">
                 <Mail size={16} className="text-teal shrink-0 mt-0.5" strokeWidth={1.75} />
                 <a href={`mailto:${BUSINESS.email}`} className="relative z-10 hover:text-dark-teal transition-colors">
@@ -64,8 +64,8 @@ export default function Footer() {
           </div>
 
           <div>
-            <h4 className="text-[15px] tracking-[0.16em] uppercase text-text mb-5 font-bold">About</h4>
-            <ul className="space-y-3 text-[15px]">
+            <h4 className="text-[16px] tracking-[0.16em] uppercase text-text mb-5 font-bold">About</h4>
+            <ul className="space-y-3 text-[16px]">
               {aboutLinks.map((link) => (
                 <li key={link.label}>
                   <FooterLink to={link.to}>{link.label}</FooterLink>
@@ -75,8 +75,8 @@ export default function Footer() {
           </div>
 
           <div>
-            <h4 className="text-[15px] tracking-[0.16em] uppercase text-text mb-5 font-bold">Customer Service</h4>
-            <ul className="space-y-3 text-[15px]">
+            <h4 className="text-[16px] tracking-[0.16em] uppercase text-text mb-5 font-bold">Customer Service</h4>
+            <ul className="space-y-3 text-[16px]">
               {serviceLinks.map((link) => (
                 <li key={link.label}>
                   <FooterLink to={link.to}>{link.label}</FooterLink>
@@ -86,8 +86,8 @@ export default function Footer() {
           </div>
 
           <div>
-            <h4 className="text-[15px] tracking-[0.16em] uppercase text-text mb-5 font-bold">Policies</h4>
-            <ul className="space-y-3 text-[15px]">
+            <h4 className="text-[16px] tracking-[0.16em] uppercase text-text mb-5 font-bold">Policies</h4>
+            <ul className="space-y-3 text-[16px]">
               {policyLinks.map((link) => (
                 <li key={link.label}>
                   <FooterLink to={link.to}>{link.label}</FooterLink>

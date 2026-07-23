@@ -158,7 +158,7 @@ export default function Contact() {
           <div className="max-w-5xl mx-auto mt-16 md:mt-20 grid md:grid-cols-2 gap-8">
             {infoSections.map((section) => (
               <section key={section.id} id={section.id} className="scroll-mt-28">
-                <h2 className="text-lg font-bold text-text">
+                <h2 className="text-[20px] font-bold text-text md:text-[22px]">
                   {section.to ? (
                     <Link to={section.to} className="hover:text-dark-teal transition-colors">
                       {section.title}
@@ -167,11 +167,11 @@ export default function Contact() {
                     section.title
                   )}
                 </h2>
-                <p className="mt-2 text-[15px] text-soft-text leading-relaxed">{section.body}</p>
+                <p className="mt-2 text-[16px] text-soft-text leading-relaxed md:text-[17px]">{section.body}</p>
                 {section.to && (
                   <Link
                     to={section.to}
-                    className="mt-3 inline-flex text-[13px] font-semibold text-dark-teal hover:text-teal"
+                    className="mt-3 inline-flex text-[15px] font-semibold text-dark-teal hover:text-teal"
                   >
                     Read more →
                   </Link>

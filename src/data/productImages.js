@@ -52,8 +52,22 @@ export function getHoverImage(product) {
 }
 
 function derivative(src, role) {
-  if (!/^\/products\/.+\/\d+\.jpg$/i.test(src || '')) return '';
-  return src.replace(/\.jpg$/i, `-${role}.webp`);
+  if (!src) return '';
+
+  if (/^\/products\/[^/]+\/\d+\.jpg$/i.test(src)) {
+    return src.replace(/\.jpg$/i, `-${role}.webp`);
+  }
+
+  if (/^\/products\/combos\/.+\.jpg$/i.test(src)) {
+    return '';
+  }
+
+  if (/^\/home\/product-details\/.+\.jpg$/i.test(src)) {
+    if (role === 'card') return src.replace(/\.jpg$/i, '-card.webp');
+    return src.replace(/\.jpg$/i, '.webp');
+  }
+
+  return '';
 }
 
 export function getResponsiveImage(src, role = 'card') {

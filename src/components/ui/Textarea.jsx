@@ -8,13 +8,13 @@ export default function Textarea({
   return (
     <div className={className}>
       {label && (
-        <label className="block text-sm font-medium text-text mb-1.5">
+        <label className="block text-[15px] font-medium text-text mb-1.5 md:text-[16px]">
           {label}
         </label>
       )}
       <textarea
         rows={rows}
-        className={`w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-text text-sm placeholder:text-gray-400 focus:outline-none focus:border-teal focus:ring-2 focus:ring-light-teal transition-colors resize-none ${
+        className={`w-full px-4 py-3.5 rounded-xl border border-gray-200 bg-white text-text text-[15px] md:text-[16px] placeholder:text-gray-400 focus:outline-none focus:border-teal focus:ring-2 focus:ring-light-teal transition-colors resize-none ${
           error ? 'border-red-400' : ''
         }`}
         {...props}

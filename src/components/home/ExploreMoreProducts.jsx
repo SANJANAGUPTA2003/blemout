@@ -1,96 +1,53 @@
-import { useCallback, useMemo, useRef } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useMemo } from 'react';
 import FadeUp from '../ui/FadeUp';
-import ProductCard from '../ui/ProductCard';
+import HomeProductCard from '../ui/HomeProductCard';
+import HomeProductMarquee from './HomeProductMarquee';
 import ApiMessage from '../ui/ApiMessage';
+import { HOMEPAGE_EXPLORE_SLUGS } from '../../data/homepageConfig';
 import { useProducts } from '../../context/ProductContext';
 
 export default function ExploreMoreProducts() {
-  const { products: allProducts, loading, error, slow, retry } = useProducts();
-  const products = useMemo(
-    () => allProducts.filter((p) => !p.isCombo).slice(0, 8),
-    [allProducts]
-  );
-  const trackRef = useRef(null);
-  const dragRef = useRef({ active: false, startX: 0, scrollLeft: 0 });
+  const { loading, error, slow, retry, getBySlug } = useProducts();
 
-  const scrollByCard = useCallback((dir) => {
-    const el = trackRef.current;
-    if (!el) return;
-    const card = el.querySelector('[data-carousel-item]');
-    const amount = card ? card.getBoundingClientRect().width + 32 : 360;
-    el.scrollBy({ left: dir * amount, behavior: 'smooth' });
-  }, []);
-
-  const onPointerDown = (e) => {
-    const el = trackRef.current;
-    if (!el) return;
-    dragRef.current = {
-      active: true,
-      startX: e.clientX,
-      scrollLeft: el.scrollLeft,
-    };
-  };
-
-  const onPointerMove = (e) => {
-    const el = trackRef.current;
-    if (!el || !dragRef.current.active) return;
-    e.preventDefault();
-    el.scrollLeft = dragRef.current.scrollLeft - (e.clientX - dragRef.current.startX);
-  };
-
-  const endDrag = () => {
-    dragRef.current.active = false;
-  };
+  const products = useMemo(() => {
+    const seen = new Set();
+    return HOMEPAGE_EXPLORE_SLUGS.map((slug) => getBySlug(slug))
+      .filter(Boolean)
+      .filter((p) => {
+        if (seen.has(p.slug)) return false;
+        seen.add(p.slug);
+        return true;
+      });
+  }, [getBySlug]);
 
   return (
-    <section className="relative py-16 md:py-24 bg-white">
-      <div className="max-w-[1400px] mx-auto px-5 md:px-8 lg:px-10 mb-10 md:mb-12 flex items-end justify-between gap-4">
+    <section className="relative bg-white py-16 md:py-24">
+      <div className="mx-auto mb-10 max-w-[1400px] px-5 md:px-8 lg:px-10 md:mb-12">
         <FadeUp>
           <div className="max-w-xl">
-            <p className="text-[12px] tracking-[0.16em] uppercase text-teal font-bold mb-3">
+            <p className="mb-3 text-[12px] font-bold uppercase tracking-[0.16em] text-teal">
               Discover
             </p>
-            <h2 className="text-[36px] md:text-[44px] lg:text-[48px] font-bold text-[#222222] tracking-[-0.03em] leading-[1.1]">
+            <h2 className="text-[36px] font-bold leading-[1.1] tracking-[-0.03em] text-[#222222] md:text-[44px] lg:text-[48px]">
               Explore More Products
             </h2>
-            <p className="mt-4 text-[16px] text-[#4a5560] leading-relaxed">
-              Shop the complete BLEMOUT lineup in one smooth product row.
+            <p className="mt-4 text-[16px] leading-relaxed text-[#4a5560]">
+              The complete BLEMOUT lineup — five individual formulas.
             </p>
           </div>
         </FadeUp>
-        {!loading && products.length > 0 && (
-          <div className="hidden sm:flex gap-2 shrink-0">
-            <button
-              type="button"
-              aria-label="Scroll discover products left"
-              onClick={() => scrollByCard(-1)}
-              className="w-10 h-10 rounded-full bg-[#f6f7f6] flex items-center justify-center text-[#26313D] hover:text-dark-teal hover:bg-[#eef1f0] transition-colors"
-            >
-              <ChevronLeft size={18} />
-            </button>
-            <button
-              type="button"
-              aria-label="Scroll discover products right"
-              onClick={() => scrollByCard(1)}
-              className="w-10 h-10 rounded-full bg-[#f6f7f6] flex items-center justify-center text-[#26313D] hover:text-dark-teal hover:bg-[#eef1f0] transition-colors"
-            >
-              <ChevronRight size={18} />
-            </button>
-          </div>
-        )}
       </div>
 
       {loading ? (
-        <div className="flex gap-6 md:gap-8 overflow-hidden px-5 md:px-8 lg:px-10">
-          {[0, 1, 2].map((index) => (
+        <div className="flex gap-4 overflow-hidden px-5 md:px-8 lg:px-10">
+          {Array.from({ length: 5 }).map((_, index) => (
             <div
               key={`explore-skeleton-${index}`}
-              className="shrink-0 w-[82vw] sm:w-[46vw] lg:w-[min(420px,calc((100vw-6rem)/3))] animate-pulse"
+              className="w-[46vw] shrink-0 animate-pulse sm:w-[30vw] lg:w-[240px]"
             >
               <div className="aspect-square w-full rounded-sm bg-[#eef2f1]" />
-              <div className="mt-4 mx-auto h-4 w-3/4 rounded bg-[#e8eceb]" />
-              <div className="mt-3 mx-auto h-3 w-1/2 rounded bg-[#eef2f1]" />
+              <div className="mt-4 h-4 w-3/4 rounded bg-[#e8eceb]" />
+              <div className="mt-3 h-10 w-full rounded-full bg-[#eef2f1]" />
             </div>
           ))}
         </div>
@@ -107,26 +64,11 @@ export default function ExploreMoreProducts() {
           />
         </div>
       ) : (
-        <div
-          ref={trackRef}
-          className="flex gap-6 md:gap-8 overflow-x-auto px-5 md:px-8 lg:px-10 pb-2 scrollbar-none cursor-grab active:cursor-grabbing select-none"
-          style={{ scrollbarWidth: 'none', touchAction: 'pan-y' }}
-          onPointerDown={onPointerDown}
-          onPointerMove={onPointerMove}
-          onPointerUp={endDrag}
-          onPointerLeave={endDrag}
-          onPointerCancel={endDrag}
-        >
+        <HomeProductMarquee className="px-5 md:px-8 lg:px-10" speed={28}>
           {products.map((product) => (
-            <div
-              key={product._id}
-              data-carousel-item
-              className="shrink-0 w-[82vw] sm:w-[46vw] lg:w-[min(420px,calc((100vw-6rem)/3))] xl:w-[min(430px,420px)]"
-            >
-              <ProductCard product={product} imageMode="promo" />
-            </div>
+            <HomeProductCard key={product._id || product.slug} product={product} />
           ))}
-        </div>
+        </HomeProductMarquee>
       )}
     </section>
   );

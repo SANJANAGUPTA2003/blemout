@@ -161,7 +161,6 @@ export function ProductProvider({ children }) {
 
   useEffect(() => {
     fetchSummary().catch(() => {});
-    return () => abortRef.current?.abort();
   }, [fetchSummary]);
 
   const isStale = useCallback(

@@ -52,8 +52,8 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   letter-spacing: -0.01em;
-  font-size: 16px;
-  line-height: 1.6;
+  font-size: clamp(16px, 1.05vw, 18px);
+  line-height: 1.65;
   font-weight: 400;
 }
 
@@ -65,10 +65,18 @@ h1, h2, h3, h4, h5, h6 {
   line-height: 1.12;
 }
 
+h1 {
+  font-size: clamp(2.25rem, 4.2vw, 3.75rem);
+}
+
+h2 {
+  font-size: clamp(1.75rem, 3vw, 2.75rem);
+}
+
 p {
   color: var(--color-soft-text);
-  font-size: 1rem;
-  line-height: 1.65;
+  font-size: clamp(1rem, 1.05vw, 1.125rem);
+  line-height: 1.7;
 }
 
 #root {
@@ -83,6 +91,34 @@ p {
   body.custom-cursor-enabled select,
   body.custom-cursor-enabled textarea {
     cursor: none;
+  }
+}
+
+@keyframes announcement-marquee {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+.announcement-bar .announcement-marquee {
+  animation: announcement-marquee 38s linear infinite;
+}
+
+.announcement-bar:hover .announcement-marquee {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .announcement-bar .announcement-marquee {
+    animation: none;
+    transform: none;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+    white-space: normal;
   }
 }
 

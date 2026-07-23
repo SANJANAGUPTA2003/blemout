@@ -1,4 +1,5 @@
-import { Link } from 'react-router-dom';
+import { useEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import {
   BadgeCheck,
   BadgeIndianRupee,
@@ -41,7 +42,23 @@ import PageMeta from '../components/seo/PageMeta';
 import { BUSINESS } from '../data/business';
 import { POLICIES, POLICY_UPDATED } from '../data/policies';
 
-const policyOrder = ['shipping', 'returns', 'privacy', 'terms'];
+const policyNav = [
+  { id: 'shipping', label: 'Shipping', to: '/shipping-policy' },
+  { id: 'returns', label: 'Returns', to: '/return-refund-policy' },
+  { id: 'privacy', label: 'Privacy', to: '/privacy-policy' },
+  { id: 'terms', label: 'Terms', to: '/terms-and-conditions' },
+  { id: 'pricing', label: 'Pricing', to: '/terms-and-conditions#pricing' },
+  { id: 'payments', label: 'Payments', to: '/terms-and-conditions#payments' },
+  { id: 'cod', label: 'Cash on Delivery', to: '/terms-and-conditions#cash-on-delivery' },
+];
+
+function sectionAnchor(heading = '') {
+  return heading
+    .toLowerCase()
+    .replace(/&/g, 'and')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
+}
 const sectionIcons = {
   BadgeCheck,
   BadgeIndianRupee,
@@ -82,7 +99,18 @@ const brandPromise = [
 ];
 
 export default function LegalPolicyPage({ policyKey }) {
+  const location = useLocation();
   const policy = POLICIES[policyKey] || POLICIES.shipping;
+
+  useEffect(() => {
+    const hash = location.hash.replace('#', '');
+    if (!hash) return undefined;
+    const timer = window.setTimeout(() => {
+      document.getElementById(hash)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 80);
+    return () => window.clearTimeout(timer);
+  }, [location.hash, policyKey]);
+
   const schema = {
     '@context': 'https://schema.org',
     '@type': ['WebPage', 'FAQPage'],
@@ -127,10 +155,10 @@ export default function LegalPolicyPage({ policyKey }) {
             <p className="mb-4 text-[12px] font-bold uppercase tracking-[0.16em] text-teal">
               Legal & Customer Care
             </p>
-            <h1 className="max-w-3xl text-[38px] font-bold leading-[1.08] tracking-[-0.035em] text-[#222222] md:text-[56px]">
+            <h1 className="max-w-3xl text-[clamp(2.5rem,5vw,3.75rem)] font-bold leading-[1.08] tracking-[-0.035em] text-[#222222]">
               {policy.title}
             </h1>
-            <p className="mt-6 max-w-2xl text-[17px] leading-relaxed text-[#4a5560] md:text-[18px]">
+            <p className="mt-6 max-w-2xl text-[18px] leading-relaxed text-[#4a5560] md:text-[19px]">
               {policy.intro}
             </p>
             <div className="mt-7 inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-[13px] font-semibold text-[#4a5560] shadow-[0_8px_30px_rgba(31,41,55,0.05)]">
@@ -142,23 +170,31 @@ export default function LegalPolicyPage({ policyKey }) {
       </header>
 
       <main className="px-5 pb-20 md:px-8 md:pb-28">
-        <div className="mx-auto grid max-w-5xl gap-12 lg:grid-cols-[190px_1fr] lg:gap-16">
+        <div className="mx-auto grid max-w-6xl gap-12 lg:grid-cols-[240px_1fr] lg:gap-16">
           <aside className="lg:sticky lg:top-28 lg:h-fit">
-            <p className="mb-4 text-[12px] font-bold uppercase tracking-[0.14em] text-[#222222]">
+            <p className="mb-4 text-[13px] font-bold uppercase tracking-[0.14em] text-[#222222]">
               Policies
             </p>
-            <nav className="flex flex-wrap gap-x-5 gap-y-2 lg:flex-col lg:gap-2">
-              {policyOrder.map((key) => {
-                const item = POLICIES[key];
+            <nav
+              className="flex gap-2 overflow-x-auto pb-1 lg:flex-col lg:overflow-visible"
+              aria-label="Policy categories"
+            >
+              {policyNav.map((item) => {
+                const fragment = item.to.includes('#') ? item.to.split('#')[1] : '';
+                const isActive = fragment
+                  ? policyKey === 'terms' && location.hash === `#${fragment}`
+                  : item.id === policyKey && (policyKey !== 'terms' || !location.hash);
                 return (
                   <Link
-                    key={key}
-                    to={item.path}
-                    className={`text-[14px] font-medium transition-colors ${
-                      key === policyKey ? 'text-teal' : 'text-[#4a5560] hover:text-dark-teal'
+                    key={item.id}
+                    to={item.to}
+                    className={`shrink-0 rounded-lg px-4 py-3 text-[15px] font-semibold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal md:text-[16px] ${
+                      isActive
+                        ? 'bg-teal text-white'
+                        : 'bg-[#f3f5f4] text-[#222222] hover:bg-[#e8eeec]'
                     }`}
                   >
-                    {item.shortTitle}
+                    {item.label}
                   </Link>
                 );
               })}
@@ -168,28 +204,31 @@ export default function LegalPolicyPage({ policyKey }) {
           <article className="min-w-0">
             {policy.sections.map((section, index) => (
               <FadeUp key={section.heading} delay={Math.min(index * 0.03, 0.15)}>
-                <section className="mb-5 scroll-mt-28 rounded-3xl bg-[#fafcfb] p-6 md:p-8">
+                <section
+                  id={sectionAnchor(section.heading)}
+                  className="mb-7 scroll-mt-28 rounded-3xl bg-[#fafcfb] p-7 md:mb-8 md:p-9"
+                >
                   <div className="flex items-start gap-4">
-                    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#e7f7f4] text-dark-teal">
+                    <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#e7f7f4] text-dark-teal">
                       {(() => {
                         const Icon = sectionIcons[section.icon] || FileText;
-                        return <Icon size={21} strokeWidth={1.8} aria-hidden="true" />;
+                        return <Icon size={22} strokeWidth={1.8} aria-hidden="true" />;
                       })()}
                     </span>
-                    <h2 className="pt-1.5 text-[23px] font-bold tracking-[-0.025em] text-[#222222] md:text-[27px]">
+                    <h2 className="pt-1.5 text-[clamp(1.4rem,2.2vw,1.85rem)] font-bold tracking-[-0.025em] text-[#222222]">
                       {section.heading}
                     </h2>
                   </div>
-                  <div className="mt-4 space-y-4">
+                  <div className="mt-5 space-y-4">
                     {section.paragraphs.map((paragraph) => (
-                      <p key={paragraph} className="text-[16px] leading-[1.8] text-[#4a5560]">
+                      <p key={paragraph} className="text-[17px] leading-[1.8] text-[#4a5560] md:text-[18px]">
                         {paragraph}
                       </p>
                     ))}
                     {section.bullets?.length > 0 && (
                       <ul className="grid gap-3 pt-1 sm:grid-cols-2">
                         {section.bullets.map((bullet) => (
-                          <li key={bullet} className="flex items-start gap-2.5 text-[15px] leading-relaxed text-[#36414c]">
+                          <li key={bullet} className="flex items-start gap-2.5 text-[16px] leading-relaxed text-[#36414c]">
                             <Check size={17} className="mt-1 shrink-0 text-teal" aria-hidden="true" />
                             <span>{bullet}</span>
                           </li>

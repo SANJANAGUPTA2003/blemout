@@ -19,9 +19,9 @@ export default function Button({
   };
 
   const sizes = {
-    sm: 'px-5 py-2 text-xs tracking-wide',
-    md: 'px-7 py-3 text-sm tracking-wide',
-    lg: 'px-9 py-3.5 text-sm tracking-wide',
+    sm: 'px-5 py-2.5 text-[14px] tracking-wide',
+    md: 'px-8 py-3.5 text-[15px] md:text-[16px] tracking-wide',
+    lg: 'px-10 py-4 text-[16px] md:text-[17px] tracking-wide',
   };
 
   return (

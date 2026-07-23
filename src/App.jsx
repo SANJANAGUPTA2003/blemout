@@ -8,6 +8,7 @@ import Home from './pages/Home';
 import Shop from './pages/Shop';
 import CollectionPage from './pages/CollectionPage';
 import ShopByConcern from './pages/ShopByConcern';
+import ConcernCollection from './pages/ConcernCollection';
 import Cart from './pages/Cart';
 import OrderSuccess from './pages/OrderSuccess';
 import Contact from './pages/Contact';
@@ -52,7 +53,7 @@ export default function App() {
                       collection="new"
                       eyebrow="New"
                       title="New Arrivals"
-                      subtitle="Fresh launches including serum and newly curated duos."
+                      subtitle="Three individual formulas and three newly curated combos."
                     />
                   }
                 />
@@ -63,7 +64,7 @@ export default function App() {
                       collection="best-sellers"
                       eyebrow="Bestsellers"
                       title="Best Sellers"
-                      subtitle="The most-loved BLEMOUT formulas and routines."
+                      subtitle="Five most-loved formulas and three standout combo routines."
                     />
                   }
                 />
@@ -74,11 +75,12 @@ export default function App() {
                       collection="limited-picks"
                       eyebrow="Limited"
                       title="Limited Picks"
-                      subtitle="Full kits and approved combo sets, curated for complete routines."
+                      subtitle="All six BLEMOUT combo sets — curated routines in one place."
                     />
                   }
                 />
                 <Route path="shop-by-concern" element={<ShopByConcern />} />
+                <Route path="shop-by-concern/:concernId" element={<ConcernCollection />} />
                 <Route path="about" element={<About />} />
                 <Route path="cart" element={<Cart />} />
                 <Route path="checkout" element={<Checkout />} />

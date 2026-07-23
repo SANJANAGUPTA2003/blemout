@@ -19,7 +19,6 @@ function ProductImage({
 }) {
   const [failed, setFailed] = useState(false);
   const [hoverFailed, setHoverFailed] = useState(false);
-  const [hoverRequested, setHoverRequested] = useState(false);
 
   const canSwapOnHover = Boolean(hoverSrc && hoverSrc !== src && !hoverFailed);
   const fitClass = fit === 'cover' ? 'object-cover' : 'object-contain';
@@ -37,8 +36,8 @@ function ProductImage({
   return (
     <div
       className={`aspect-square w-full relative overflow-hidden border-0 bg-transparent ${containerClass}`}
-      onPointerEnter={() => setHoverRequested(true)}
     >
+      {/* Hover layer is mounted immediately so the colourful image is cached before first hover */}
       <picture>
         {primary.srcSet && <source type="image/webp" srcSet={primary.srcSet} sizes={sizes} />}
         <img
@@ -50,14 +49,12 @@ function ProductImage({
           decoding="async"
           fetchPriority={fetchPriority}
           onError={() => setFailed(true)}
-          className={`relative z-0 block w-full h-full ${fitClass} transition-[opacity,transform] duration-300 ease-out ${
-            canSwapOnHover
-              ? '[@media(hover:hover)]:group-hover:opacity-0 [@media(hover:hover)]:group-hover:scale-[1.02]'
-              : '[@media(hover:hover)]:group-hover:scale-[1.02]'
+          className={`relative z-0 block w-full h-full ${fitClass} transition-opacity duration-400 ease-out ${
+            canSwapOnHover ? '[@media(hover:hover)]:group-hover:opacity-0' : ''
           } ${className}`}
         />
       </picture>
-      {canSwapOnHover && hoverRequested && (
+      {canSwapOnHover && (
         <picture>
           {hover.srcSet && <source type="image/webp" srcSet={hover.srcSet} sizes={sizes} />}
           <img
@@ -66,10 +63,10 @@ function ProductImage({
             aria-hidden="true"
             width={width}
             height={height}
-            loading="lazy"
+            loading="eager"
             decoding="async"
             onError={() => setHoverFailed(true)}
-            className={`absolute z-10 left-0 top-0 w-full h-full border-0 ${fitClass} opacity-0 transition-[opacity,transform] duration-300 ease-out [@media(hover:hover)]:group-hover:opacity-100 [@media(hover:hover)]:group-hover:scale-[1.02] ${className}`}
+            className={`absolute z-10 left-0 top-0 w-full h-full border-0 ${fitClass} opacity-0 transition-opacity duration-400 ease-out [@media(hover:hover)]:group-hover:opacity-100 ${className}`}
           />
         </picture>
       )}
