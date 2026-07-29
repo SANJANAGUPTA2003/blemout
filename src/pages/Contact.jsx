@@ -25,7 +25,7 @@ const infoSections = [
   {
     id: 'shipping',
     title: 'Shipping Policy',
-    body: 'Shiprocket orders are processed in 1–3 business days and usually arrive within 7–15 business days. Shipping is free on 3+ products.',
+    body: 'Shiprocket orders are processed in 3–5 business days and usually arrive within 7–15 business days. Shipping is free on 3+ products.',
     to: '/shipping-policy',
   },
   {

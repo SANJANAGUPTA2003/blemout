@@ -153,7 +153,10 @@ export default function About() {
               <p className="mb-4 text-[12px] font-bold uppercase tracking-[0.16em] text-teal">
                 Our Story · Since {BUSINESS.foundedYear}
               </p>
-              <h1 className="max-w-xl text-[42px] font-bold leading-[1.05] tracking-[-0.04em] text-[#222222] md:text-[60px] lg:text-[68px]">
+              <p className="mb-3 text-[clamp(2.75rem,6vw,4.5rem)] font-bold leading-none tracking-[-0.05em] text-[#222222]">
+                BLEMOUT
+              </p>
+              <h1 className="max-w-xl text-[clamp(1.75rem,3.5vw,2.75rem)] font-bold leading-[1.12] tracking-[-0.03em] text-[#222222]">
                 Care That Respects Your Skin.
               </h1>
               <p className="mt-6 max-w-lg text-[18px] leading-relaxed text-[#4a5560] md:text-[20px]">
@@ -177,6 +180,57 @@ export default function About() {
             </div>
           </div>
         </FadeUp>
+      </section>
+
+      <section id="science" className="scroll-mt-28 bg-[#f2fbf9] px-5 py-16 md:px-8 md:py-24 lg:px-10">
+        <div className="mx-auto max-w-[1400px]">
+          <FadeUp>
+            <div className="mx-auto mb-12 max-w-3xl text-center md:mb-16">
+              <p className="mb-3 text-[12px] font-bold uppercase tracking-[0.16em] text-teal">
+                BLEMOUT Formulations
+              </p>
+              <h2 className="text-[clamp(2rem,4vw,3.15rem)] font-bold tracking-[-0.035em] text-[#222222]">
+                The Science Behind the Care
+              </h2>
+              <p className="mt-5 text-[17px] leading-relaxed text-[#4a5560] md:text-[18px]">
+                Every BLEMOUT formula is built around purposeful ingredients, barrier-respectful
+                design and a calm, consistent approach to everyday skin concerns.
+              </p>
+            </div>
+          </FadeUp>
+
+          <div className="grid gap-8 md:grid-cols-3 md:gap-10">
+            {[
+              {
+                title: 'Ingredient intelligence',
+                copy:
+                  'We select actives for clarity of role — brightening support, barrier comfort, hydration or daily defence — and combine them thoughtfully rather than overcrowding a formula.',
+              },
+              {
+                title: 'Skin-first formulation',
+                copy:
+                  'Textures are designed to feel lightweight and wearable. Our approach prioritises tolerance and long-term comfort over harsh shortcuts or exaggerated claims.',
+              },
+              {
+                title: 'Routine that builds trust',
+                copy:
+                  'BLEMOUT is meant for everyday use. Consistent care, clear usage guidance and transparent information help you understand what you are applying and why.',
+              },
+            ].map((item, index) => (
+              <FadeUp key={item.title} delay={index * 0.04}>
+                <article className="h-full bg-white p-7 md:p-8">
+                  <p className="text-[13px] font-bold uppercase tracking-[0.14em] text-teal">
+                    0{index + 1}
+                  </p>
+                  <h3 className="mt-4 text-[22px] font-bold tracking-[-0.02em] text-[#222222]">
+                    {item.title}
+                  </h3>
+                  <p className="mt-3 text-[16px] leading-relaxed text-[#4a5560]">{item.copy}</p>
+                </article>
+              </FadeUp>
+            ))}
+          </div>
+        </div>
       </section>
 
       <section className="px-5 py-16 md:px-8 md:py-24 lg:px-10">

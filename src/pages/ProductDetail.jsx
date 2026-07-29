@@ -20,15 +20,16 @@ import {
 } from 'lucide-react';
 import FadeUp from '../components/ui/FadeUp';
 import Button from '../components/ui/Button';
-import ProductCard from '../components/ui/ProductCard';
 import ApiMessage from '../components/ui/ApiMessage';
 import ImageZoomLightbox from '../components/product/ImageZoomLightbox';
 import StickyPurchaseBar from '../components/product/StickyPurchaseBar';
 import ProductQuickAdd from '../components/product/ProductQuickAdd';
+import ProductRecommendCarousel from '../components/product/ProductRecommendCarousel';
 import { useCart } from '../context/CartContext';
 import { useProducts } from '../context/ProductContext';
 import { getResponsiveImage, normalizeProductContent } from '../data/productImages';
 import { getDetailGallery, getProductBadge } from '../data/productDisplay';
+import { getRecommendedProducts } from '../data/productRecommendations';
 import { calcDiscountPercent, getSellingPrice } from '../data/business';
 import { formatPrice } from '../utils/format';
 
@@ -91,7 +92,7 @@ export default function ProductDetail() {
   const { slug } = useParams();
   const navigate = useNavigate();
   const { addToCart, isDrawerOpen } = useCart();
-  const { products: summaryProducts, getProductBySlug, slow } = useProducts();
+  const { products: summaryProducts, getProductBySlug, getBySlug, slow } = useProducts();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -103,41 +104,49 @@ export default function ProductDetail() {
   const [quickAddOpen, setQuickAddOpen] = useState(false);
   const purchaseRef = useRef(null);
 
+  // Instant paint from summary cache when available
   useEffect(() => {
-    let active = true;
-
-    Promise.resolve().then(() => {
-      if (!active) return;
+    const cached = getBySlug?.(slug);
+    if (cached) {
+      setProduct((prev) => prev?.slug === slug ? prev : normalizeProductContent(cached));
+      setLoading(false);
+    } else {
       setLoading(true);
-      setError(null);
+    }
+    setError(null);
+    setActiveImage(0);
+    setQuantity(1);
+    setOpenAccordion('overview');
 
-      getProductBySlug(slug)
-        .then((data) => {
-          if (!active) return;
-          if (!data) {
+    let active = true;
+    getProductBySlug(slug)
+      .then((data) => {
+        if (!active) return;
+        if (!data) {
+          if (!cached) {
             setProduct(null);
             setError('notfound');
-            return;
           }
-          setProduct(normalizeProductContent(data));
-          setActiveImage(0);
-          setQuantity(1);
-          setOpenAccordion('overview');
-        })
-        .catch((err) => {
-          if (!active) return;
+          return;
+        }
+        setProduct(normalizeProductContent(data));
+        setError(null);
+      })
+      .catch((err) => {
+        if (!active) return;
+        if (!cached) {
           setProduct(null);
           setError(err.response?.status === 404 ? 'notfound' : 'offline');
-        })
-        .finally(() => {
-          if (active) setLoading(false);
-        });
-    });
+        }
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
 
     return () => {
       active = false;
     };
-  }, [slug, getProductBySlug]);
+  }, [slug, getProductBySlug, getBySlug]);
 
   const fetchProduct = useCallback(() => {
     setLoading(true);
@@ -163,25 +172,20 @@ export default function ProductDetail() {
 
   const images = useMemo(() => (product ? getDetailGallery(product) : []), [product]);
 
-  const related = useMemo(() => {
-    if (!product) return [];
-    const others = summaryProducts.filter((p) => p._id !== product._id);
-    const same = others.filter((p) => p.category === product.category);
-    const combos = others.filter((p) => p.isCombo);
-    const best = others.filter((p) => p.isBestSeller);
-    const merged = [];
-    const seen = new Set();
-    for (const list of [same, combos, best]) {
-      for (const item of list) {
-        const key = String(item._id);
-        if (seen.has(key)) continue;
-        seen.add(key);
-        merged.push(item);
-        if (merged.length >= 4) return merged;
-      }
-    }
-    return merged;
-  }, [product, summaryProducts]);
+  // Prefetch next gallery image for faster swipe
+  useEffect(() => {
+    if (!images.length) return;
+    const next = images[(activeImage + 1) % images.length];
+    if (!next || typeof window === 'undefined') return;
+    const img = new window.Image();
+    img.decoding = 'async';
+    img.src = next;
+  }, [images, activeImage]);
+
+  const related = useMemo(
+    () => getRecommendedProducts(product, summaryProducts),
+    [product, summaryProducts]
+  );
 
   if (loading) {
     return (
@@ -371,10 +375,10 @@ export default function ProductDetail() {
                   {badge}
                 </p>
               )}
-              <p className="text-[12px] tracking-[0.2em] uppercase text-teal font-bold mb-3">
+              <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.16em] text-teal md:text-[12px]">
                 {product.category}
               </p>
-              <h1 className="text-[32px] md:text-[40px] font-bold text-text tracking-tight leading-tight">
+              <h1 className="text-[clamp(1.5rem,2.5vw,1.85rem)] font-bold leading-snug tracking-[-0.02em] text-text md:text-[28px]">
                 {product.name}
               </h1>
               <div className="mt-3 flex items-center gap-1 text-teal" aria-label="Rated 5 out of 5 stars">
@@ -484,23 +488,14 @@ export default function ProductDetail() {
           </div>
         </FadeUp>
 
-        {related.length > 0 && (
-          <section className="mt-20 md:mt-28">
-            <h2 className="text-[32px] md:text-[40px] font-bold text-[#222222] tracking-[-0.03em] mb-8 md:mb-10">
-              Related Products
-            </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-6 md:gap-x-8 gap-y-10">
-              {related.slice(0, 3).map((item) => (
-                <ProductCard key={item._id} product={item} />
-              ))}
-            </div>
-            <div className="mt-6">
-              <Link to="/shop" className="text-[15px] font-semibold text-dark-teal hover:text-teal">
-                Browse all products →
-              </Link>
-            </div>
-          </section>
-        )}
+        <ProductRecommendCarousel
+          products={related}
+          title={
+            product.isCombo || product.category === 'Combo'
+              ? 'Pair With These Essentials'
+              : 'You May Also Like'
+          }
+        />
       </div>
 
       <ImageZoomLightbox

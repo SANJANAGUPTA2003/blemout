@@ -20,7 +20,7 @@ const PAGES = {
   shipping: {
     title: 'Shipping Policy',
     body: [
-      'Orders are typically prepared within 1–2 business days. Delivery timelines vary by location across India.',
+      'Orders are typically prepared within 3–5 business days. Delivery timelines vary by location across India.',
       'You will receive a secure Order ID after checkout that you can use to track your package.',
     ],
   },

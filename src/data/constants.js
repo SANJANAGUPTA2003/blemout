@@ -121,7 +121,7 @@ export const faqs = [
   },
   {
     question: 'What is your shipping policy?',
-    answer: 'Orders are processed within 1–3 business days and usually arrive within 7–15 business days. Shipping is free when you purchase 3 or more products.',
+    answer: 'Orders are processed within 3–5 business days and usually arrive within 7–15 business days. Shipping is free when you purchase 3 or more products.',
   },
   {
     question: 'How do I track my order?',

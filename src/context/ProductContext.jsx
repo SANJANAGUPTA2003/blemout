@@ -11,7 +11,8 @@ import api from '../utils/api';
 
 const ProductContext = createContext(null);
 
-const TTL_MS = 5 * 60 * 1000;
+const TTL_MS = 15 * 60 * 1000;
+const DETAIL_TTL_MS = 30 * 60 * 1000;
 const SLOW_MS = 4500;
 const RETRY_COOLDOWN_MS = 2500;
 
@@ -112,26 +113,63 @@ export function ProductProvider({ children }) {
 
   const getProductBySlug = useCallback(async (slug) => {
     if (!slug) return null;
-    const cached = detailCacheRef.current.get(slug);
-    if (cached && Date.now() - cached.at < TTL_MS) return cached.data;
 
-    if (detailInflightRef.current.has(slug)) {
-      return detailInflightRef.current.get(slug);
+    const cached = detailCacheRef.current.get(slug);
+    if (cached && Date.now() - cached.at < DETAIL_TTL_MS) return cached.data;
+
+    let sessionData = null;
+    try {
+      const raw = sessionStorage.getItem(`blemout_pdp_${slug}`);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed?.data && Date.now() - parsed.at < DETAIL_TTL_MS) {
+          sessionData = parsed.data;
+          detailCacheRef.current.set(slug, parsed);
+        }
+      }
+    } catch {
+      /* ignore */
     }
 
+    if (detailInflightRef.current.has(slug)) {
+      return sessionData || detailInflightRef.current.get(slug);
+    }
+
+    const fromSummary = allProducts.find((p) => p.slug === slug);
+
     const request = api
-      .get(`/products/${slug}`, { timeout: 20000 })
+      .get(`/products/${slug}`, { timeout: 12000 })
       .then(({ data }) => {
         detailCacheRef.current.set(slug, { data, at: Date.now() });
+        try {
+          sessionStorage.setItem(
+            `blemout_pdp_${slug}`,
+            JSON.stringify({ data, at: Date.now() })
+          );
+        } catch {
+          /* ignore quota */
+        }
         return data;
+      })
+      .catch((err) => {
+        if (sessionData) return sessionData;
+        if (fromSummary) return fromSummary;
+        throw err;
       })
       .finally(() => {
         detailInflightRef.current.delete(slug);
       });
 
     detailInflightRef.current.set(slug, request);
+
+    // Return session/summary immediately; network will refresh cache for next visit
+    if (sessionData) return sessionData;
+    if (fromSummary) {
+      request.catch(() => {});
+      return fromSummary;
+    }
     return request;
-  }, []);
+  }, [allProducts]);
 
   const invalidate = useCallback(() => {
     cacheRef.current.clear();

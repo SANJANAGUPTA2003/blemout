@@ -12,7 +12,7 @@ export const POLICIES = {
         heading: 'Order Processing',
         icon: 'PackageCheck',
         paragraphs: [
-          'Orders are processed within 1–3 business days after payment confirmation or successful order placement, as applicable.',
+          'Orders are processed within 3–5 business days after payment confirmation or successful order placement, as applicable.',
           'Processing may take longer during public holidays, promotional events or periods of unusually high demand. Business days exclude Sundays and public holidays.',
           'Once an order has entered processing, changes to the delivery address or items may not be possible.',
         ],
@@ -54,7 +54,7 @@ export const POLICIES = {
       {
         question: 'How long will my BLEMOUT order take to arrive?',
         answer:
-          'Orders are processed within 1–3 business days and generally delivered within 7–15 business days, depending on your location and courier serviceability.',
+          'Orders are processed within 3–5 business days and generally delivered within 7–15 business days, depending on your location and courier serviceability.',
       },
       {
         question: 'When is shipping free?',
