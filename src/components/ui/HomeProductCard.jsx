@@ -53,8 +53,8 @@ function HomeProductCard({
           role="card"
           loading="lazy"
           fit="contain"
-          containerClass="aspect-[5/6] bg-[#f7faf9]"
-          className="scale-[1.04]"
+          containerClass="aspect-[4/5] bg-[#f7faf9] p-4 sm:p-5 lg:p-6"
+          className="scale-[1.02]"
         />
         {badge && (
           <span className="absolute left-3 top-3 z-10 rounded-[2px] bg-white/95 px-2.5 py-1.5 text-[11px] font-bold tracking-[0.12em] text-[#222222]">
@@ -65,25 +65,25 @@ function HomeProductCard({
 
       <div className="flex flex-1 flex-col pt-4 text-left md:pt-5">
         <Link to={path}>
-          <h3 className="min-h-[2.8em] text-[clamp(1.05rem,1.35vw,1.25rem)] font-semibold leading-snug tracking-[-0.01em] text-[#222222] line-clamp-2 [@media(hover:hover)]:group-hover:text-dark-teal">
+          <h3 className="text-[15px] font-semibold leading-snug tracking-[-0.01em] text-[#222222] sm:text-[16px] lg:text-[17px] line-clamp-3 [@media(hover:hover)]:group-hover:text-dark-teal">
             {name}
           </h3>
         </Link>
 
-        <div className="mt-2 flex items-center gap-0.5 text-teal" aria-label="Rated 5 out of 5 stars">
+        <div className="mt-2.5 flex items-center gap-0.5 text-teal" aria-label="Rated 5 out of 5 stars">
           {Array.from({ length: 5 }).map((_, i) => (
             <Star key={i} size={14} fill="currentColor" strokeWidth={0} aria-hidden="true" />
           ))}
         </div>
 
         {benefitLine && (
-          <p className="mt-2 min-h-[2.6em] text-[14px] leading-relaxed text-[#4a5560] line-clamp-2 md:text-[15px]">
+          <p className="mt-2.5 text-[14px] leading-relaxed text-[#4a5560] line-clamp-2 md:text-[15px] lg:line-clamp-3">
             {benefitLine}
           </p>
         )}
 
-        <div className="mt-3 flex flex-wrap items-baseline gap-2">
-          <p className="text-[clamp(1.15rem,1.5vw,1.35rem)] font-bold text-[#222222]">
+        <div className="mt-3.5 flex flex-wrap items-baseline gap-2">
+          <p className="text-[16px] font-bold text-[#222222] sm:text-[17px] lg:text-[18px]">
             {formatPrice(sellingPrice)}
           </p>
           {mrp && (

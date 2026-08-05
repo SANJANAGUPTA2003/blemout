@@ -1,19 +1,23 @@
-import { Children, useMemo, useState } from 'react';
+import { Children, useEffect, useMemo, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-
-const PAGE_SIZE = 5;
+import { useHomeProductPageSize } from '../../hooks/useHomeProductPageSize';
 
 /**
- * Calm paged product strip: show 5 cards, arrow advances one page at a time.
+ * Calm paged product strip: responsive card count per viewport.
  * No autoplay / infinite marquee.
  */
 export default function HomeProductPager({ children, className = '' }) {
   const items = useMemo(() => Children.toArray(children), [children]);
-  const pageCount = Math.max(1, Math.ceil(items.length / PAGE_SIZE));
+  const { pageSize, gridClass } = useHomeProductPageSize();
+  const pageCount = Math.max(1, Math.ceil(items.length / pageSize));
   const [page, setPage] = useState(0);
 
+  useEffect(() => {
+    setPage(0);
+  }, [pageSize]);
+
   const safePage = Math.min(page, pageCount - 1);
-  const start = safePage * PAGE_SIZE;
+  const start = safePage * pageSize;
 
   const go = (dir) => {
     setPage((p) => {
@@ -30,10 +34,10 @@ export default function HomeProductPager({ children, className = '' }) {
     <div className={`relative ${className}`}>
       <div className="overflow-hidden">
         <div
-          key={safePage}
-          className="grid grid-cols-2 gap-x-4 gap-y-10 animate-[pagerFade_420ms_ease] sm:grid-cols-3 md:gap-x-5 lg:grid-cols-5 lg:gap-x-6"
+          key={`${safePage}-${pageSize}`}
+          className={`grid ${gridClass} items-stretch gap-x-5 gap-y-12 animate-[pagerFade_420ms_ease] md:gap-x-6 lg:gap-x-8 xl:gap-x-10`}
         >
-          {items.slice(start, start + PAGE_SIZE).map((child, i) => (
+          {items.slice(start, start + pageSize).map((child, i) => (
             <div key={`page-${safePage}-${i}`} className="min-w-0">
               {child}
             </div>

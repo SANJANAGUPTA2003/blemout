@@ -48,12 +48,12 @@ export default function HomeBestSellers() {
   if (loading) {
     return (
       <section className="bg-white py-16 md:py-24">
-        <div className="mx-auto max-w-[1400px] px-5 md:px-8 lg:px-10">
+        <div className="mx-auto max-w-[1520px] px-5 md:px-8 lg:px-10 xl:px-12">
           <div className="mb-10 h-10 w-56 animate-pulse rounded bg-[#eef2f1]" />
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-            {Array.from({ length: 5 }).map((_, i) => (
+          <div className="grid grid-cols-2 gap-5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 md:gap-6 lg:gap-8">
+            {Array.from({ length: 4 }).map((_, i) => (
               <div key={i} className="animate-pulse">
-                <div className="aspect-[5/6] rounded-sm bg-[#eef2f1]" />
+                <div className="aspect-[4/5] rounded-sm bg-[#eef2f1]" />
                 <div className="mt-4 h-4 w-3/4 rounded bg-[#e8eceb]" />
                 <div className="mt-3 h-10 w-full rounded-full bg-[#eef2f1]" />
               </div>
@@ -68,7 +68,7 @@ export default function HomeBestSellers() {
 
   return (
     <section className="relative z-10 bg-white py-16 md:py-24">
-      <div className="mx-auto max-w-[1400px] px-5 md:px-8 lg:px-10">
+      <div className="mx-auto max-w-[1520px] px-5 md:px-8 lg:px-10 xl:px-12">
         <FadeUp>
           <div className="mb-10 max-w-xl md:mb-12">
             <p className="mb-3 text-[12px] font-bold uppercase tracking-[0.16em] text-teal">
@@ -78,7 +78,7 @@ export default function HomeBestSellers() {
               Best Sellers
             </h2>
             <p className="mt-4 text-[16px] leading-relaxed text-[#4a5560]">
-              Five most-loved BLEMOUT picks — browse calmly, one page at a time.
+              Most-loved BLEMOUT picks — browse calmly, one page at a time.
             </p>
           </div>
         </FadeUp>

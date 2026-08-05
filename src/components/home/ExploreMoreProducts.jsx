@@ -25,7 +25,7 @@ export default function ExploreMoreProducts() {
 
   return (
     <section className="relative bg-white py-16 md:py-24">
-      <div className="mx-auto max-w-[1400px] px-5 md:px-8 lg:px-10">
+      <div className="mx-auto max-w-[1520px] px-5 md:px-8 lg:px-10 xl:px-12">
         <FadeUp>
           <div className="mb-10 max-w-xl md:mb-12">
             <p className="mb-3 text-[12px] font-bold uppercase tracking-[0.16em] text-teal">
@@ -35,16 +35,16 @@ export default function ExploreMoreProducts() {
               Explore More Products
             </h2>
             <p className="mt-4 text-[16px] leading-relaxed text-[#4a5560]">
-              The BLEMOUT lineup — five products per view, with more one click away.
+              The full BLEMOUT lineup — browse calmly, one page at a time.
             </p>
           </div>
         </FadeUp>
 
         {loading ? (
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-            {Array.from({ length: 5 }).map((_, index) => (
+          <div className="grid grid-cols-2 gap-5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 md:gap-6 lg:gap-8">
+            {Array.from({ length: 4 }).map((_, index) => (
               <div key={`explore-skeleton-${index}`} className="animate-pulse">
-                <div className="aspect-[5/6] w-full rounded-sm bg-[#eef2f1]" />
+                <div className="aspect-[4/5] w-full rounded-sm bg-[#eef2f1]" />
                 <div className="mt-4 h-4 w-3/4 rounded bg-[#e8eceb]" />
                 <div className="mt-3 h-10 w-full rounded-full bg-[#eef2f1]" />
               </div>
