@@ -20,7 +20,7 @@ export const COMBO_SLUGS = {
   complete: 'complete-blemish-routine',
 };
 
-/** White = cards; colourful = hover / promo / gallery lead */
+/** White = cards; colourful = hover / promo */
 export const COMBO_MEDIA = {
   [COMBO_SLUGS.fwSerumMoist]: {
     white: '/products/combos/face-wash-serum-moisturizer-combo-white.jpg',
@@ -87,15 +87,15 @@ const FOLDER_BY_SLUG = {
   [PRODUCT_SLUGS.repairCream]: '/products/repair-cream',
 };
 
-/** Build combo gallery: colourful → white → each product 1.jpg + 6.jpg */
+/** Combo carousel: white group → coloured group → 3.jpg of each included product */
 export function getComboGallery(slug) {
   const media = COMBO_MEDIA[slug];
   if (!media) return [];
-  const images = [media.creative, media.white];
+  const images = [media.white, media.creative];
   for (const productSlug of media.included) {
     const folder = FOLDER_BY_SLUG[productSlug];
     if (!folder) continue;
-    images.push(`${folder}/1.jpg`, `${folder}/6.jpg`);
+    images.push(`${folder}/3.jpg`);
   }
   return images;
 }
@@ -251,15 +251,15 @@ export const MEGA_MENUS = {
       {
         label: 'Sunscreen',
         to: `/shop/${PRODUCT_SLUGS.sunscreen}`,
-        image: MEGA_CAMPAIGN.sunscreen,
-        fit: 'cover',
+        image: '/products/sunscreen/1.jpg',
+        fit: 'contain',
         position: 'center',
       },
       {
         label: 'Serum',
         to: `/shop/${PRODUCT_SLUGS.serum}`,
-        image: MEGA_CAMPAIGN.serum,
-        fit: 'cover',
+        image: '/products/serum/1.jpg',
+        fit: 'contain',
         position: 'center',
       },
     ],
@@ -272,16 +272,16 @@ export const MEGA_MENUS = {
       {
         label: 'Face Wash',
         to: `/shop/${PRODUCT_SLUGS.facewash}`,
-        image: MEGA_CAMPAIGN.facewash,
-        fit: 'cover',
+        image: '/products/facewash/1.jpg',
+        fit: 'contain',
         position: 'center',
       },
       {
         label: 'Blemish Cream',
         to: `/shop/${PRODUCT_SLUGS.repairCream}`,
-        image: MEGA_CAMPAIGN.repairCream,
-        fit: 'cover',
-        position: 'center top',
+        image: '/products/repair-cream/1.jpg',
+        fit: 'contain',
+        position: 'center',
       },
       {
         label: 'Facewash + Cream + Sunscreen',

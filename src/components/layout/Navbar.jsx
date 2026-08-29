@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { NavLink, Link, useLocation, useNavigate } from 'react-router-dom';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { Search, ShoppingBag, Menu, X } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
 import Logo from '../ui/Logo';
@@ -16,7 +16,7 @@ const utilityLinks = [
 ];
 
 const navLinkClass = ({ isActive }) =>
-  `relative inline-flex items-center py-1 text-[15px] xl:text-[16px] font-semibold tracking-[0.04em] uppercase transition-colors duration-250 whitespace-nowrap ${
+  `relative inline-flex shrink-0 items-center py-1 text-[13px] font-semibold tracking-[0.06em] uppercase whitespace-nowrap transition-colors duration-250 2xl:text-[14px] ${
     isActive
       ? 'text-teal after:absolute after:-bottom-1 after:left-0 after:right-0 after:h-[2px] after:bg-teal'
       : 'text-[#26313D] hover:text-dark-teal'
@@ -61,25 +61,20 @@ export default function Navbar() {
         <div className="grid h-[70px] grid-cols-[auto_1fr_auto] items-center gap-3 md:h-[76px] md:gap-5">
           <Logo variant="navbar" className="justify-self-start" />
 
-          <nav className="hidden items-center justify-self-center gap-2 xl:flex 2xl:gap-3">
+          <nav className="hidden min-w-0 flex-nowrap items-center justify-center gap-x-5 xl:flex">
             <NavbarMegaMenu panelHostRef={megaPanelRef} />
-            {secondaryLinks.map((link) => (
-              <NavLink key={link.label} to={link.to} className={navLinkClass}>
+            {[...secondaryLinks, ...utilityLinks].map((link) => (
+              <NavLink
+                key={link.label}
+                to={link.to}
+                className={navLinkClass}
+              >
                 {link.label}
               </NavLink>
             ))}
           </nav>
 
           <div className="flex items-center justify-self-end gap-0.5">
-            {utilityLinks.map((link) => (
-              <Link
-                key={link.label}
-                to={link.to}
-                className="hidden items-center px-2.5 py-2 text-[15px] font-semibold uppercase tracking-[0.04em] text-[#26313D] transition-colors hover:text-dark-teal lg:inline-flex xl:text-[16px]"
-              >
-                {link.label}
-              </Link>
-            ))}
             <button
               onClick={() => setSearchOpen(!searchOpen)}
               className="inline-flex items-center justify-center p-2.5 text-[#26313D] transition-colors duration-250 hover:text-dark-teal"

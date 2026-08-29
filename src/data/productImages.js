@@ -1,8 +1,9 @@
-/** Product image paths — synced with public/products/ numbered 1–6 assets */
+/** Product image paths — synced with public/products/ numbered 1–6 assets (repair cream includes 7). */
+
+import { PRODUCT_SLUGS } from './storefrontConfig';
 
 function numbered(base) {
-  // Gallery order: 1, 2, then 5, 6 in place of 3, 4 (interchanged), then remaining 3, 4.
-  return [1, 2, 5, 6, 3, 4].map((n) => `${base}/${n}.jpg`);
+  return [1, 2, 3, 4, 5, 6].map((n) => `${base}/${n}.jpg`);
 }
 
 export const FACEWASH_IMAGES = {
@@ -12,19 +13,29 @@ export const FACEWASH_IMAGES = {
 };
 
 export const SERUM_IMAGES = numbered('/products/serum');
-export const REPAIR_CREAM_IMAGES = numbered('/products/repair-cream');
+export const REPAIR_CREAM_IMAGES = [
+  ...numbered('/products/repair-cream'),
+  '/products/repair-cream/7.jpg',
+];
 export const MOISTURIZER_IMAGES = numbered('/products/moisturizer');
 export const SUNSCREEN_IMAGES = numbered('/products/sunscreen');
 
+const GALLERY_BY_SLUG = {
+  [PRODUCT_SLUGS.facewash]: FACEWASH_IMAGES.gallery,
+  [PRODUCT_SLUGS.serum]: SERUM_IMAGES,
+  [PRODUCT_SLUGS.repairCream]: REPAIR_CREAM_IMAGES,
+  [PRODUCT_SLUGS.moisturizer]: MOISTURIZER_IMAGES,
+  [PRODUCT_SLUGS.sunscreen]: SUNSCREEN_IMAGES,
+};
+
 export function getProductImages(product) {
-  if (product?.images?.length) return product.images.filter(Boolean);
-  if (product?.category === 'Face Wash') return FACEWASH_IMAGES.gallery;
-  if (product?.category === 'Blemishes Repair Cream' || product?.category === 'Repair Cream') {
-    return REPAIR_CREAM_IMAGES;
+  if (product?.isCombo || product?.category === 'Combo') {
+    return (product?.images || []).filter(Boolean);
   }
-  if (product?.category === 'Moisturizer') return MOISTURIZER_IMAGES;
-  if (product?.category === 'Sunscreen') return SUNSCREEN_IMAGES;
-  if (product?.category === 'Serum') return SERUM_IMAGES;
+  if (product?.slug && GALLERY_BY_SLUG[product.slug]) {
+    return GALLERY_BY_SLUG[product.slug];
+  }
+  if (product?.images?.length) return product.images.filter(Boolean);
   if (product?.imageUrl) return [product.imageUrl];
   return [];
 }
@@ -54,6 +65,12 @@ export function getHoverImage(product) {
 
 function derivative(src, role) {
   if (!src) return '';
+
+  // Numbered product JPGs are served as JPEG so newly copied finals are not
+  // hidden by stale webp derivatives while those files are locked on Windows.
+  if (/^\/products\/(facewash|moisturizer|serum|sunscreen|repair-cream)\/\d+\.jpg$/i.test(src)) {
+    return '';
+  }
 
   if (/^\/products\/[^/]+\/\d+\.jpg$/i.test(src)) {
     return src.replace(/\.jpg$/i, `-${role}.webp`);

@@ -31,6 +31,7 @@ import { getResponsiveImage, normalizeProductContent } from '../data/productImag
 import { getDetailGallery, getProductBadge } from '../data/productDisplay';
 import { getComboIncludedLabels } from '../data/storefrontConfig';
 import { getRecommendedProducts } from '../data/productRecommendations';
+import { getFullIngredients } from '../data/productIngredients';
 import { calcDiscountPercent, getSellingPrice } from '../data/business';
 import PriceDisplay from '../components/ui/PriceDisplay';
 
@@ -292,7 +293,7 @@ export default function ProductDetail() {
       product.ingredients || 'See packaging for key ingredients.'
     ),
     howToUse: product.howToUse || 'Details coming soon.',
-    ingredients: product.ingredients || 'See product packaging.',
+    ingredients: getFullIngredients(product) || 'See product packaging.',
     precautions: product.precautions || 'For external use only. Discontinue if irritation occurs.',
     faqs: product.faqs.length ? (
       <div className="space-y-4">
@@ -381,7 +382,7 @@ export default function ProductDetail() {
 
             <div className="lg:pt-2">
               {badge && (
-                <p className="mb-3 inline-block rounded-[2px] bg-[#6db6d0] px-2.5 py-1 text-[11px] font-bold tracking-[0.12em] text-white">
+                <p className="mb-3 inline-block rounded-[2px] bg-[#9fd9cf] px-2.5 py-1 text-[11px] font-bold tracking-[0.12em] text-[#1f5c56]">
                   {badge}
                 </p>
               )}

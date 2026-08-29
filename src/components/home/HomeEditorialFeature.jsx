@@ -16,7 +16,6 @@ export default function HomeEditorialFeature({
   if (!product || !promotionalImage) return null;
 
   const reverse = imagePosition === 'right';
-  const benefits = (product.benefits || []).filter(Boolean).slice(0, 3);
   const summary = product.summary || product.description || '';
   const path = productPath(product);
 
@@ -56,16 +55,6 @@ export default function HomeEditorialFeature({
                 <p className="mt-5 text-[16px] leading-relaxed text-[#4a5560] md:text-[17px]">
                   {summary}
                 </p>
-              )}
-              {benefits.length > 0 && (
-                <ul className="mt-6 space-y-2.5">
-                  {benefits.map((item) => (
-                    <li key={item} className="flex gap-2 text-[15px] text-[#26313D]">
-                      <span className="mt-0.5 font-bold text-teal">•</span>
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
               )}
               <div className="mt-8">
                 <Link to={path} className="block w-full sm:inline-block sm:w-auto">

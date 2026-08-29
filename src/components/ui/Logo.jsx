@@ -20,7 +20,7 @@ export default function Logo({ className = '', variant = 'navbar' }) {
         onClick={goHomeTop}
         className={`inline-flex items-center gap-2.5 sm:gap-3 shrink-0 ${className}`}
         aria-label="BLEMOUT home"
-        style={{ width: 'clamp(140px, 28vw, 220px)' }}
+        style={{ width: 'clamp(132px, 16vw, 176px)' }}
       >
         <LogoImage
           src="/logo-left.png"

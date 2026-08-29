@@ -300,7 +300,7 @@ export default function NavbarMegaMenu({ mobile = false, onNavigate, panelHostRe
 
   return (
     <>
-      <div ref={buttonsRef} className="hidden items-center gap-1 xl:flex">
+      <div ref={buttonsRef} className="hidden items-center gap-x-5 xl:flex">
         {MENU_KEYS.map((key) => {
           const menu = MEGA_MENUS[key];
           const isOpen = openKey === key;
@@ -308,8 +308,8 @@ export default function NavbarMegaMenu({ mobile = false, onNavigate, panelHostRe
             <button
               key={key}
               type="button"
-              className={`px-3 py-2 text-[15px] font-semibold uppercase tracking-[0.04em] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal xl:text-[16px] ${
-                isOpen ? 'text-teal' : 'text-[#222222] hover:text-dark-teal'
+              className={`shrink-0 whitespace-nowrap py-1 text-[13px] font-semibold uppercase tracking-[0.06em] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal 2xl:text-[14px] ${
+                isOpen ? 'text-teal' : 'text-[#26313D] hover:text-dark-teal'
               }`}
               aria-expanded={isOpen}
               aria-haspopup="true"

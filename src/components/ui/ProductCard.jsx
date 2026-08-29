@@ -48,7 +48,7 @@ function ProductCard({ product }) {
             className="scale-[1.04]"
           />
           {badge && (
-            <span className="absolute left-3 top-3 z-10 rounded-[2px] bg-[#6db6d0] px-2.5 py-1.5 text-[11px] font-bold tracking-[0.12em] text-white">
+            <span className="absolute left-3 top-3 z-10 rounded-[2px] bg-[#9fd9cf] px-2.5 py-1.5 text-[11px] font-bold tracking-[0.12em] text-[#1f5c56]">
               {badge}
             </span>
           )}

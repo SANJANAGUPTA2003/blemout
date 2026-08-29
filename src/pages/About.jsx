@@ -8,12 +8,6 @@ import FadeUp from '../components/ui/FadeUp';
 import PageMeta from '../components/seo/PageMeta';
 import { BUSINESS } from '../data/business';
 
-const FOUNDER_QUOTE =
-  'True confidence starts with understanding and caring for your skin. We created Blemout® to empower you with effective, gentle solutions that celebrate your unique beauty. Love the skin you are in, nourish it, and let your inner radiance shine. Trust the journey, embrace the glow.';
-
-const COFOUNDER_QUOTE =
-  'At BLEMOUT, our goal is not to promise overnight transformation. It is to create skincare that is thoughtful, purposeful and transparent. From the ingredients we choose to the way we communicate with our customers, we want every decision to reflect responsibility, quality and care. We want people to understand what they are using, why they are using it and how it fits into a consistent skincare routine.';
-
 const whyChoose = [
   {
     title: 'Thoughtful Formulation',
@@ -72,7 +66,7 @@ const aboutSchema = {
   },
 };
 
-function VoiceCard({ name, role, quote, image, alt, reverse = false }) {
+function VoiceCard({ name, role, image, alt, reverse = false }) {
   return (
     <article className="grid items-center gap-8 lg:grid-cols-2 lg:gap-12">
       <div className={`overflow-hidden bg-[#f4f8f7] ${reverse ? 'lg:order-2' : ''}`}>
@@ -91,7 +85,6 @@ function VoiceCard({ name, role, quote, image, alt, reverse = false }) {
         <h2 className="mt-3 text-[clamp(1.85rem,3.4vw,2.75rem)] font-bold tracking-[-0.03em] text-[#222222]">
           {name}
         </h2>
-        <p className="mt-6 text-[17px] leading-[1.85] text-[#4a5560] md:text-[18px]">{quote}</p>
       </div>
     </article>
   );
@@ -132,7 +125,6 @@ export default function About() {
             <VoiceCard
               name="Raj Vilecha"
               role="Founder, BLEMOUT"
-              quote={FOUNDER_QUOTE}
               image="/about/raj-vilecha.png"
               alt="Raj Vilecha, Founder of BLEMOUT"
             />
@@ -142,7 +134,6 @@ export default function About() {
             <VoiceCard
               name="Vinod Jindal"
               role="Co-Founder, BLEMOUT"
-              quote={COFOUNDER_QUOTE}
               image="/about/vinod-jindal.png"
               alt="Vinod Jindal, Co-Founder of BLEMOUT"
               reverse
@@ -153,7 +144,7 @@ export default function About() {
 
       <section id="vision" className="scroll-mt-28 bg-[#f4fbf9] px-5 py-16 md:px-8 md:py-24 lg:px-10">
         <FadeUp>
-          <div className="mx-auto grid max-w-[1400px] items-center gap-10 lg:grid-cols-2 lg:gap-16">
+          <div className="mx-auto grid max-w-[1400px] gap-10 md:grid-cols-2 md:gap-16">
             <div>
               <h2 className="text-[clamp(2rem,4vw,3.1rem)] font-bold tracking-[-0.035em] text-[#222222]">
                 Our Vision
@@ -162,36 +153,7 @@ export default function About() {
                 To make thoughtful skincare simpler, clearer and more trustworthy for everyday people.
               </p>
             </div>
-            <div className="overflow-hidden bg-white p-6 md:p-10">
-              <img
-                src="/about/about-facewash.jpg"
-                alt="BLEMOUT Skin Glow Facewash"
-                width="1400"
-                height="933"
-                loading="lazy"
-                decoding="async"
-                className="h-auto max-h-[520px] w-full object-contain"
-              />
-            </div>
-          </div>
-        </FadeUp>
-      </section>
-
-      <section id="mission" className="scroll-mt-28 px-5 py-16 md:px-8 md:py-24 lg:px-10">
-        <FadeUp>
-          <div className="mx-auto grid max-w-[1400px] items-center gap-10 lg:grid-cols-2 lg:gap-16">
-            <div className="order-2 overflow-hidden bg-[#f5f8f7] p-6 md:order-1 md:p-10">
-              <img
-                src="/about/about-repair-cream.jpg"
-                alt="BLEMOUT Blemishes Repair Cream"
-                width="1400"
-                height="933"
-                loading="lazy"
-                decoding="async"
-                className="h-auto max-h-[520px] w-full object-contain"
-              />
-            </div>
-            <div className="order-1 md:order-2">
+            <div id="mission">
               <h2 className="text-[clamp(2rem,4vw,3.1rem)] font-bold tracking-[-0.035em] text-[#222222]">
                 Our Mission
               </h2>
@@ -204,7 +166,7 @@ export default function About() {
         </FadeUp>
       </section>
 
-      <section id="why" className="scroll-mt-28 bg-[#d4ebf3] px-5 py-16 md:px-8 md:py-24 lg:px-10">
+      <section id="why" className="scroll-mt-28 bg-[#d8f0eb] px-5 py-16 md:px-8 md:py-24 lg:px-10">
         <div className="mx-auto max-w-[1400px]">
           <FadeUp>
             <div className="mx-auto mb-12 max-w-2xl text-center md:mb-16">
@@ -216,8 +178,8 @@ export default function About() {
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-5">
             {whyChoose.map((item, index) => (
               <FadeUp key={item.title} delay={index * 0.04}>
-                <article className="h-full bg-[#b7dce8] p-6 md:p-7">
-                  <p className="text-[13px] font-bold uppercase tracking-[0.14em] text-[#2a6f8a]">
+                <article className="h-full bg-[#b8e4dc] p-6 md:p-7">
+                  <p className="text-[13px] font-bold uppercase tracking-[0.14em] text-[#1f5c56]">
                     0{index + 1}
                   </p>
                   <h3 className="mt-4 text-[18px] font-bold tracking-[-0.02em] text-[#222222]">
