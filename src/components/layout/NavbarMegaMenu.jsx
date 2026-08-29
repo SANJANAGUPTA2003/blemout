@@ -98,51 +98,50 @@ export default function NavbarMegaMenu({ mobile = false, onNavigate, panelHostRe
               id={`${baseId}-panel`}
               role="region"
               aria-label={`${openMenu.label} menu`}
-              className="relative z-[60] w-full overflow-hidden rounded-b-2xl border-b border-[#e8eeec] bg-[#F6FFFD] shadow-[0_18px_40px_rgba(31,41,55,0.12)]"
+              className="relative z-[60] w-full overflow-hidden border-b border-[#e8eeec] bg-[#F6FFFD] shadow-[0_18px_40px_rgba(31,41,55,0.12)]"
               initial={{ opacity: 0, y: -16 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -12 }}
               transition={{ duration: 0.28, ease: [0.25, 0.1, 0.25, 1] }}
             >
               <div
-                className={`mx-auto flex min-h-[420px] max-h-[min(620px,72vh)] max-w-[1400px] gap-8 overflow-y-auto px-5 py-9 md:px-8 md:py-10 lg:gap-10 lg:px-10 ${
-                  hasCards
-                    ? 'flex-col items-stretch lg:flex-row lg:items-center'
-                    : 'flex-col lg:flex-row lg:items-center'
+                className={`mx-auto w-full max-w-[1400px] px-5 py-8 md:px-8 md:py-9 lg:px-10 ${
+                  hasCards ? 'flex flex-col gap-8 lg:flex-row lg:items-center lg:gap-10' : ''
                 }`}
               >
                 {!hasCards && (
-                  <div className="flex w-full flex-col justify-center gap-1 lg:max-w-xl">
-                    {openMenu.links.map((link) => (
-                      <NavLink
-                        key={link.to + link.label}
-                        to={link.to}
-                        onClick={() => {
-                          close();
-                          onNavigate?.();
-                        }}
-                        className={({ isActive }) =>
-                          `w-fit py-2.5 text-[clamp(1.15rem,1.7vw,1.55rem)] font-semibold tracking-[-0.03em] transition-colors ${
-                            isActive
-                              ? 'text-teal underline decoration-2 underline-offset-8'
-                              : 'text-[#222222] hover:text-teal'
-                          }`
-                        }
-                      >
-                        {link.label}
-                      </NavLink>
-                    ))}
-                    <Link
-                      to={openMenu.to}
-                      onClick={() => {
-                        close();
-                        onNavigate?.();
-                      }}
-                      className="mt-6 inline-flex w-fit items-center gap-2 text-[13px] font-bold uppercase tracking-[0.14em] text-[#222222] transition-colors hover:text-teal"
-                    >
-                      See More
-                      <span aria-hidden="true">→</span>
-                    </Link>
+                  <div className="grid w-full gap-8 sm:grid-cols-2 lg:grid-cols-3 lg:gap-12">
+                    {(openMenu.columns || [{ heading: openMenu.label, links: openMenu.links }]).map(
+                      (column) => (
+                        <div key={column.heading}>
+                          <p className="mb-3 text-[12px] font-bold uppercase tracking-[0.14em] text-teal">
+                            {column.heading}
+                          </p>
+                          <ul className="space-y-2">
+                            {column.links.map((link) => (
+                              <li key={link.to + link.label}>
+                                <NavLink
+                                  to={link.to}
+                                  onClick={() => {
+                                    close();
+                                    onNavigate?.();
+                                  }}
+                                  className={({ isActive }) =>
+                                    `block py-1 text-[17px] font-semibold tracking-[-0.02em] transition-colors md:text-[18px] ${
+                                      isActive
+                                        ? 'text-teal'
+                                        : 'text-[#222222] hover:text-teal'
+                                    }`
+                                  }
+                                >
+                                  {link.label}
+                                </NavLink>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )
+                    )}
                   </div>
                 )}
 
@@ -179,7 +178,7 @@ export default function NavbarMegaMenu({ mobile = false, onNavigate, panelHostRe
                     >
                       {openMenu.cards.map((card) => {
                         const fitClass =
-                          card.fit === 'contain' ? 'object-contain' : 'object-cover';
+                          card.fit === 'cover' ? 'object-cover' : 'object-contain';
                         const pos = card.position || 'center';
                         return (
                           <Link

@@ -1,107 +1,53 @@
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import {
-  BadgeCheck,
-  Eye,
   FlaskConical,
-  Heart,
-  HeartPulse,
-  Leaf,
-  Microscope,
-  Search,
-  ShieldCheck,
   Sparkles,
 } from 'lucide-react';
 import FadeUp from '../components/ui/FadeUp';
 import PageMeta from '../components/seo/PageMeta';
 import { BUSINESS } from '../data/business';
 
-const founderStories = [
+const FOUNDER_QUOTE =
+  'True confidence starts with understanding and caring for your skin. We created Blemout® to empower you with effective, gentle solutions that celebrate your unique beauty. Love the skin you are in, nourish it, and let your inner radiance shine. Trust the journey, embrace the glow.';
+
+const COFOUNDER_QUOTE =
+  'At BLEMOUT, our goal is not to promise overnight transformation. It is to create skincare that is thoughtful, purposeful and transparent. From the ingredients we choose to the way we communicate with our customers, we want every decision to reflect responsibility, quality and care. We want people to understand what they are using, why they are using it and how it fits into a consistent skincare routine.';
+
+const whyChoose = [
   {
-    image: '/about/about-repair-cream.jpg',
-    alt: 'BLEMOUT Blemishes Repair Cream with model',
-    chapters: [
-      {
-        id: 'story',
-        title: 'Why BLEMOUT Began',
-        paragraphs: [
-          'I began this journey with a simple belief: skincare should heal, not harm; care, not compromise. In a world overflowing with quick fixes and harsh formulations, I felt a deep responsibility to create products that respect the skin, the body and the human being behind every face.',
-          'Our skin is not a trend. It is a living, breathing part of us — carrying our stories, our stress, our joy and our resilience. Since 2023, BLEMOUT has honoured that truth with skincare that sees the person, not only the concern.',
-        ],
-      },
-      {
-        id: 'promise',
-        title: 'Our Promise',
-        paragraphs: [
-          'Every product we create is guided by one non-negotiable promise: effective care without unnecessary side effects. We choose ingredients thoughtfully, formulate responsibly and test with patience — never shortcuts.',
-          'True results should never come at the cost of long-term health. If something is not safe, not needed or not aligned with our values, it does not belong in our products, no matter how popular it may be.',
-        ],
-      },
-    ],
+    title: 'Thoughtful Formulation',
+    copy: 'Products are developed around purposeful ingredient selection and clear product intent.',
   },
   {
-    image: '/about/about-sunscreen.jpg',
-    alt: 'BLEMOUT Enviro Shield Sunscreen product creative',
-    reverse: true,
-    chapters: [
-      {
-        id: 'sustainability',
-        title: 'Beauty With Responsibility',
-        paragraphs: [
-          'Our purpose goes beyond beauty. We believe skincare is an act of self-respect and humanity — a choice that can support confidence, dignity and well-being. When a brand chooses honesty, safety and transparency, it contributes, however quietly, to a kinder world.',
-          'We are committed to science-backed formulations, ethical practices and conscious choices that honour your body, protect your future and reflect compassion for people and the planet.',
-        ],
-      },
-      {
-        id: 'looking-ahead',
-        title: 'Looking Ahead',
-        paragraphs: [
-          'Continuous learning is part of our responsibility. We will keep listening, researching and improving so that every decision remains grounded in safety, purpose and respect for long-term well-being.',
-          'Thank you for trusting us with your skin. That trust is never taken lightly. We promise to treat it with honesty, patience and care — today, and always.',
-        ],
-      },
-    ],
+    title: 'Transparency',
+    copy: 'We aim to communicate clearly about what our products contain and how they are intended to be used.',
+  },
+  {
+    title: 'Responsible Care',
+    copy: 'We focus on responsible skincare rather than unrealistic overnight promises.',
+  },
+  {
+    title: 'Quality Focus',
+    copy: 'We prioritize consistency, formulation quality and thoughtful product development.',
+  },
+  {
+    title: 'Continuous Learning',
+    copy: 'We continue learning and refining our approach as formulation knowledge evolves.',
   },
 ];
 
-const philosophyItems = [
-  {
-    icon: FlaskConical,
-    title: 'Science-backed formulations',
-    copy: 'Formulation decisions guided by ingredient knowledge and purposeful product design.',
-  },
-  {
-    icon: Leaf,
-    title: 'Thoughtfully selected ingredients',
-    copy: 'Every ingredient is considered for its role, compatibility and place in the complete formula.',
-  },
-  {
-    icon: HeartPulse,
-    title: 'Ethical skincare',
-    copy: 'Care built around responsibility, respect and choices we can stand behind.',
-  },
-  {
-    icon: Eye,
-    title: 'Transparent formulation',
-    copy: 'Clear product information without fear-based language or unrealistic promises.',
-  },
-  {
-    icon: Microscope,
-    title: 'Continuous research',
-    copy: 'An ongoing commitment to learning, evaluating and improving our approach.',
-  },
-  {
-    icon: Search,
-    title: 'Long-term skin health',
-    copy: 'Routines designed around consistency and healthy-looking skin over quick fixes.',
-  },
-];
-
-const values = [
-  { icon: Eye, title: 'Transparency', copy: 'Clear information and honest expectations.' },
-  { icon: ShieldCheck, title: 'Safety', copy: 'Responsible choices made with care.' },
-  { icon: BadgeCheck, title: 'Quality', copy: 'Purposeful products and considered details.' },
-  { icon: Heart, title: 'Care', copy: 'Respect for your skin guides every decision.' },
+const featuredIngredients = [
+  'Niacinamide',
+  'Alpha Arbutin',
+  'Glutathione',
+  'Tranexamic Acid',
+  'Azelaic Acid',
+  'Kojic Acid Dipalmitate',
+  'Salicylic Acid',
+  'Sodium Hyaluronate',
+  'Green Tea Extract',
+  'Licorice Root Extract',
 ];
 
 const aboutSchema = {
@@ -109,11 +55,12 @@ const aboutSchema = {
   '@type': 'AboutPage',
   name: 'About BLEMOUT',
   description:
-    'Learn about BLEMOUT’s founder story since 2023, responsible skincare philosophy, steroid-free promise and commitment to transparent formulations.',
+    'Meet BLEMOUT founders Raj Vilecha and Vinod Jindal, and learn our vision, mission and formulation approach since 2023.',
   mainEntity: {
     '@type': 'Organization',
     name: BUSINESS.name,
     email: BUSINESS.email,
+    foundingDate: String(BUSINESS.foundedYear),
     address: {
       '@type': 'PostalAddress',
       streetAddress: '#166 B, HUDA R-2',
@@ -124,6 +71,31 @@ const aboutSchema = {
     },
   },
 };
+
+function VoiceCard({ name, role, quote, image, alt, reverse = false }) {
+  return (
+    <article className="grid items-center gap-8 lg:grid-cols-2 lg:gap-12">
+      <div className={`overflow-hidden bg-[#f4f8f7] ${reverse ? 'lg:order-2' : ''}`}>
+        <img
+          src={image}
+          alt={alt}
+          width="1600"
+          height="900"
+          loading="lazy"
+          decoding="async"
+          className="h-auto w-full object-contain"
+        />
+      </div>
+      <div className={reverse ? 'lg:order-1' : ''}>
+        <p className="text-[12px] font-bold uppercase tracking-[0.16em] text-teal">{role}</p>
+        <h2 className="mt-3 text-[clamp(1.85rem,3.4vw,2.75rem)] font-bold tracking-[-0.03em] text-[#222222]">
+          {name}
+        </h2>
+        <p className="mt-6 text-[17px] leading-[1.85] text-[#4a5560] md:text-[18px]">{quote}</p>
+      </div>
+    </article>
+  );
+}
 
 export default function About() {
   const location = useLocation();
@@ -140,92 +112,118 @@ export default function About() {
   return (
     <div className="bg-white">
       <PageMeta
-        title="About BLEMOUT | Care That Respects Your Skin"
-        description="Discover BLEMOUT’s founder story since 2023, skincare philosophy, steroid-free promise and commitment to responsible, transparent care."
+        title="About BLEMOUT | Founder Voices, Vision and Care"
+        description="Read BLEMOUT founder and co-founder perspectives, plus our vision, mission, values and science-led approach to everyday skincare."
         path="/about"
         schema={aboutSchema}
       />
 
-      <section className="px-5 py-14 md:px-8 md:py-20 lg:px-10">
-        <FadeUp>
-          <div className="mx-auto grid max-w-[1400px] items-center gap-10 lg:grid-cols-[0.48fr_0.52fr] lg:gap-14">
-            <div>
-              <p className="mb-4 text-[12px] font-bold uppercase tracking-[0.16em] text-teal">
-                Our Story · Since {BUSINESS.foundedYear}
-              </p>
-              <p className="mb-3 text-[clamp(2.75rem,6vw,4.5rem)] font-bold leading-none tracking-[-0.05em] text-[#222222]">
-                BLEMOUT
-              </p>
-              <h1 className="max-w-xl text-[clamp(1.75rem,3.5vw,2.75rem)] font-bold leading-[1.12] tracking-[-0.03em] text-[#222222]">
-                Care That Respects Your Skin.
+      <section id="voices" className="scroll-mt-28 px-5 py-14 md:px-8 md:py-20 lg:px-10">
+        <div className="mx-auto max-w-[1400px] space-y-20 md:space-y-28">
+          <FadeUp>
+            <div className="mx-auto max-w-3xl text-center">
+              <h1 className="text-[clamp(2.1rem,4.2vw,3.4rem)] font-bold tracking-[-0.04em] text-[#222222]">
+                About BLEMOUT
               </h1>
-              <p className="mt-6 max-w-lg text-[18px] leading-relaxed text-[#4a5560] md:text-[20px]">
-                Science-backed skincare created with honesty, responsibility and care —
-                trusted since {BUSINESS.foundedYear}.
+            </div>
+          </FadeUp>
+
+          <FadeUp>
+            <VoiceCard
+              name="Raj Vilecha"
+              role="Founder, BLEMOUT"
+              quote={FOUNDER_QUOTE}
+              image="/about/raj-vilecha.png"
+              alt="Raj Vilecha, Founder of BLEMOUT"
+            />
+          </FadeUp>
+
+          <FadeUp>
+            <VoiceCard
+              name="Vinod Jindal"
+              role="Co-Founder, BLEMOUT"
+              quote={COFOUNDER_QUOTE}
+              image="/about/vinod-jindal.png"
+              alt="Vinod Jindal, Co-Founder of BLEMOUT"
+              reverse
+            />
+          </FadeUp>
+        </div>
+      </section>
+
+      <section id="vision" className="scroll-mt-28 bg-[#f4fbf9] px-5 py-16 md:px-8 md:py-24 lg:px-10">
+        <FadeUp>
+          <div className="mx-auto grid max-w-[1400px] items-center gap-10 lg:grid-cols-2 lg:gap-16">
+            <div>
+              <h2 className="text-[clamp(2rem,4vw,3.1rem)] font-bold tracking-[-0.035em] text-[#222222]">
+                Our Vision
+              </h2>
+              <p className="mt-6 max-w-xl text-[18px] leading-[1.8] text-[#4a5560] md:text-[20px]">
+                To make thoughtful skincare simpler, clearer and more trustworthy for everyday people.
               </p>
             </div>
-            <div className="flex min-h-[320px] items-center justify-center overflow-hidden bg-[#f5f8f7] p-6 sm:min-h-[400px] sm:p-8 md:min-h-[480px] md:p-10 lg:min-h-[520px]">
-              <picture className="flex h-full w-full items-center justify-center">
-                <source srcSet="/about/about-facewash.jpg" type="image/jpeg" />
-                <img
-                  src="/about/about-facewash.jpg"
-                  alt="BLEMOUT Skin Glow Facewash tube"
-                  width="1400"
-                  height="933"
-                  decoding="async"
-                  fetchPriority="high"
-                  className="h-full max-h-[min(70vh,560px)] w-full object-contain object-center"
-                />
-              </picture>
+            <div className="overflow-hidden bg-white p-6 md:p-10">
+              <img
+                src="/about/about-facewash.jpg"
+                alt="BLEMOUT Skin Glow Facewash"
+                width="1400"
+                height="933"
+                loading="lazy"
+                decoding="async"
+                className="h-auto max-h-[520px] w-full object-contain"
+              />
             </div>
           </div>
         </FadeUp>
       </section>
 
-      <section id="science" className="scroll-mt-28 bg-[#f2fbf9] px-5 py-16 md:px-8 md:py-24 lg:px-10">
-        <div className="mx-auto max-w-[1400px]">
-          <FadeUp>
-            <div className="mx-auto mb-12 max-w-3xl text-center md:mb-16">
-              <p className="mb-3 text-[12px] font-bold uppercase tracking-[0.16em] text-teal">
-                BLEMOUT Formulations
-              </p>
-              <h2 className="text-[clamp(2rem,4vw,3.15rem)] font-bold tracking-[-0.035em] text-[#222222]">
-                The Science Behind the Care
+      <section id="mission" className="scroll-mt-28 px-5 py-16 md:px-8 md:py-24 lg:px-10">
+        <FadeUp>
+          <div className="mx-auto grid max-w-[1400px] items-center gap-10 lg:grid-cols-2 lg:gap-16">
+            <div className="order-2 overflow-hidden bg-[#f5f8f7] p-6 md:order-1 md:p-10">
+              <img
+                src="/about/about-repair-cream.jpg"
+                alt="BLEMOUT Blemishes Repair Cream"
+                width="1400"
+                height="933"
+                loading="lazy"
+                decoding="async"
+                className="h-auto max-h-[520px] w-full object-contain"
+              />
+            </div>
+            <div className="order-1 md:order-2">
+              <h2 className="text-[clamp(2rem,4vw,3.1rem)] font-bold tracking-[-0.035em] text-[#222222]">
+                Our Mission
               </h2>
-              <p className="mt-5 text-[17px] leading-relaxed text-[#4a5560] md:text-[18px]">
-                Every BLEMOUT formula is built around purposeful ingredients, barrier-respectful
-                design and a calm, consistent approach to everyday skin concerns.
+              <p className="mt-6 max-w-xl text-[18px] leading-[1.8] text-[#4a5560] md:text-[20px]">
+                To create purposeful skincare with carefully selected ingredients, responsible
+                formulation and transparent communication.
               </p>
             </div>
-          </FadeUp>
+          </div>
+        </FadeUp>
+      </section>
 
-          <div className="grid gap-8 md:grid-cols-3 md:gap-10">
-            {[
-              {
-                title: 'Ingredient intelligence',
-                copy:
-                  'We select actives for clarity of role — brightening support, barrier comfort, hydration or daily defence — and combine them thoughtfully rather than overcrowding a formula.',
-              },
-              {
-                title: 'Skin-first formulation',
-                copy:
-                  'Textures are designed to feel lightweight and wearable. Our approach prioritises tolerance and long-term comfort over harsh shortcuts or exaggerated claims.',
-              },
-              {
-                title: 'Routine that builds trust',
-                copy:
-                  'BLEMOUT is meant for everyday use. Consistent care, clear usage guidance and transparent information help you understand what you are applying and why.',
-              },
-            ].map((item, index) => (
+      <section id="why" className="scroll-mt-28 bg-[#d4ebf3] px-5 py-16 md:px-8 md:py-24 lg:px-10">
+        <div className="mx-auto max-w-[1400px]">
+          <FadeUp>
+            <div className="mx-auto mb-12 max-w-2xl text-center md:mb-16">
+              <h2 className="text-[clamp(2rem,4vw,3.1rem)] font-bold tracking-[-0.035em] text-[#222222]">
+                Why Choose BLEMOUT
+              </h2>
+            </div>
+          </FadeUp>
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-5">
+            {whyChoose.map((item, index) => (
               <FadeUp key={item.title} delay={index * 0.04}>
-                <article className="h-full bg-white p-7 md:p-8">
-                  <p className="text-[13px] font-bold uppercase tracking-[0.14em] text-teal">
+                <article className="h-full bg-[#b7dce8] p-6 md:p-7">
+                  <p className="text-[13px] font-bold uppercase tracking-[0.14em] text-[#2a6f8a]">
                     0{index + 1}
                   </p>
-                  <h3 className="mt-4 text-[22px] font-bold tracking-[-0.02em] text-[#222222]">
+                  <h3 className="mt-4 text-[18px] font-bold tracking-[-0.02em] text-[#222222]">
                     {item.title}
                   </h3>
-                  <p className="mt-3 text-[16px] leading-relaxed text-[#4a5560]">{item.copy}</p>
+                  <p className="mt-3 text-[15px] leading-relaxed text-[#3f4d56]">{item.copy}</p>
                 </article>
               </FadeUp>
             ))}
@@ -233,158 +231,31 @@ export default function About() {
         </div>
       </section>
 
-      <section className="px-5 py-16 md:px-8 md:py-24 lg:px-10">
+      <section id="science" className="scroll-mt-28 bg-[#f2fbf9] px-5 py-16 md:px-8 md:py-24 lg:px-10">
         <div className="mx-auto max-w-[1400px]">
           <FadeUp>
-            <div className="mb-14 max-w-2xl md:mb-20">
-              <p className="mb-4 text-[12px] font-bold uppercase tracking-[0.16em] text-teal">
-                A Note From Our Founder
-              </p>
-              <h2 className="text-[36px] font-bold leading-[1.1] tracking-[-0.035em] text-[#222222] md:text-[50px]">
-                Built with intention, not shortcuts.
+            <div className="mx-auto mb-12 max-w-3xl text-center md:mb-16">
+              <FlaskConical className="mx-auto mb-5 text-teal" size={28} strokeWidth={1.5} />
+              <h2 className="text-[clamp(2rem,4vw,3.15rem)] font-bold tracking-[-0.035em] text-[#222222]">
+                Science Behind the Care
               </h2>
+              <p className="mt-5 text-[17px] leading-relaxed text-[#4a5560] md:text-[18px]">
+                Every BLEMOUT formula is built around purposeful ingredients and a consistent
+                approach to everyday skin concerns. We highlight selected actives already used in
+                our products so you can see what each formula is designed around.
+              </p>
             </div>
           </FadeUp>
-
-          <div className="space-y-20 md:space-y-28">
-            {founderStories.map((story) => (
-              <section key={story.image}>
-                <FadeUp>
-                  <div
-                    className={`flex flex-col items-center gap-10 lg:flex-row lg:gap-16 ${
-                      story.reverse ? 'lg:flex-row-reverse' : ''
-                    }`}
-                  >
-                    <div className="flex min-h-[360px] items-center justify-center overflow-hidden bg-[#f6f7f6] p-6 sm:min-h-[440px] sm:p-8 md:min-h-[520px] md:p-10 lg:w-[48%]">
-                      <picture className="flex h-full w-full items-center justify-center">
-                        <source srcSet={story.image.replace(/\.png$/, '.webp')} type="image/webp" />
-                        <img
-                          src={story.image}
-                          alt={story.alt}
-                          width="1120"
-                          height="1400"
-                          loading="lazy"
-                          decoding="async"
-                          className="h-full max-h-[min(72vh,580px)] w-full object-contain object-center"
-                        />
-                      </picture>
-                    </div>
-                    <div className="max-w-lg space-y-12 lg:w-[52%]">
-                      {story.chapters.map((chapter) => (
-                        <article key={chapter.id} id={chapter.id} className="scroll-mt-28">
-                          <p className="mb-4 text-[12px] font-bold uppercase tracking-[0.16em] text-teal">
-                            Founder Story
-                          </p>
-                          <h2 className="text-[clamp(1.85rem,3vw,2.65rem)] font-bold leading-[1.1] tracking-[-0.03em] text-[#222222]">
-                            {chapter.title}
-                          </h2>
-                          <div className="mt-6 space-y-4">
-                            {chapter.paragraphs.map((paragraph) => (
-                              <p
-                                key={paragraph}
-                                className="text-[17px] leading-[1.8] text-[#4a5560] md:text-[18px]"
-                              >
-                                {paragraph}
-                              </p>
-                            ))}
-                          </div>
-                        </article>
-                      ))}
-                    </div>
-                  </div>
-                </FadeUp>
-              </section>
+          <div className="flex flex-wrap justify-center gap-3 md:gap-4">
+            {featuredIngredients.map((name) => (
+              <span
+                key={name}
+                className="inline-flex items-center gap-2 bg-white px-4 py-3 text-[14px] font-bold text-[#222222] md:text-[15px]"
+              >
+                <Sparkles size={14} className="text-teal" strokeWidth={1.75} />
+                {name}
+              </span>
             ))}
-          </div>
-        </div>
-      </section>
-
-      <section id="philosophy" className="scroll-mt-28 bg-[#f7fbfa] px-5 py-20 md:px-8 md:py-28 lg:px-10">
-        <div className="mx-auto max-w-[1400px]">
-          <FadeUp>
-            <div className="mx-auto mb-14 max-w-2xl text-center">
-              <Sparkles className="mx-auto mb-5 text-teal" size={26} strokeWidth={1.5} />
-              <p className="mb-3 text-[12px] font-bold uppercase tracking-[0.16em] text-teal">
-                What Guides Us
-              </p>
-              <h2 className="text-[36px] font-bold tracking-[-0.035em] text-[#222222] md:text-[50px]">
-                Our Philosophy
-              </h2>
-              <p className="mt-5 text-[17px] leading-relaxed text-[#4a5560]">
-                Thoughtful skincare begins with clear choices and continues with a commitment to learn.
-              </p>
-            </div>
-          </FadeUp>
-
-          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-            {philosophyItems.map((item, index) => {
-              const Icon = item.icon;
-              return (
-                <FadeUp key={item.title} delay={index * 0.035}>
-                  <article className="h-full bg-white p-7 md:p-8">
-                    <Icon className="text-teal" size={24} strokeWidth={1.5} />
-                    <h3 className="mt-6 text-[19px] font-bold tracking-[-0.02em] text-[#222222]">
-                      {item.title}
-                    </h3>
-                    <p className="mt-3 text-[15px] leading-relaxed text-[#4a5560]">
-                      {item.copy}
-                    </p>
-                  </article>
-                </FadeUp>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      <section id="steroid-free" className="scroll-mt-28 px-5 py-20 md:px-8 md:py-28 lg:px-10">
-        <FadeUp>
-          <div className="mx-auto grid max-w-5xl items-center gap-8 bg-[#eaf7f5] p-8 md:grid-cols-[auto_1fr] md:gap-10 md:p-14">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white text-teal">
-              <ShieldCheck size={30} strokeWidth={1.5} />
-            </div>
-            <div>
-              <p className="mb-3 text-[12px] font-bold uppercase tracking-[0.16em] text-dark-teal">
-                Our Responsible Formulation Promise
-              </p>
-              <h2 className="text-[32px] font-bold tracking-[-0.03em] text-[#222222] md:text-[44px]">
-                Formulated Without Steroids
-              </h2>
-              <p className="mt-5 max-w-3xl text-[16px] leading-[1.8] text-[#3f4d56] md:text-[17px]">
-                Our formulations are created without steroid-based ingredients and focus on responsible
-                skincare that supports healthy-looking skin without unnecessary harsh ingredients.
-              </p>
-            </div>
-          </div>
-        </FadeUp>
-      </section>
-
-      <section id="values" className="scroll-mt-28 px-5 pb-24 md:px-8 md:pb-32 lg:px-10">
-        <div className="mx-auto max-w-[1400px]">
-          <FadeUp>
-            <div className="mb-12">
-              <p className="mb-3 text-[12px] font-bold uppercase tracking-[0.16em] text-teal">
-                The BLEMOUT Standard
-              </p>
-              <h2 className="text-[36px] font-bold tracking-[-0.035em] text-[#222222] md:text-[50px]">
-                Our Values
-              </h2>
-            </div>
-          </FadeUp>
-
-          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-            {values.map((value, index) => {
-              const Icon = value.icon;
-              return (
-                <FadeUp key={value.title} delay={index * 0.04}>
-                  <article>
-                    <Icon className="text-teal" size={23} strokeWidth={1.5} />
-                    <h3 className="mt-5 text-[20px] font-bold text-[#222222]">{value.title}</h3>
-                    <p className="mt-2 text-[15px] leading-relaxed text-[#4a5560]">{value.copy}</p>
-                  </article>
-                </FadeUp>
-              );
-            })}
           </div>
         </div>
       </section>

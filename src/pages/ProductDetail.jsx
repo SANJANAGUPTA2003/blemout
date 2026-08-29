@@ -29,9 +29,10 @@ import { useCart } from '../context/CartContext';
 import { useProducts } from '../context/ProductContext';
 import { getResponsiveImage, normalizeProductContent } from '../data/productImages';
 import { getDetailGallery, getProductBadge } from '../data/productDisplay';
+import { getComboIncludedLabels } from '../data/storefrontConfig';
 import { getRecommendedProducts } from '../data/productRecommendations';
 import { calcDiscountPercent, getSellingPrice } from '../data/business';
-import { formatPrice } from '../utils/format';
+import PriceDisplay from '../components/ui/PriceDisplay';
 
 const ICONS = { Droplet, FlaskConical, Heart, Leaf, Shield, Sparkles, Sun };
 
@@ -238,6 +239,11 @@ export default function ProductDetail() {
       ? product.discountPercentage
       : calcDiscountPercent(mrp, sellingPrice);
   const badge = getProductBadge(product);
+  const isCombo = Boolean(product.isCombo || product.category === 'Combo');
+  const includedLabels =
+    (product.includedProducts || product.comboItems)?.length > 0
+      ? product.includedProducts || product.comboItems
+      : getComboIncludedLabels(product.slug);
   const maxQty = product.stock > 0 ? product.stock : 99;
 
   const goImage = (dir) => {
@@ -304,10 +310,14 @@ export default function ProductDetail() {
     <div className="bg-white">
       <div className="max-w-[1400px] mx-auto px-4 md:px-6 lg:px-8 py-8 md:py-12">
         <FadeUp>
-          <div className="grid lg:grid-cols-[1.15fr_0.85fr] gap-8 lg:gap-12 items-start">
+          <div className="grid items-start gap-8 lg:grid-cols-2 lg:gap-12">
             <div>
               <div
-                className="relative aspect-square border-0 bg-[#fafafa] flex items-center justify-center overflow-hidden"
+                className={`relative flex items-center justify-center overflow-hidden border-0 bg-[#fafafa] ${
+                  isCombo
+                    ? 'h-[min(58vw,680px)] max-h-[680px] min-h-[240px] w-full'
+                    : 'aspect-square'
+                }`}
                 onTouchStart={(e) => setTouchX(e.changedTouches[0]?.clientX ?? null)}
                 onTouchEnd={(e) => {
                   const end = e.changedTouches[0]?.clientX;
@@ -371,14 +381,14 @@ export default function ProductDetail() {
 
             <div className="lg:pt-2">
               {badge && (
-                <p className="mb-3 inline-block rounded-[2px] bg-[#f6f7f6] px-2.5 py-1 text-[11px] font-bold tracking-[0.12em] text-[#222222]">
+                <p className="mb-3 inline-block rounded-[2px] bg-[#6db6d0] px-2.5 py-1 text-[11px] font-bold tracking-[0.12em] text-white">
                   {badge}
                 </p>
               )}
               <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.16em] text-teal md:text-[12px]">
                 {product.category}
               </p>
-              <h1 className="text-[clamp(1.5rem,2.5vw,1.85rem)] font-bold leading-snug tracking-[-0.02em] text-text md:text-[28px]">
+              <h1 className="text-[clamp(1.65rem,2.8vw,2.15rem)] font-bold leading-snug tracking-[-0.02em] text-[#111111] md:text-[32px]">
                 {product.name}
               </h1>
               <div className="mt-3 flex items-center gap-1 text-teal" aria-label="Rated 5 out of 5 stars">
@@ -390,10 +400,13 @@ export default function ProductDetail() {
                 <p className="mt-4 text-[16px] text-soft-text leading-relaxed">{product.summary}</p>
               )}
 
-              <div className="mt-6 flex items-baseline gap-3 flex-wrap">
-                <span className="text-2xl font-bold text-text">{formatPrice(sellingPrice)}</span>
-                {mrp && <span className="text-soft-text line-through text-base">{formatPrice(mrp)}</span>}
-                {discount > 0 ? <span className="text-sm font-semibold text-teal">{discount}% off</span> : null}
+              <div className="mt-6">
+                <PriceDisplay
+                  sellingPrice={sellingPrice}
+                  mrp={mrp}
+                  discount={discount}
+                  size="pdp"
+                />
               </div>
 
               {product.size && (
@@ -406,10 +419,21 @@ export default function ProductDetail() {
                   Suitable for: <span className="text-text font-semibold">{product.skinType}</span>
                 </p>
               )}
-              {typeof product.stock === 'number' && (
-                <p className="mt-2 text-[14px] text-soft-text">
-                  {product.stock > 0 ? `In stock (${product.stock})` : 'Currently out of stock'}
-                </p>
+              {typeof product.stock === 'number' && product.stock === 0 && (
+                <p className="mt-2 text-[14px] text-soft-text">Currently unavailable</p>
+              )}
+
+              {includedLabels.length > 0 && (
+                <div className="mt-6">
+                  <p className="mb-2 text-[12px] font-bold uppercase tracking-[0.14em] text-[#111111]">
+                    Includes
+                  </p>
+                  <ul className="space-y-1.5 text-[16px] text-[#4a5560]">
+                    {includedLabels.map((item) => (
+                      <li key={item}>• {item}</li>
+                    ))}
+                  </ul>
+                </div>
               )}
 
               <div ref={purchaseRef} className="mt-6 inline-flex items-center border border-gray-200 rounded-full">
@@ -436,7 +460,7 @@ export default function ProductDetail() {
                 <Button onClick={handleAddToCart} className="flex-1 gap-2" disabled={product.stock === 0}>
                   <ShoppingBag size={16} /> Add to Cart
                 </Button>
-                <Button variant="secondary" onClick={handleBuyNow} className="flex-1" disabled={product.stock === 0}>
+                <Button variant="outline" onClick={handleBuyNow} className="flex-1" disabled={product.stock === 0}>
                   Buy Now
                 </Button>
               </div>
@@ -449,17 +473,6 @@ export default function ProductDetail() {
                   <ShieldCheck size={16} className="text-teal" /> Dermatologically inspired formulas
                 </p>
               </div>
-
-              {(product.includedProducts || product.comboItems)?.length > 0 && (
-                <div className="mt-8">
-                  <p className="text-xs tracking-[0.16em] uppercase font-bold text-text mb-3">Includes</p>
-                  <ul className="space-y-1.5 text-[15px] text-soft-text">
-                    {(product.includedProducts || product.comboItems).map((item) => (
-                      <li key={item}>• {item}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
 
               <div className="mt-10 border-t border-gray-100">
                 {accordionDefs.map((item) => {

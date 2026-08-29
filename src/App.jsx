@@ -51,9 +51,7 @@ export default function App() {
                   element={
                     <CollectionPage
                       collection="new"
-                      eyebrow="New"
-                      title="New Arrivals"
-                      subtitle="Three individual formulas and three newly curated combos."
+                      title="New"
                     />
                   }
                 />
@@ -62,9 +60,7 @@ export default function App() {
                   element={
                     <CollectionPage
                       collection="best-sellers"
-                      eyebrow="Bestsellers"
                       title="Best Sellers"
-                      subtitle="Five most-loved formulas and three standout combo routines."
                     />
                   }
                 />
@@ -73,9 +69,7 @@ export default function App() {
                   element={
                     <CollectionPage
                       collection="limited-picks"
-                      eyebrow="Limited"
                       title="Limited Picks"
-                      subtitle="All six BLEMOUT combo sets — curated routines in one place."
                     />
                   }
                 />

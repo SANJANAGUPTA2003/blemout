@@ -43,7 +43,7 @@ export default function ConcernCollection() {
               </h1>
               <p className="mt-4 text-[16px] leading-relaxed text-[#4a5560]">{concern.description}</p>
             </div>
-            <div className="mx-auto h-28 w-28 shrink-0 overflow-hidden rounded-full bg-[#f4f7f6] md:mx-0 md:h-36 md:w-36">
+            <div className="mx-auto aspect-square w-36 shrink-0 overflow-hidden bg-[#f4f7f6] md:mx-0 md:w-44">
               <img
                 src={concern.image}
                 alt=""

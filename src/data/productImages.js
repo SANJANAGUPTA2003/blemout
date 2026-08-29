@@ -1,7 +1,8 @@
 /** Product image paths — synced with public/products/ numbered 1–6 assets */
 
 function numbered(base) {
-  return [1, 2, 3, 4, 5, 6].map((n) => `${base}/${n}.jpg`);
+  // Gallery order: 1, 2, then 5, 6 in place of 3, 4 (interchanged), then remaining 3, 4.
+  return [1, 2, 5, 6, 3, 4].map((n) => `${base}/${n}.jpg`);
 }
 
 export const FACEWASH_IMAGES = {

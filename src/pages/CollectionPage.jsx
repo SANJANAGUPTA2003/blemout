@@ -16,8 +16,6 @@ const SLUG_MAP = {
 export default function CollectionPage({
   collection,
   title,
-  subtitle,
-  eyebrow = 'Collection',
 }) {
   const { products, loading, error, slow, retry } = useProducts();
   const list = useMemo(() => {
@@ -30,13 +28,9 @@ export default function CollectionPage({
     <div className="bg-white">
       <div className="mx-auto max-w-[1400px] px-5 py-14 md:px-8 md:py-20 lg:px-10">
         <FadeUp>
-          <p className="mb-3 text-[12px] font-bold uppercase tracking-[0.16em] text-teal">
-            {eyebrow}
-          </p>
-          <h1 className="text-[clamp(2.25rem,4vw,3.5rem)] font-bold leading-[1.1] tracking-[-0.03em] text-[#222222]">
+          <h1 className="text-center text-[clamp(2.25rem,4vw,3.5rem)] font-bold leading-[1.1] tracking-[-0.03em] text-[#222222]">
             {title}
           </h1>
-          <p className="mt-4 max-w-xl text-[17px] leading-relaxed text-[#4a5560] md:text-[18px]">{subtitle}</p>
         </FadeUp>
 
         <div className="mt-12 md:mt-14">

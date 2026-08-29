@@ -1,9 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { X } from 'lucide-react';
 import Button from '../ui/Button';
-import { formatPrice } from '../../utils/format';
-import { getListingImage } from '../../data/productDisplay';
-import { getSellingPrice } from '../../data/business';
+import PriceDisplay from '../ui/PriceDisplay';
+import { getListingImage, normalizePricing } from '../../data/productDisplay';
 import { useCart } from '../../context/CartContext';
 
 export default function ProductQuickAdd({
@@ -44,7 +43,7 @@ export default function ProductQuickAdd({
   if (!product || dismissed || !visible || disabled || isDrawerOpen) return null;
   if (typeof window !== 'undefined' && window.innerWidth < 380) return null;
 
-  const price = getSellingPrice(product);
+  const { sellingPrice, mrp, discount } = normalizePricing(product);
   const thumb = getListingImage(product);
 
   const close = () => {
@@ -55,7 +54,7 @@ export default function ProductQuickAdd({
 
   const add = () => {
     addedRef.current = true;
-    addToCart({ ...product, price }, 1);
+    addToCart({ ...product, price: sellingPrice }, 1);
     sessionStorage.setItem(storageKey, '1');
     setVisible(false);
   };
@@ -71,7 +70,9 @@ export default function ProductQuickAdd({
       />
       <div className="min-w-0 flex-1">
         <p className="truncate text-[13px] font-semibold text-[#222222]">{product.name}</p>
-        <p className="mt-0.5 text-[13px] font-bold text-[#222222]">{formatPrice(price)}</p>
+        <div className="mt-1">
+          <PriceDisplay sellingPrice={sellingPrice} mrp={mrp} discount={discount} />
+        </div>
         <Button type="button" size="sm" className="mt-2 w-full" onClick={add}>
           Add to Cart
         </Button>

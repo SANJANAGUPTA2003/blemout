@@ -241,23 +241,23 @@ export default function LegalPolicyPage({ policyKey }) {
             ))}
 
             <FadeUp>
-              <section className="mt-10 overflow-hidden rounded-[2rem] bg-[#123f3d] p-7 text-white md:p-10">
+              <section className="mt-10 overflow-hidden rounded-[2rem] bg-[#e8f7f5] p-7 md:p-10">
                 <div className="flex items-start gap-4">
-                  <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/10 text-[#74d9cc]">
+                  <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white text-teal">
                     <ShieldCheck size={25} aria-hidden="true" />
                   </span>
                   <div>
-                    <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#74d9cc]">
+                    <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-teal">
                       Responsible skincare
                     </p>
-                    <h2 className="mt-2 text-[28px] font-bold tracking-[-0.03em] text-white md:text-[34px]">
+                    <h2 className="mt-2 text-[28px] font-bold tracking-[-0.03em] text-[#222222] md:text-[34px]">
                       Our Brand Promise
                     </h2>
                   </div>
                 </div>
                 <div className="mt-6 grid gap-4 md:grid-cols-2">
                   {brandPromise.map((paragraph) => (
-                    <p key={paragraph} className="text-[15px] leading-[1.75] text-white/82">
+                    <p key={paragraph} className="text-[15px] leading-[1.75] text-[#3f4d56]">
                       {paragraph}
                     </p>
                   ))}
@@ -313,11 +313,7 @@ export default function LegalPolicyPage({ policyKey }) {
                 </a>
                 <div className="flex items-start gap-3">
                   <MapPin size={18} className="mt-0.5 shrink-0 text-teal" />
-                    <span>
-                      {BUSINESS.addressLines.map((line) => (
-                        <span key={line} className="block">{line}</span>
-                      ))}
-                    </span>
+                    <span className="max-w-xl leading-relaxed">{BUSINESS.address}</span>
                 </div>
               </div>
               </section>

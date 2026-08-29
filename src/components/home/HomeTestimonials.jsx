@@ -9,16 +9,10 @@ export default function HomeTestimonials() {
     <section className="bg-[#fafafa] py-16 md:py-24">
       <div className="mx-auto max-w-[1400px] px-5 md:px-8 lg:px-10">
         <FadeUp>
-          <div className="mb-10 md:mb-14 max-w-xl">
-            <p className="mb-3 text-[12px] font-bold uppercase tracking-[0.16em] text-teal">
-              Voices
-            </p>
-            <h2 className="text-[36px] font-bold leading-[1.1] tracking-[-0.03em] text-[#222222] md:text-[44px] lg:text-[48px]">
-              What People Are Saying
+          <div className="mb-10 text-center md:mb-14">
+            <h2 className="text-[36px] font-bold leading-[1.1] tracking-[-0.03em] text-[#222222] md:text-[48px] lg:text-[56px]">
+              Testimonials
             </h2>
-            <p className="mt-4 text-[15px] leading-relaxed text-[#4a5560]">
-              Sample layout copy for design approval — not verified customer reviews.
-            </p>
           </div>
         </FadeUp>
 

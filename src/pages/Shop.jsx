@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { SlidersHorizontal, X } from 'lucide-react';
 import FadeUp from '../components/ui/FadeUp';
 import ProductCard from '../components/ui/ProductCard';
@@ -17,15 +17,13 @@ import { getSellingPrice } from '../data/business';
 import { resolveBySlugs } from '../data/productDisplay';
 
 const CATEGORY_OPTIONS = [
-  { id: 'all', label: 'View All' },
-  { id: 'individual', label: 'Individual Products', param: 'type', value: 'individual' },
-  { id: 'combo', label: 'Combos', param: 'type', value: 'combo' },
+  { id: 'all', label: 'All' },
   { id: 'face-wash', label: 'Face Wash', param: 'category', value: 'face-wash' },
   { id: 'serum', label: 'Serum', param: 'category', value: 'serum' },
   { id: 'moisturizer', label: 'Moisturizer', param: 'category', value: 'moisturizer' },
   { id: 'sunscreen', label: 'Sunscreen', param: 'category', value: 'sunscreen' },
   { id: 'blemish-cream', label: 'Blemish Cream', param: 'category', value: 'blemish-cream' },
-  { id: 'concern', label: 'Shop by Concern', href: '/shop-by-concern' },
+  { id: 'combo', label: 'Combos', param: 'type', value: 'combo' },
 ];
 
 const COLLECTION_OPTIONS = [
@@ -60,14 +58,6 @@ const CATEGORY_MATCH = {
     p.slug === PRODUCT_SLUGS.repairCream ||
     /repair\s*cream|blemish\s*cream/i.test(p.category || ''),
 };
-
-function chipClass(active) {
-  return `rounded-full px-4 py-2.5 text-[14px] font-semibold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal md:text-[15px] ${
-    active
-      ? 'bg-teal text-white'
-      : 'bg-[#eef8f6] text-[#26313D] hover:bg-[#e0f2ef]'
-  }`;
-}
 
 function rankIndex(list, slug) {
   const i = list.indexOf(slug);
@@ -230,105 +220,77 @@ export default function Shop() {
   ].filter(Boolean);
 
   const FiltersBody = (
-    <>
-      <div>
-        <p className="mb-3 text-[12px] font-bold uppercase tracking-[0.14em] text-[#6b7280]">
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <label className="flex min-w-0 flex-col gap-1.5">
+        <span className="text-[11px] font-bold uppercase tracking-[0.12em] text-[#6b7280]">
           Category
-        </p>
-        <div className="flex flex-wrap gap-2">
-          {CATEGORY_OPTIONS.map((item) => {
-            if (item.href) {
-              return (
-                <Link key={item.id} to={item.href} className={chipClass(false)}>
-                  {item.label}
-                </Link>
-              );
-            }
-            const active = activeCategoryId === item.id;
-            return (
-              <button
-                key={item.id}
-                type="button"
-                className={chipClass(active)}
-                onClick={() => {
-                  if (item.id === 'all') {
-                    patchParams({ type: '', category: '' });
-                  } else if (item.param === 'type') {
-                    patchParams({ type: item.value, category: '' });
-                  } else {
-                    patchParams({ category: item.value, type: '' });
-                  }
-                  setMobileFiltersOpen(false);
-                }}
-              >
-                {item.label}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      <div className="mt-6">
-        <p className="mb-3 text-[12px] font-bold uppercase tracking-[0.14em] text-[#6b7280]">
+        </span>
+        <select
+          value={activeCategoryId}
+          onChange={(e) => {
+            const item = CATEGORY_OPTIONS.find((opt) => opt.id === e.target.value);
+            if (!item || item.id === 'all') patchParams({ type: '', category: '' });
+            else if (item.param === 'type') patchParams({ type: item.value, category: '' });
+            else patchParams({ category: item.value, type: '' });
+            setMobileFiltersOpen(false);
+          }}
+          className="w-full rounded-full border-0 bg-[#eef8f6] px-4 py-2.5 text-[15px] font-semibold text-[#222222] focus:outline-none focus:ring-2 focus:ring-teal/30"
+        >
+          {CATEGORY_OPTIONS.map((item) => (
+            <option key={item.id} value={item.id}>
+              {item.label}
+            </option>
+          ))}
+        </select>
+      </label>
+      <label className="flex min-w-0 flex-col gap-1.5">
+        <span className="text-[11px] font-bold uppercase tracking-[0.12em] text-[#6b7280]">
           Collection
-        </p>
-        <div className="flex flex-wrap gap-2">
-          {COLLECTION_OPTIONS.map((item) => {
-            const active =
-              (item.id === 'all' && !effectiveCollection) ||
-              item.value === effectiveCollection;
-            return (
-              <button
-                key={item.id}
-                type="button"
-                className={chipClass(active)}
-                onClick={() => {
-                  patchParams({ collection: item.id === 'all' ? '' : item.value });
-                  setMobileFiltersOpen(false);
-                }}
-              >
-                {item.label}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-    </>
+        </span>
+        <select
+          value={effectiveCollection || 'all'}
+          onChange={(e) => {
+            patchParams({ collection: e.target.value === 'all' ? '' : e.target.value });
+            setMobileFiltersOpen(false);
+          }}
+          className="w-full rounded-full border-0 bg-[#eef8f6] px-4 py-2.5 text-[15px] font-semibold text-[#222222] focus:outline-none focus:ring-2 focus:ring-teal/30"
+        >
+          {COLLECTION_OPTIONS.map((item) => (
+            <option key={item.id} value={item.id === 'all' ? 'all' : item.value}>
+              {item.label}
+            </option>
+          ))}
+        </select>
+      </label>
+      <label className="flex min-w-0 flex-col gap-1.5">
+        <span className="text-[11px] font-bold uppercase tracking-[0.12em] text-[#6b7280]">
+          Sort by
+        </span>
+        <select
+          value={sort}
+          onChange={(e) => patchParams({ sort: e.target.value })}
+          className="w-full rounded-full border-0 bg-[#eef8f6] px-4 py-2.5 text-[15px] font-semibold text-[#222222] focus:outline-none focus:ring-2 focus:ring-teal/30"
+        >
+          {SORT_OPTIONS.map((opt) => (
+            <option key={opt.id} value={opt.id}>
+              {opt.label}
+            </option>
+          ))}
+        </select>
+      </label>
+    </div>
   );
 
   return (
     <div className="bg-white">
       <div className="mx-auto max-w-[1400px] px-5 py-14 md:px-8 md:py-20 lg:px-10">
         <FadeUp>
-          <p className="mb-3 text-[13px] font-bold uppercase tracking-[0.16em] text-teal">Shop</p>
-          <h1 className="text-[clamp(2.25rem,4vw,3.5rem)] font-bold leading-[1.1] tracking-[-0.03em] text-[#222222]">
-            All Products
+          <h1 className="text-center text-[clamp(2.25rem,4vw,3.5rem)] font-bold leading-[1.1] tracking-[-0.03em] text-[#222222]">
+            Shop
           </h1>
-          <p className="mt-4 max-w-xl text-[17px] leading-relaxed text-[#4a5560] md:text-[18px]">
-            Five individual formulas and six curated combos — eleven essentials in one place.
-          </p>
         </FadeUp>
 
-        {/* Desktop toolbar */}
-        <div className="mt-10 hidden items-start justify-between gap-6 lg:flex">
-          <div className="min-w-0 flex-1">{FiltersBody}</div>
-          <div className="shrink-0 pt-7">
-            <label className="mb-2 block text-[12px] font-bold uppercase tracking-[0.14em] text-[#6b7280]">
-              Sort by
-            </label>
-            <select
-              value={sort}
-              onChange={(e) => patchParams({ sort: e.target.value })}
-              className="min-w-[220px] rounded-full border-0 bg-[#eef8f6] px-5 py-2.5 text-[15px] font-semibold text-[#222222] focus:outline-none focus:ring-2 focus:ring-teal/30"
-            >
-              {SORT_OPTIONS.map((opt) => (
-                <option key={opt.id} value={opt.id}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
+        <div className="mt-8 hidden lg:block">{FiltersBody}</div>
 
         {/* Mobile toolbar */}
         <div className="mt-8 flex gap-3 lg:hidden">
@@ -375,7 +337,7 @@ export default function Shop() {
           </div>
         )}
 
-        <div className="mt-10 md:mt-12">
+        <div className="mt-8 md:mt-10">
           {loading ? (
             <ProductSkeleton count={8} />
           ) : error ? (

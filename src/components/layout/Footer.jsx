@@ -4,9 +4,9 @@ import Logo from '../ui/Logo';
 import { BUSINESS } from '../../data/business';
 
 const aboutLinks = [
-  { label: 'Our Story', to: '/about#story' },
-  { label: 'Our Philosophy', to: '/about#philosophy' },
-  { label: 'Sustainability', to: '/about#sustainability' },
+  { label: 'Our Story', to: '/about#voices' },
+  { label: 'Our Philosophy', to: '/about#why' },
+  { label: 'Sustainability', to: '/about#science' },
 ];
 
 const serviceLinks = [
@@ -42,7 +42,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 gap-12 sm:grid-cols-2 lg:grid-cols-5 lg:gap-10">
           <div className="lg:col-span-2">
             <Logo variant="footer" />
-            <p className="mt-5 max-w-sm text-[16px] leading-relaxed text-[#3d4a52] md:text-[17px]">
+            <p className="mt-5 max-w-xl text-[16px] leading-relaxed text-[#3d4a52] md:text-[17px]">
               Since {BUSINESS.foundedYear}, dermatologically inspired formulas for
               pigmentation, uneven tone, and blemish-prone areas.
             </p>
@@ -58,13 +58,7 @@ export default function Footer() {
               </li>
               <li className="flex items-start gap-2.5">
                 <MapPin size={16} className="mt-0.5 shrink-0 text-teal" strokeWidth={1.75} />
-                <span className="leading-relaxed">
-                  {BUSINESS.addressLines.map((line) => (
-                    <span key={line} className="block">
-                      {line}
-                    </span>
-                  ))}
-                </span>
+                <span className="max-w-xl leading-relaxed">{BUSINESS.address}</span>
               </li>
             </ul>
           </div>
@@ -105,9 +99,6 @@ export default function Footer() {
                   <FooterLink to={link.to}>{link.label}</FooterLink>
                 </li>
               ))}
-              <li>
-                <FooterLink to="/admin/login">Admin</FooterLink>
-              </li>
             </ul>
           </div>
         </div>

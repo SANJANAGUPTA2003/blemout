@@ -27,16 +27,10 @@ export default function ExploreMoreProducts() {
     <section className="relative bg-white py-16 md:py-24">
       <div className="mx-auto max-w-[1520px] px-5 md:px-8 lg:px-10 xl:px-12">
         <FadeUp>
-          <div className="mb-10 max-w-xl md:mb-12">
-            <p className="mb-3 text-[12px] font-bold uppercase tracking-[0.16em] text-teal">
-              Discover
-            </p>
+          <div className="mb-10 text-center md:mb-12">
             <h2 className="text-[36px] font-bold leading-[1.1] tracking-[-0.03em] text-[#222222] md:text-[44px] lg:text-[48px]">
               Explore More Products
             </h2>
-            <p className="mt-4 text-[16px] leading-relaxed text-[#4a5560]">
-              The full BLEMOUT lineup — browse calmly, one page at a time.
-            </p>
           </div>
         </FadeUp>
 

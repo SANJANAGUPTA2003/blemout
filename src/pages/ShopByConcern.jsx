@@ -19,24 +19,22 @@ export default function ShopByConcern() {
           </p>
         </FadeUp>
 
-        <div className="mt-12 grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-5 md:gap-8">
+        <div className="mt-12 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5 md:gap-6">
           {CONCERNS.map((concern, index) => (
             <FadeUp key={concern.id} delay={index * 0.04}>
-              <Link to={`/shop-by-concern/${concern.id}`} className="group block text-center">
-                <div className="mx-auto aspect-square w-full max-w-[200px] overflow-hidden rounded-full bg-[#f4f7f6]">
+              <Link to={`/shop-by-concern/${concern.id}`} className="group block">
+                <div className="aspect-square w-full overflow-hidden bg-[#f4f7f6]">
                   <img
                     src={concern.image}
                     alt={concern.name}
-                    width="400"
-                    height="400"
+                    width="800"
+                    height="800"
                     loading="lazy"
                     decoding="async"
-                    className="h-full w-full object-cover transition-transform duration-500 [@media(hover:hover)]:group-hover:scale-[1.05]"
+                    className="h-full w-full object-cover transition-transform duration-500 [@media(hover:hover)]:group-hover:scale-[1.03]"
                   />
                 </div>
-                <h2 className="mt-4 text-[15px] font-bold tracking-[-0.02em] text-[#222222] md:text-[16px] group-hover:text-dark-teal">
-                  {concern.name}
-                </h2>
+                <span className="sr-only">{concern.name}</span>
               </Link>
             </FadeUp>
           ))}

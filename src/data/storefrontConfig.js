@@ -65,6 +65,20 @@ export const COMBO_MEDIA = {
   },
 };
 
+export const PRODUCT_DISPLAY_NAMES = {
+  [PRODUCT_SLUGS.facewash]: 'Face Wash',
+  [PRODUCT_SLUGS.serum]: 'Serum',
+  [PRODUCT_SLUGS.moisturizer]: 'Moisturizer',
+  [PRODUCT_SLUGS.sunscreen]: 'Sunscreen',
+  [PRODUCT_SLUGS.repairCream]: 'Blemish Cream',
+};
+
+export function getComboIncludedLabels(slug) {
+  return (COMBO_MEDIA[slug]?.included || []).map(
+    (itemSlug) => PRODUCT_DISPLAY_NAMES[itemSlug] || itemSlug
+  );
+}
+
 const FOLDER_BY_SLUG = {
   [PRODUCT_SLUGS.facewash]: '/products/facewash',
   [PRODUCT_SLUGS.serum]: '/products/serum',
@@ -185,15 +199,47 @@ export const MEGA_MENUS = {
     label: 'SHOP',
     to: '/shop',
     links: [
-      { label: 'View All', to: '/shop' },
+      { label: 'Shop All', to: '/shop' },
       { label: 'Individual Products', to: '/shop?type=individual' },
       { label: 'Combos', to: '/shop?type=combo' },
-      { label: 'Shop by Concern', to: '/shop-by-concern' },
       { label: 'Face Wash', to: '/shop?category=face-wash' },
       { label: 'Serum', to: '/shop?category=serum' },
       { label: 'Moisturizer', to: '/shop?category=moisturizer' },
       { label: 'Sunscreen', to: '/shop?category=sunscreen' },
       { label: 'Blemish Cream', to: '/shop?category=blemish-cream' },
+      { label: 'Shop by Concern', to: '/shop-by-concern' },
+      { label: 'New', to: '/new' },
+      { label: 'Best Sellers', to: '/best-sellers' },
+      { label: 'Limited Picks', to: '/limited-picks' },
+    ],
+    columns: [
+      {
+        heading: 'SHOP',
+        links: [
+          { label: 'Shop All', to: '/shop' },
+          { label: 'Individual Products', to: '/shop?type=individual' },
+          { label: 'Combos', to: '/shop?type=combo' },
+        ],
+      },
+      {
+        heading: 'PRODUCTS',
+        links: [
+          { label: 'Face Wash', to: '/shop?category=face-wash' },
+          { label: 'Serum', to: '/shop?category=serum' },
+          { label: 'Moisturizer', to: '/shop?category=moisturizer' },
+          { label: 'Sunscreen', to: '/shop?category=sunscreen' },
+          { label: 'Blemish Cream', to: '/shop?category=blemish-cream' },
+        ],
+      },
+      {
+        heading: 'DISCOVER',
+        links: [
+          { label: 'Shop by Concern', to: '/shop-by-concern' },
+          { label: 'New', to: '/new' },
+          { label: 'Best Sellers', to: '/best-sellers' },
+          { label: 'Limited Picks', to: '/limited-picks' },
+        ],
+      },
     ],
     cards: [],
   },
@@ -302,7 +348,7 @@ export const CONCERNS = [
     id: 'dryness-dehydration',
     name: 'Dryness & Dehydration',
     description: 'Hydrating steps that support comfortable, softer-feeling skin.',
-    image: '/home/concerns/dryness-dehydration.webp',
+    image: '/home/concerns/dryness-dehydration.jpg',
     productSlugs: [
       PRODUCT_SLUGS.moisturizer,
       PRODUCT_SLUGS.facewash,
@@ -315,7 +361,7 @@ export const CONCERNS = [
     name: 'Dullness & Uneven Skin Tone',
     description:
       'Brightening-support routines designed for a more even-looking, radiant appearance.',
-    image: '/home/concerns/dullness-uneven-tone.webp',
+    image: '/home/concerns/dullness-uneven-tone.jpg',
     productSlugs: [
       PRODUCT_SLUGS.serum,
       PRODUCT_SLUGS.facewash,

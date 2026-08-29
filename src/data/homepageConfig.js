@@ -14,12 +14,18 @@ export const HOMEPAGE_ANNOUNCEMENTS = [
 
 export const HOMEPAGE_HERO_SLIDES = [
   {
-    id: 'hero-landing',
+    id: 'hero-landing-1',
     image: '/hero/blemout-landing-hero.png',
     alt: 'BLEMOUT Advanced Sun Defence everyday — SPF 50+ moisturiser radiance',
-    to: '/shop/blemout-enviro-shield-sunscreen',
-    fit: 'contain',
-    position: 'center',
+    to: '/shop',
+    bg: '#8ec8ef',
+  },
+  {
+    id: 'hero-landing-2',
+    image: '/hero/blemout-landing-hero-2.jpg',
+    alt: "BLEMOUT — your skin's complete love story, 12% off on combo",
+    to: '/limited-picks',
+    bg: '#d8efe9',
   },
 ];
 
@@ -84,13 +90,13 @@ export const HOMEPAGE_CONCERNS = [
   {
     id: 'dryness-dehydration',
     name: 'Dryness & Dehydration',
-    image: '/home/concerns/dryness-dehydration.webp',
+    image: '/home/concerns/dryness-dehydration.jpg',
     to: '/shop/blemout-hydra-glow-water-creme',
   },
   {
     id: 'dullness-uneven-tone',
     name: 'Dullness & Uneven Skin Tone',
-    image: '/home/concerns/dullness-uneven-tone.webp',
+    image: '/home/concerns/dullness-uneven-tone.jpg',
     to: '/shop/blemout-advanced-blemishes-repair-serum-30ml',
   },
   {

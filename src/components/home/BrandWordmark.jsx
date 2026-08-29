@@ -1,11 +1,9 @@
-import { BUSINESS } from '../../data/business';
-
 export default function BrandWordmark({ className = '' }) {
   return (
     <section className={`overflow-hidden bg-white ${className}`}>
-      <div className="mx-auto max-w-[1400px] px-5 py-14 text-center md:px-8 md:py-20 lg:px-10">
-        <p className="mb-6 text-[11px] font-semibold uppercase tracking-[0.28em] text-teal md:mb-8 md:text-[12px]">
-          Since {BUSINESS.foundedYear} · Care for clearer-looking skin
+      <div className="mx-auto max-w-[1400px] px-5 py-14 text-center md:px-8 md:py-16 lg:px-10">
+        <p className="mb-6 text-[12px] font-bold uppercase tracking-[0.18em] text-[#4f9fc4] md:mb-8 md:text-[13px]">
+          Science Behind the Care
         </p>
         <div
           className="inline-flex max-w-full items-center justify-center gap-[clamp(12px,2vw,32px)]"

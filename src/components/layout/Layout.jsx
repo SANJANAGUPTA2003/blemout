@@ -3,6 +3,7 @@ import AnnouncementBar from './AnnouncementBar';
 import Navbar from './Navbar';
 import Footer from './Footer';
 import BrandWordmark from '../home/BrandWordmark';
+import HomeBrandClaim from '../home/HomeBrandClaim';
 import ScrollToTop from '../ScrollToTop';
 import CustomCursor from '../CustomCursor';
 import CartDrawer from '../CartDrawer';
@@ -28,6 +29,7 @@ export default function Layout() {
           <Outlet />
         </main>
       </ProductProvider>
+      <HomeBrandClaim />
       <BrandWordmark />
       <Footer />
       <CartDrawer />

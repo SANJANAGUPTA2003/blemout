@@ -70,16 +70,10 @@ export default function HomeBestSellers() {
     <section className="relative z-10 bg-white py-16 md:py-24">
       <div className="mx-auto max-w-[1520px] px-5 md:px-8 lg:px-10 xl:px-12">
         <FadeUp>
-          <div className="mb-10 max-w-xl md:mb-12">
-            <p className="mb-3 text-[12px] font-bold uppercase tracking-[0.16em] text-teal">
-              Bestsellers
-            </p>
-            <h2 className="text-[36px] font-bold leading-[1.1] tracking-[-0.03em] text-[#222222] md:text-[44px] lg:text-[48px]">
+          <div className="mb-10 text-center md:mb-12">
+            <h2 className="text-[36px] font-bold leading-[1.1] tracking-[-0.03em] text-[#222222] md:text-[48px] lg:text-[56px]">
               Best Sellers
             </h2>
-            <p className="mt-4 text-[16px] leading-relaxed text-[#4a5560]">
-              Most-loved BLEMOUT picks — browse calmly, one page at a time.
-            </p>
           </div>
         </FadeUp>
 

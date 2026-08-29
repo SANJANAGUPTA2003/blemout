@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Star } from 'lucide-react';
 import ProductImage from './ProductImage';
 import Button from './Button';
-import { formatPrice } from '../../utils/format';
+import PriceDisplay from './PriceDisplay';
 import { productPath } from '../../data/productImages';
 import {
   getBenefitLine,
@@ -48,7 +48,7 @@ function ProductCard({ product }) {
             className="scale-[1.04]"
           />
           {badge && (
-            <span className="absolute left-3 top-3 z-10 rounded-[2px] bg-white/95 px-2.5 py-1.5 text-[11px] font-bold tracking-[0.12em] text-[#222222]">
+            <span className="absolute left-3 top-3 z-10 rounded-[2px] bg-[#6db6d0] px-2.5 py-1.5 text-[11px] font-bold tracking-[0.12em] text-white">
               {badge}
             </span>
           )}
@@ -74,14 +74,8 @@ function ProductCard({ product }) {
           </p>
         )}
 
-        <div className="mt-3.5 flex flex-wrap items-baseline gap-2.5">
-          <p className="text-[clamp(1.2rem,1.55vw,1.45rem)] font-bold text-[#222222]">
-            {formatPrice(sellingPrice)}
-          </p>
-          {mrp && <p className="text-[15px] text-[#6b7280] line-through md:text-[16px]">{formatPrice(mrp)}</p>}
-          {discount > 0 && (
-            <p className="text-[13px] font-semibold text-teal md:text-[14px]">{discount}% off</p>
-          )}
+        <div className="mt-3.5">
+          <PriceDisplay sellingPrice={sellingPrice} mrp={mrp} discount={discount} />
         </div>
 
         <div className="mt-auto pt-5">
