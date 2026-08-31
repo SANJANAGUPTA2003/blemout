@@ -6,7 +6,7 @@ import { HOMEPAGE_HERO_SLIDES } from '../../data/homepageConfig';
 const INTERVAL_MS = 5000;
 const TRANSITION_MS = 600;
 
-/** Two landing banners in an exact 16:9 frame with a horizontal autoplay slide. */
+/** Full-bleed landing banners — the image is the section, with no letterbox frame. */
 export default function HeroCarousel() {
   const [index, setIndex] = useState(0);
   const count = HOMEPAGE_HERO_SLIDES.length;
@@ -24,10 +24,10 @@ export default function HeroCarousel() {
   }, [count]);
 
   return (
-    <section className="relative z-0 w-full overflow-hidden">
-      <div className="relative w-full overflow-hidden" style={{ aspectRatio: '16 / 9' }}>
+    <section className="relative z-0 w-full overflow-hidden bg-white">
+      <div className="relative w-full overflow-hidden">
         <div
-          className="hero-slideshow-track flex h-full w-full"
+          className="hero-slideshow-track flex w-full"
           style={{
             transform: `translate3d(-${index * 100}%, 0, 0)`,
             transition: `transform ${TRANSITION_MS}ms cubic-bezier(0.25, 0.1, 0.25, 1)`,
@@ -39,7 +39,7 @@ export default function HeroCarousel() {
               to={hero.to}
               aria-label={hero.alt}
               tabIndex={i === index ? 0 : -1}
-              className="relative h-full w-full min-w-full shrink-0 cursor-pointer overflow-hidden"
+              className="relative block w-full min-w-full shrink-0 cursor-pointer overflow-hidden"
             >
               <img
                 src={hero.image}
@@ -51,7 +51,7 @@ export default function HeroCarousel() {
                 fetchPriority={i === 0 ? 'high' : 'auto'}
                 sizes="100vw"
                 draggable={false}
-                className="absolute inset-0 h-full w-full object-cover object-center"
+                className="block h-auto w-full"
               />
             </Link>
           ))}

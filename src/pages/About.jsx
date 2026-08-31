@@ -66,26 +66,18 @@ const aboutSchema = {
   },
 };
 
-function VoiceCard({ name, role, image, alt, reverse = false }) {
+function VoiceBanner({ image, alt }) {
   return (
-    <article className="grid items-center gap-8 md:grid-cols-2 lg:gap-12">
-      <div className={`overflow-hidden bg-[#f4f8f7] ${reverse ? 'md:order-2' : ''}`}>
-        <img
-          src={image}
-          alt={alt}
-          width="1600"
-          height="900"
-          loading="lazy"
-          decoding="async"
-          className="h-auto w-full object-contain"
-        />
-      </div>
-      <div className={reverse ? 'md:order-1' : ''}>
-        <p className="text-[12px] font-bold uppercase tracking-[0.16em] text-teal">{role}</p>
-        <h2 className="mt-3 text-[clamp(1.85rem,3.4vw,2.75rem)] font-bold tracking-[-0.03em] text-[#222222]">
-          {name}
-        </h2>
-      </div>
+    <article className="w-full overflow-hidden bg-white">
+      <img
+        src={image}
+        alt={alt}
+        width="1920"
+        height="1080"
+        loading="lazy"
+        decoding="async"
+        className="h-auto w-full object-cover object-center"
+      />
     </article>
   );
 }
@@ -111,8 +103,8 @@ export default function About() {
         schema={aboutSchema}
       />
 
-      <section id="voices" className="scroll-mt-28 px-5 py-14 md:px-8 md:py-20 lg:px-10">
-        <div className="mx-auto max-w-[1400px] space-y-20 md:space-y-28">
+      <section id="voices" className="scroll-mt-28">
+        <div className="px-5 py-14 md:px-8 md:py-16 lg:px-10">
           <FadeUp>
             <div className="mx-auto max-w-3xl text-center">
               <h1 className="text-[clamp(2.1rem,4.2vw,3.4rem)] font-bold tracking-[-0.04em] text-[#222222]">
@@ -120,25 +112,17 @@ export default function About() {
               </h1>
             </div>
           </FadeUp>
+        </div>
 
-          <FadeUp>
-            <VoiceCard
-              name="Raj Vilecha"
-              role="Founder, BLEMOUT"
-              image="/about/raj-vilecha.png"
-              alt="Raj Vilecha, Founder of BLEMOUT"
-            />
-          </FadeUp>
-
-          <FadeUp>
-            <VoiceCard
-              name="Vinod Jindal"
-              role="Co-Founder, BLEMOUT"
-              image="/about/vinod-jindal.png"
-              alt="Vinod Jindal, Co-Founder of BLEMOUT"
-              reverse
-            />
-          </FadeUp>
+        <div className="flex flex-col gap-16 md:gap-20">
+          <VoiceBanner
+            image="/about/raj-vilecha.png"
+            alt="A message to everyone who loves their skin"
+          />
+          <VoiceBanner
+            image="/about/vinod-jindal.png"
+            alt="A commitment to better skin, every day"
+          />
         </div>
       </section>
 
