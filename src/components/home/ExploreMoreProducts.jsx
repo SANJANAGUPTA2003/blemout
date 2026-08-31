@@ -28,14 +28,12 @@ export default function ExploreMoreProducts() {
       <div className="mx-auto max-w-[1520px] px-5 md:px-8 lg:px-10 xl:px-12">
         <FadeUp>
           <div className="mb-10 text-center md:mb-12">
-            <h2 className="text-[36px] font-bold leading-[1.1] tracking-[-0.03em] text-[#222222] md:text-[44px] lg:text-[48px]">
-              Explore More Products
-            </h2>
+            <h2 className="section-heading">Explore More Products</h2>
           </div>
         </FadeUp>
 
         {loading ? (
-          <div className="grid grid-cols-2 gap-5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 md:gap-6 lg:gap-8">
+          <div className="grid grid-cols-2 gap-5 md:grid-cols-3 lg:grid-cols-4 md:gap-6 lg:gap-8">
             {Array.from({ length: 4 }).map((_, index) => (
               <div key={`explore-skeleton-${index}`} className="animate-pulse">
                 <div className="aspect-[4/5] w-full rounded-sm bg-[#eef2f1]" />

@@ -10,9 +10,7 @@ export default function HomeTestimonials() {
       <div className="mx-auto max-w-[1400px] px-5 md:px-8 lg:px-10">
         <FadeUp>
           <div className="mb-10 text-center md:mb-14">
-            <h2 className="text-[36px] font-bold leading-[1.1] tracking-[-0.03em] text-[#222222] md:text-[48px] lg:text-[56px]">
-              Testimonials
-            </h2>
+            <h2 className="section-heading">Testimonials</h2>
           </div>
         </FadeUp>
 

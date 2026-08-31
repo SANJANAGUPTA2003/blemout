@@ -41,8 +41,8 @@ export default function EditorialStory({
     <section className="py-14 md:py-20 bg-white">
       <div className="max-w-[1400px] mx-auto px-5 md:px-8 lg:px-10">
         <div
-          className={`grid lg:grid-cols-2 gap-8 lg:gap-14 xl:gap-20 items-center ${
-            reverse ? 'lg:[&>*:first-child]:order-2' : ''
+          className={`grid md:grid-cols-2 gap-8 md:gap-10 lg:gap-14 xl:gap-20 items-center ${
+            reverse ? 'md:[&>*:first-child]:order-2' : ''
           }`}
         >
           <FadeUp>

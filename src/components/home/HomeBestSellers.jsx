@@ -50,7 +50,7 @@ export default function HomeBestSellers() {
       <section className="bg-white py-16 md:py-24">
         <div className="mx-auto max-w-[1520px] px-5 md:px-8 lg:px-10 xl:px-12">
           <div className="mb-10 h-10 w-56 animate-pulse rounded bg-[#eef2f1]" />
-          <div className="grid grid-cols-2 gap-5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 md:gap-6 lg:gap-8">
+          <div className="grid grid-cols-2 gap-5 md:grid-cols-3 lg:grid-cols-4 md:gap-6 lg:gap-8">
             {Array.from({ length: 4 }).map((_, i) => (
               <div key={i} className="animate-pulse">
                 <div className="aspect-[4/5] rounded-sm bg-[#eef2f1]" />
@@ -71,9 +71,7 @@ export default function HomeBestSellers() {
       <div className="mx-auto max-w-[1520px] px-5 md:px-8 lg:px-10 xl:px-12">
         <FadeUp>
           <div className="mb-10 text-center md:mb-12">
-            <h2 className="text-[36px] font-bold leading-[1.1] tracking-[-0.03em] text-[#222222] md:text-[48px] lg:text-[56px]">
-              Best Sellers
-            </h2>
+            <h2 className="section-heading">Best Sellers</h2>
           </div>
         </FadeUp>
 

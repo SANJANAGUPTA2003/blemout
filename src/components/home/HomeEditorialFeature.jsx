@@ -23,22 +23,20 @@ export default function HomeEditorialFeature({
     <section className="bg-white py-14 md:py-20">
       <div className="mx-auto max-w-[1400px] px-5 md:px-8 lg:px-10">
         <div
-          className={`grid items-center gap-8 lg:grid-cols-2 lg:gap-14 xl:gap-20 ${
-            reverse ? 'lg:[&>*:first-child]:order-2' : ''
+          className={`grid items-center gap-8 md:grid-cols-2 md:gap-10 lg:gap-14 xl:gap-20 ${
+            reverse ? 'md:[&>*:first-child]:order-2' : ''
           }`}
         >
           <FadeUp>
-            <div className="aspect-square overflow-hidden bg-[#fafafa]">
-              <img
-                src={promotionalImage}
-                alt={product.name}
-                width="1400"
-                height="1400"
-                loading="lazy"
-                decoding="async"
-                className="h-full w-full object-contain"
-              />
-            </div>
+            <img
+              src={promotionalImage}
+              alt={product.name}
+              width="1400"
+              height="933"
+              loading="lazy"
+              decoding="async"
+              className="h-auto w-full max-w-full object-contain"
+            />
           </FadeUp>
 
           <FadeUp delay={0.08}>
@@ -48,7 +46,7 @@ export default function HomeEditorialFeature({
                   {eyebrow}
                 </p>
               )}
-              <h2 className="text-[32px] font-bold leading-[1.12] tracking-[-0.03em] text-[#222222] md:text-[40px] lg:text-[44px]">
+              <h2 className="text-[clamp(1.7rem,3.2vw,2.75rem)] font-bold leading-[1.12] tracking-[-0.03em] text-[#222222]">
                 {product.name}
               </h2>
               {summary && (

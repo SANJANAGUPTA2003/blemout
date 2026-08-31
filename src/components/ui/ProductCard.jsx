@@ -44,8 +44,8 @@ function ProductCard({ product }) {
             role="card"
             loading="lazy"
             fit="contain"
-            containerClass="aspect-[5/6] bg-[#f7faf9]"
-            className="scale-[1.04]"
+            containerClass="aspect-square"
+            className=""
           />
           {badge && (
             <span className="absolute left-3 top-3 z-10 rounded-[2px] bg-[#9fd9cf] px-2.5 py-1.5 text-[11px] font-bold tracking-[0.12em] text-[#1f5c56]">
@@ -57,7 +57,10 @@ function ProductCard({ product }) {
 
       <div className="flex flex-1 flex-col pt-4 text-left md:pt-5">
         <Link to={path}>
-          <h3 className="min-h-[2.8em] text-[clamp(1.1rem,1.45vw,1.4rem)] font-semibold leading-snug tracking-[-0.01em] text-[#222222] line-clamp-2 [@media(hover:hover)]:group-hover:text-dark-teal">
+          <h3
+            title={product.name}
+            className="min-h-[3.6em] text-[clamp(16px,1.2vw,18px)] font-semibold leading-snug tracking-[-0.01em] text-[#222222] [@media(hover:hover)]:group-hover:text-dark-teal"
+          >
             {product.name}
           </h3>
         </Link>

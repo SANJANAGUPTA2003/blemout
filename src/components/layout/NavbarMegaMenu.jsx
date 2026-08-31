@@ -243,7 +243,7 @@ export default function NavbarMegaMenu({ mobile = false, onNavigate, panelHostRe
             <div key={key} className="border-b border-[#eef1f0]">
               <button
                 type="button"
-                className="flex w-full items-center justify-between py-3.5 text-left text-[15px] font-semibold uppercase tracking-[0.06em] text-[#222222]"
+                className="flex w-full items-center justify-between py-3.5 text-left text-[15px] font-bold uppercase tracking-[0.02em] text-[#222222]"
                 aria-expanded={isOpen}
                 onClick={() => handleLabelClick(key, menu.to)}
               >
@@ -300,7 +300,7 @@ export default function NavbarMegaMenu({ mobile = false, onNavigate, panelHostRe
 
   return (
     <>
-      <div ref={buttonsRef} className="hidden items-center gap-x-5 xl:flex">
+      <div ref={buttonsRef} className="hidden items-center gap-x-4 xl:flex 2xl:gap-x-[18px]">
         {MENU_KEYS.map((key) => {
           const menu = MEGA_MENUS[key];
           const isOpen = openKey === key;
@@ -308,7 +308,7 @@ export default function NavbarMegaMenu({ mobile = false, onNavigate, panelHostRe
             <button
               key={key}
               type="button"
-              className={`shrink-0 whitespace-nowrap py-1 text-[13px] font-semibold uppercase tracking-[0.06em] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal 2xl:text-[14px] ${
+              className={`shrink-0 whitespace-nowrap py-1 text-[14px] font-bold uppercase tracking-[0.02em] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal 2xl:text-[15px] ${
                 isOpen ? 'text-teal' : 'text-[#26313D] hover:text-dark-teal'
               }`}
               aria-expanded={isOpen}

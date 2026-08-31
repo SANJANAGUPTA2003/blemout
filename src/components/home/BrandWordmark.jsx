@@ -2,7 +2,7 @@ export default function BrandWordmark({ className = '' }) {
   return (
     <section className={`overflow-hidden bg-white ${className}`}>
       <div className="mx-auto max-w-[1400px] px-5 py-14 text-center md:px-8 md:py-16 lg:px-10">
-        <p className="mb-6 text-[12px] font-bold uppercase tracking-[0.18em] text-[#4f9fc4] md:mb-8 md:text-[13px]">
+        <p className="mb-5 text-[clamp(1.35rem,2.4vw,2.15rem)] font-bold leading-[1.15] tracking-[-0.03em] text-[#222222] md:mb-7">
           Science Behind the Care
         </p>
         <div

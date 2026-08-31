@@ -68,8 +68,8 @@ const aboutSchema = {
 
 function VoiceCard({ name, role, image, alt, reverse = false }) {
   return (
-    <article className="grid items-center gap-8 lg:grid-cols-2 lg:gap-12">
-      <div className={`overflow-hidden bg-[#f4f8f7] ${reverse ? 'lg:order-2' : ''}`}>
+    <article className="grid items-center gap-8 md:grid-cols-2 lg:gap-12">
+      <div className={`overflow-hidden bg-[#f4f8f7] ${reverse ? 'md:order-2' : ''}`}>
         <img
           src={image}
           alt={alt}
@@ -80,7 +80,7 @@ function VoiceCard({ name, role, image, alt, reverse = false }) {
           className="h-auto w-full object-contain"
         />
       </div>
-      <div className={reverse ? 'lg:order-1' : ''}>
+      <div className={reverse ? 'md:order-1' : ''}>
         <p className="text-[12px] font-bold uppercase tracking-[0.16em] text-teal">{role}</p>
         <h2 className="mt-3 text-[clamp(1.85rem,3.4vw,2.75rem)] font-bold tracking-[-0.03em] text-[#222222]">
           {name}

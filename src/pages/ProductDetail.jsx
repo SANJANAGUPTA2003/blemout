@@ -191,8 +191,8 @@ export default function ProductDetail() {
 
   if (loading) {
     return (
-      <div className="max-w-[1400px] mx-auto px-4 md:px-6 lg:px-8 py-8 md:py-12">
-        <div className="grid lg:grid-cols-[1.15fr_0.85fr] gap-8 lg:gap-12">
+      <div className="mx-auto max-w-[1400px] px-5 py-10 min-[1920px]:max-w-[1600px] md:px-8 md:py-12 lg:px-10">
+        <div className="grid lg:grid-cols-[1.15fr_0.85fr] gap-8 md:grid-cols-2 md:gap-10 lg:gap-12">
           <div className="aspect-square rounded-sm bg-[#eef2f1] animate-pulse" />
           <div className="space-y-4 pt-2">
             <div className="h-4 w-24 rounded bg-[#eef2f1] animate-pulse" />
@@ -309,12 +309,12 @@ export default function ProductDetail() {
 
   return (
     <div className="bg-white">
-      <div className="max-w-[1400px] mx-auto px-4 md:px-6 lg:px-8 py-8 md:py-12">
+      <div className="mx-auto max-w-[1400px] px-5 py-10 min-[1920px]:max-w-[1600px] md:px-8 md:py-12 lg:px-10">
         <FadeUp>
-          <div className="grid items-start gap-8 lg:grid-cols-2 lg:gap-12">
+          <div className="grid items-start gap-8 md:grid-cols-2 lg:gap-12">
             <div>
               <div
-                className={`relative flex items-center justify-center overflow-hidden border-0 bg-[#fafafa] ${
+                className={`relative flex items-center justify-center overflow-hidden border-0 ${
                   isCombo
                     ? 'h-[min(58vw,680px)] max-h-[680px] min-h-[240px] w-full'
                     : 'aspect-square'

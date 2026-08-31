@@ -283,17 +283,17 @@ export default function Shop() {
 
   return (
     <div className="bg-white">
-      <div className="mx-auto max-w-[1400px] px-5 py-14 md:px-8 md:py-20 lg:px-10">
+      <div className="mx-auto max-w-[1400px] px-5 py-14 min-[1920px]:max-w-[1680px] md:px-8 md:py-20 lg:px-10">
         <FadeUp>
           <h1 className="text-center text-[clamp(2.25rem,4vw,3.5rem)] font-bold leading-[1.1] tracking-[-0.03em] text-[#222222]">
             Shop
           </h1>
         </FadeUp>
 
-        <div className="mt-8 hidden lg:block">{FiltersBody}</div>
+        <div className="mt-8 hidden md:block">{FiltersBody}</div>
 
-        {/* Mobile toolbar */}
-        <div className="mt-8 flex gap-3 lg:hidden">
+        {/* Compact toolbar on small screens */}
+        <div className="mt-8 flex gap-3 md:hidden">
           <button
             type="button"
             onClick={() => setMobileFiltersOpen(true)}
@@ -360,7 +360,7 @@ export default function Shop() {
               </Button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 md:gap-x-8 md:gap-y-16">
+            <div className="grid grid-cols-2 gap-x-4 gap-y-10 min-[768px]:grid-cols-3 xl:grid-cols-4 md:gap-x-8 md:gap-y-16">
               {filtered.map((product) => (
                 <ProductCard key={product._id || product.slug} product={product} />
               ))}
@@ -371,7 +371,7 @@ export default function Shop() {
 
       {/* Mobile filter sheet */}
       {mobileFiltersOpen && (
-        <div className="fixed inset-0 z-[90] lg:hidden">
+        <div className="fixed inset-0 z-[90] md:hidden">
           <button
             type="button"
             className="absolute inset-0 bg-black/40"

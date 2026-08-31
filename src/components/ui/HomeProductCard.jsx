@@ -53,8 +53,8 @@ function HomeProductCard({
           role="card"
           loading="lazy"
           fit="contain"
-          containerClass="aspect-[4/5] bg-[#f7faf9] p-4 sm:p-5 lg:p-6"
-          className="scale-[1.02]"
+          containerClass="aspect-square"
+          className=""
         />
         {badge && (
           <span className="absolute left-3 top-3 z-10 rounded-[2px] bg-[#9fd9cf] px-2.5 py-1.5 text-[11px] font-bold tracking-[0.12em] text-[#1f5c56]">
@@ -65,7 +65,10 @@ function HomeProductCard({
 
       <div className="flex flex-1 flex-col pt-4 text-left md:pt-5">
         <Link to={path}>
-          <h3 className="text-[15px] font-semibold leading-snug tracking-[-0.01em] text-[#222222] sm:text-[16px] lg:text-[17px] line-clamp-3 [@media(hover:hover)]:group-hover:text-dark-teal">
+          <h3
+            title={name}
+            className="min-h-[3.6em] text-[clamp(16px,1.2vw,18px)] font-semibold leading-snug tracking-[-0.01em] text-[#222222] [@media(hover:hover)]:group-hover:text-dark-teal"
+          >
             {name}
           </h3>
         </Link>

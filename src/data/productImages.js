@@ -66,18 +66,12 @@ export function getHoverImage(product) {
 function derivative(src, role) {
   if (!src) return '';
 
-  // Numbered product JPGs are served as JPEG so newly copied finals are not
-  // hidden by stale webp derivatives while those files are locked on Windows.
-  if (/^\/products\/(facewash|moisturizer|serum|sunscreen|repair-cream)\/\d+\.jpg$/i.test(src)) {
-    return '';
-  }
-
   if (/^\/products\/[^/]+\/\d+\.jpg$/i.test(src)) {
     return src.replace(/\.jpg$/i, `-${role}.webp`);
   }
 
   if (/^\/products\/combos\/.+\.jpg$/i.test(src)) {
-    return '';
+    return src.replace(/\.jpg$/i, `-${role}.webp`);
   }
 
   if (/^\/home\/product-details\/.+\.jpg$/i.test(src)) {

@@ -1,6 +1,6 @@
 export default function ProductSkeleton({ count = 3, className = '' }) {
   return (
-    <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 md:gap-x-10 gap-y-12 ${className}`}>
+    <div className={`grid grid-cols-2 gap-x-4 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 md:gap-x-8 md:gap-y-16 ${className}`}>
       {Array.from({ length: count }).map((_, index) => (
         <div key={`skeleton-${index}`} className="animate-pulse">
           <div className="aspect-square w-full rounded-sm bg-[#eef2f1]" />

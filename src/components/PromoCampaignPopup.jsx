@@ -5,8 +5,9 @@ import Button from './ui/Button';
 
 const DISMISS_KEY = 'blemout_promo_popup_dismissed';
 const START_KEY = 'blemout_promo_timer_started_at';
-/** Production delay: 120 seconds */
-const DELAY_MS = 120000;
+const SHOWN_KEY = 'blemout_promo_shown_count';
+/** Show at 30s, then 80s, then 120s from first eligible visit. */
+const SHOW_AT_MS = [30000, 80000, 120000];
 
 const BLOCKED = ['/cart', '/checkout', '/order-success', '/track-order', '/admin'];
 
@@ -16,7 +17,7 @@ function isBlockedPath(pathname) {
 
 /**
  * Global storefront promo popup.
- * Session-stable start timestamp — navigating eligible pages does not reset the 120s clock.
+ * Session-stable start timestamp. Shows at 30s, then 80s, then 120s if dismissed.
  * Timer starts when the customer first enters an eligible storefront page.
  */
 export default function PromoCampaignPopup({ blockedByOther }) {
@@ -25,7 +26,12 @@ export default function PromoCampaignPopup({ blockedByOther }) {
   const timerRef = useRef(null);
 
   const dismiss = useCallback(() => {
-    sessionStorage.setItem(DISMISS_KEY, '1');
+    const shown = Number(sessionStorage.getItem(SHOWN_KEY) || 0);
+    const next = shown + 1;
+    sessionStorage.setItem(SHOWN_KEY, String(next));
+    if (next >= SHOW_AT_MS.length) {
+      sessionStorage.setItem(DISMISS_KEY, '1');
+    }
     setReady(false);
   }, []);
 
@@ -40,13 +46,29 @@ export default function PromoCampaignPopup({ blockedByOther }) {
       sessionStorage.setItem(START_KEY, String(startedAt));
     }
 
-    const remaining = Math.max(0, DELAY_MS - (Date.now() - startedAt));
+    const shown = Number(sessionStorage.getItem(SHOWN_KEY) || 0);
+    if (shown >= SHOW_AT_MS.length) {
+      sessionStorage.setItem(DISMISS_KEY, '1');
+      return undefined;
+    }
+
+    const now = Date.now();
+    let target = null;
+    for (let i = shown; i < SHOW_AT_MS.length; i += 1) {
+      const at = startedAt + SHOW_AT_MS[i];
+      if (at > now + 40) {
+        target = at;
+        break;
+      }
+    }
+    if (target == null) return undefined;
 
     if (timerRef.current) window.clearTimeout(timerRef.current);
     timerRef.current = window.setTimeout(() => {
       if (sessionStorage.getItem(DISMISS_KEY) === '1') return;
+      if (isBlockedPath(window.location.pathname)) return;
       setReady(true);
-    }, remaining);
+    }, target - now);
 
     return () => {
       if (timerRef.current) {
@@ -54,7 +76,7 @@ export default function PromoCampaignPopup({ blockedByOther }) {
         timerRef.current = null;
       }
     };
-  }, [location.pathname]);
+  }, [location.pathname, ready]);
 
   const eligible =
     ready &&
@@ -88,7 +110,7 @@ export default function PromoCampaignPopup({ blockedByOther }) {
       onClick={dismiss}
     >
       <div
-        className="relative w-full max-w-lg overflow-hidden rounded-2xl bg-[#faf9f6] shadow-[0_20px_60px_rgba(0,0,0,0.22)]"
+      className="relative w-full max-w-lg max-h-[min(92vh,760px)] overflow-y-auto overflow-x-hidden rounded-2xl bg-[#faf9f6] shadow-[0_20px_60px_rgba(0,0,0,0.22)]"
         onClick={(e) => e.stopPropagation()}
       >
         <button

@@ -16,7 +16,7 @@ const utilityLinks = [
 ];
 
 const navLinkClass = ({ isActive }) =>
-  `relative inline-flex shrink-0 items-center py-1 text-[13px] font-semibold tracking-[0.06em] uppercase whitespace-nowrap transition-colors duration-250 2xl:text-[14px] ${
+  `relative inline-flex shrink-0 items-center py-1 text-[14px] font-bold tracking-[0.02em] uppercase whitespace-nowrap transition-colors duration-250 2xl:text-[15px] ${
     isActive
       ? 'text-teal after:absolute after:-bottom-1 after:left-0 after:right-0 after:h-[2px] after:bg-teal'
       : 'text-[#26313D] hover:text-dark-teal'
@@ -61,7 +61,7 @@ export default function Navbar() {
         <div className="grid h-[70px] grid-cols-[auto_1fr_auto] items-center gap-3 md:h-[76px] md:gap-5">
           <Logo variant="navbar" className="justify-self-start" />
 
-          <nav className="hidden min-w-0 flex-nowrap items-center justify-center gap-x-5 xl:flex">
+          <nav className="hidden min-w-0 flex-nowrap items-center justify-center gap-x-4 xl:flex 2xl:gap-x-[18px]">
             <NavbarMegaMenu panelHostRef={megaPanelRef} />
             {[...secondaryLinks, ...utilityLinks].map((link) => (
               <NavLink
@@ -130,7 +130,7 @@ export default function Navbar() {
               key={link.label}
               to={link.to}
               className={({ isActive }) =>
-                `block py-3 text-[15px] font-semibold uppercase tracking-[0.03em] transition-colors duration-250 ${
+                `block py-3 text-[15px] font-bold uppercase tracking-[0.02em] transition-colors duration-250 ${
                   isActive ? 'text-teal' : 'text-[#26313D] hover:text-dark-teal'
                 }`
               }
@@ -143,7 +143,7 @@ export default function Navbar() {
               key={link.label}
               to={link.to}
               className={({ isActive }) =>
-                `block py-3 text-[15px] font-semibold uppercase tracking-[0.03em] transition-colors duration-250 ${
+                `block py-3 text-[15px] font-bold uppercase tracking-[0.02em] transition-colors duration-250 ${
                   isActive ? 'text-teal' : 'text-[#26313D] hover:text-dark-teal'
                 }`
               }

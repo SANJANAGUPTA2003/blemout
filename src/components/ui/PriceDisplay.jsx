@@ -7,7 +7,7 @@ export default function PriceDisplay({ sellingPrice, mrp, discount = 0, size = '
   const isPdp = size === 'pdp';
 
   return (
-    <div className="flex flex-wrap items-baseline gap-x-2.5 gap-y-0.5">
+    <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1 sm:flex-nowrap">
       <span
         className={
           isPdp

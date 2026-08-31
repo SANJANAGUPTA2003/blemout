@@ -1,4 +1,4 @@
-import { memo, useState } from 'react';
+import { memo, useEffect, useRef, useState } from 'react';
 import ProductPlaceholder from './ProductPlaceholder';
 import { getResponsiveImage } from '../../data/productImages';
 
@@ -11,19 +11,35 @@ function ProductImage({
   size = 'md',
   fit = 'contain',
   role = 'card',
-  sizes = '(max-width: 640px) 82vw, (max-width: 1024px) 46vw, 420px',
+  sizes = '(max-width: 640px) 92vw, (max-width: 1024px) 46vw, 360px',
   loading = 'lazy',
   fetchPriority = 'auto',
-  width = 900,
-  height = 900,
+  width = 640,
+  height = 640,
 }) {
   const [failed, setFailed] = useState(false);
   const [hoverFailed, setHoverFailed] = useState(false);
+  const [hoverReady, setHoverReady] = useState(false);
+  const wrapRef = useRef(null);
 
   const canSwapOnHover = Boolean(hoverSrc && hoverSrc !== src && !hoverFailed);
   const fitClass = fit === 'cover' ? 'object-cover' : 'object-contain';
   const primary = getResponsiveImage(src, role);
   const hover = getResponsiveImage(hoverSrc, role);
+
+  useEffect(() => {
+    if (!canSwapOnHover) return undefined;
+    const el = wrapRef.current;
+    if (!el || typeof IntersectionObserver === 'undefined') return undefined;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) setHoverReady(true);
+      },
+      { rootMargin: '160px' }
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [canSwapOnHover]);
 
   if (!src || failed) {
     return (
@@ -39,11 +55,14 @@ function ProductImage({
 
   return (
     <div
+      ref={wrapRef}
       className={`relative w-full overflow-hidden border-0 bg-transparent ${
         containerClass.includes('aspect-') ? '' : 'aspect-square'
       } ${containerClass}`}
+      onPointerEnter={() => {
+        if (canSwapOnHover) setHoverReady(true);
+      }}
     >
-      {/* Hover layer is mounted immediately so the colourful image is cached before first hover */}
       <picture>
         {primary.srcSet && <source type="image/webp" srcSet={primary.srcSet} sizes={sizes} />}
         <img
@@ -55,12 +74,12 @@ function ProductImage({
           decoding="async"
           fetchPriority={fetchPriority}
           onError={() => setFailed(true)}
-          className={`relative z-0 block w-full h-full ${fitClass} transition-opacity duration-400 ease-out ${
+          className={`relative z-0 block h-full w-full ${fitClass} transition-opacity duration-400 ease-out ${
             canSwapOnHover ? '[@media(hover:hover)]:group-hover:opacity-0' : ''
           } ${className}`}
         />
       </picture>
-      {canSwapOnHover && (
+      {canSwapOnHover && hoverReady && (
         <picture>
           {hover.srcSet && <source type="image/webp" srcSet={hover.srcSet} sizes={sizes} />}
           <img
@@ -69,10 +88,10 @@ function ProductImage({
             aria-hidden="true"
             width={width}
             height={height}
-            loading="eager"
+            loading="lazy"
             decoding="async"
             onError={() => setHoverFailed(true)}
-            className={`absolute z-10 left-0 top-0 w-full h-full border-0 ${fitClass} opacity-0 transition-opacity duration-400 ease-out [@media(hover:hover)]:group-hover:opacity-100 ${className}`}
+            className={`absolute z-10 left-0 top-0 h-full w-full border-0 ${fitClass} opacity-0 transition-opacity duration-400 ease-out [@media(hover:hover)]:group-hover:opacity-100 ${className}`}
           />
         </picture>
       )}

@@ -1,11 +1,13 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { HOMEPAGE_HERO_SLIDES } from '../../data/homepageConfig';
 
-/** Two landing banners in an exact 16:9 frame with a horizontal slide. */
+const INTERVAL_MS = 5000;
+const TRANSITION_MS = 600;
+
+/** Two landing banners in an exact 16:9 frame with a horizontal autoplay slide. */
 export default function HeroCarousel() {
-  const navigate = useNavigate();
   const [index, setIndex] = useState(0);
   const count = HOMEPAGE_HERO_SLIDES.length;
 
@@ -13,25 +15,31 @@ export default function HeroCarousel() {
     setIndex((i) => (i + dir + count) % count);
   };
 
+  useEffect(() => {
+    if (count < 2) return undefined;
+    const id = window.setInterval(() => {
+      setIndex((i) => (i + 1) % count);
+    }, INTERVAL_MS);
+    return () => window.clearInterval(id);
+  }, [count]);
+
   return (
-    <section className="relative z-0 w-full overflow-hidden bg-black">
+    <section className="relative z-0 w-full overflow-hidden">
       <div className="relative w-full overflow-hidden" style={{ aspectRatio: '16 / 9' }}>
         <div
-          className="flex h-full w-full transition-transform duration-500 ease-[cubic-bezier(0.25,0.1,0.25,1)]"
-          style={{ transform: `translateX(-${index * 100}%)` }}
+          className="hero-slideshow-track flex h-full w-full"
+          style={{
+            transform: `translate3d(-${index * 100}%, 0, 0)`,
+            transition: `transform ${TRANSITION_MS}ms cubic-bezier(0.25, 0.1, 0.25, 1)`,
+          }}
         >
           {HOMEPAGE_HERO_SLIDES.map((hero, i) => (
-            <button
+            <Link
               key={hero.id}
-              type="button"
+              to={hero.to}
               aria-label={hero.alt}
-              onClick={() => {
-                navigate(hero.to);
-                window.requestAnimationFrame(() => {
-                  window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
-                });
-              }}
-              className="relative h-full w-full shrink-0 cursor-pointer overflow-hidden border-0 bg-transparent p-0"
+              tabIndex={i === index ? 0 : -1}
+              className="relative h-full w-full min-w-full shrink-0 cursor-pointer overflow-hidden"
             >
               <img
                 src={hero.image}
@@ -42,9 +50,10 @@ export default function HeroCarousel() {
                 decoding="async"
                 fetchPriority={i === 0 ? 'high' : 'auto'}
                 sizes="100vw"
+                draggable={false}
                 className="absolute inset-0 h-full w-full object-cover object-center"
               />
-            </button>
+            </Link>
           ))}
         </div>
 
@@ -54,6 +63,7 @@ export default function HeroCarousel() {
               type="button"
               aria-label="Previous landing image"
               onClick={(e) => {
+                e.preventDefault();
                 e.stopPropagation();
                 go(-1);
               }}
@@ -65,6 +75,7 @@ export default function HeroCarousel() {
               type="button"
               aria-label="Next landing image"
               onClick={(e) => {
+                e.preventDefault();
                 e.stopPropagation();
                 go(1);
               }}

@@ -29,6 +29,7 @@ img {
 
 html {
   scroll-behavior: smooth;
+  overflow-x: clip;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -43,10 +44,15 @@ html {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+
+  .hero-slideshow-track {
+    transition-duration: 600ms !important;
+  }
 }
 
 body {
   margin: 0;
+  overflow-x: clip;
   font-family: 'Noto Sans', 'Helvetica Neue', Helvetica, Arial, ui-sans-serif, system-ui, sans-serif;
   color: var(--color-text);
   background-color: var(--color-white);
@@ -82,6 +88,16 @@ p {
 
 #root {
   min-height: 100vh;
+  min-width: 0;
+  overflow-x: clip;
+}
+
+.section-heading {
+  font-size: clamp(1.85rem, 4.4vw, 3.5rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  color: #222222;
 }
 
 @media (pointer: fine) and (min-width: 1024px) {

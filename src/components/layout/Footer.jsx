@@ -39,8 +39,8 @@ export default function Footer() {
   return (
     <footer className="relative z-20 mt-auto border-t border-[#d7ebe8]/70 bg-[#F2FBFA]">
       <div className="mx-auto max-w-[1400px] px-5 py-16 md:px-8 md:py-20 lg:px-10">
-        <div className="grid grid-cols-1 gap-12 sm:grid-cols-2 lg:grid-cols-5 lg:gap-10">
-          <div className="lg:col-span-2">
+        <div className="grid grid-cols-2 gap-10 lg:grid-cols-5 lg:gap-10">
+          <div className="col-span-2">
             <Logo variant="footer" />
             <p className="mt-5 max-w-xl text-[16px] leading-relaxed text-[#3d4a52] md:text-[17px]">
               Since {BUSINESS.foundedYear}, dermatologically inspired formulas for
