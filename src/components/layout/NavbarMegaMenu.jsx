@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { MEGA_MENUS } from '../../data/storefrontConfig';
+import SmartImage from '../ui/SmartImage';
 
 const MENU_KEYS = ['shop', 'new', 'bestSellers', 'limitedPicks'];
 
@@ -191,15 +192,16 @@ export default function NavbarMegaMenu({ mobile = false, onNavigate, panelHostRe
                             className="group block min-w-0"
                           >
                             <div className="aspect-square overflow-hidden rounded-2xl bg-[#e8f4f1]">
-                              <img
+                              <SmartImage
                                 src={card.image}
                                 alt={card.label}
-                                width="640"
-                                height="640"
+                                role="card"
+                                width={640}
+                                height={640}
                                 className={`h-full w-full ${fitClass} transition-transform duration-500 ease-out [@media(hover:hover)]:group-hover:scale-[1.03]`}
                                 style={{ objectPosition: pos }}
-                                loading="eager"
-                                decoding="async"
+                                loading="lazy"
+                                sizes="(max-width: 1024px) 40vw, 18vw"
                               />
                             </div>
                             <p className="mt-3 text-[15px] font-semibold text-[#222222] md:text-[16px]">
@@ -267,12 +269,15 @@ export default function NavbarMegaMenu({ mobile = false, onNavigate, panelHostRe
                       {menu.cards.map((card) => (
                         <Link key={card.to} to={card.to} onClick={onNavigate} className="block">
                           <div className="aspect-square overflow-hidden rounded-xl bg-[#e8f4f1]">
-                            <img
+                            <SmartImage
                               src={card.image}
                               alt={card.label}
+                              role="card"
+                              width={640}
+                              height={640}
                               className="h-full w-full object-cover"
                               loading="lazy"
-                              decoding="async"
+                              sizes="42vw"
                             />
                           </div>
                           <p className="mt-2 text-[13px] font-semibold text-[#222222]">

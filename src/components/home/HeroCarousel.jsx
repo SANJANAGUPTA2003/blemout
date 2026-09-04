@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { HOMEPAGE_HERO_SLIDES } from '../../data/homepageConfig';
+import SmartImage from '../ui/SmartImage';
 
 const INTERVAL_MS = 5000;
 const TRANSITION_MS = 600;
@@ -9,18 +10,42 @@ const TRANSITION_MS = 600;
 /** Full-bleed landing banners — the image is the section, with no letterbox frame. */
 export default function HeroCarousel() {
   const [index, setIndex] = useState(0);
+  const [loaded, setLoaded] = useState(() => new Set([0]));
   const count = HOMEPAGE_HERO_SLIDES.length;
 
+  const mark = (i) => {
+    setLoaded((prev) => {
+      if (prev.has(i)) return prev;
+      const next = new Set(prev);
+      next.add(i);
+      return next;
+    });
+  };
+
   const go = (dir) => {
-    setIndex((i) => (i + dir + count) % count);
+    setIndex((i) => {
+      const next = (i + dir + count) % count;
+      mark(next);
+      mark((next + 1) % count);
+      return next;
+    });
   };
 
   useEffect(() => {
     if (count < 2) return undefined;
+    const warm = window.setTimeout(() => mark(1), 700);
     const id = window.setInterval(() => {
-      setIndex((i) => (i + 1) % count);
+      setIndex((i) => {
+        const next = (i + 1) % count;
+        mark(next);
+        mark((next + 1) % count);
+        return next;
+      });
     }, INTERVAL_MS);
-    return () => window.clearInterval(id);
+    return () => {
+      window.clearTimeout(warm);
+      window.clearInterval(id);
+    };
   }, [count]);
 
   return (
@@ -41,18 +66,21 @@ export default function HeroCarousel() {
               tabIndex={i === index ? 0 : -1}
               className="relative block w-full min-w-full shrink-0 cursor-pointer overflow-hidden"
             >
-              <img
-                src={hero.image}
-                alt={hero.alt}
-                width={1920}
-                height={1080}
-                loading={i === 0 ? 'eager' : 'lazy'}
-                decoding="async"
-                fetchPriority={i === 0 ? 'high' : 'auto'}
-                sizes="100vw"
-                draggable={false}
-                className="block h-auto w-full"
-              />
+              {loaded.has(i) ? (
+                <SmartImage
+                  src={hero.image}
+                  alt={hero.alt}
+                  role="hero"
+                  width={1920}
+                  height={1080}
+                  loading={i === 0 ? 'eager' : 'lazy'}
+                  fetchPriority={i === 0 ? 'high' : 'low'}
+                  sizes="100vw"
+                  className="block h-auto w-full"
+                />
+              ) : (
+                <div className="aspect-[16/9] w-full bg-white" aria-hidden="true" />
+              )}
             </Link>
           ))}
         </div>

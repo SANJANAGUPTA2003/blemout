@@ -2,6 +2,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useCart } from '../context/CartContext';
 import { formatPrice } from '../utils/format';
 import ProductPlaceholder from './ui/ProductPlaceholder';
+import { getOptimizedSrc } from '../data/productImages';
 
 /**
  * Premium teal sticky “Added to cart” bar.
@@ -29,7 +30,7 @@ export default function CartToast() {
               <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white/95 md:h-[72px] md:w-[72px]">
                 {toast.imageUrl ? (
                   <img
-                    src={toast.imageUrl}
+                    src={getOptimizedSrc(toast.imageUrl, 'thumb')}
                     alt=""
                     width="72"
                     height="72"

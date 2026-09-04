@@ -1,5 +1,5 @@
-import { Star } from 'lucide-react';
 import FadeUp from '../ui/FadeUp';
+import StarRating from '../ui/StarRating';
 import { HOMEPAGE_TESTIMONIALS } from '../../data/homepageConfig';
 
 // Placeholder testimonials – replace with client-approved customer reviews before production launch.
@@ -18,20 +18,7 @@ export default function HomeTestimonials() {
           {HOMEPAGE_TESTIMONIALS.map((item, index) => (
             <FadeUp key={item.id} delay={index * 0.03}>
               <article className="flex h-full flex-col bg-white p-6 md:p-7">
-                <div
-                  className="flex items-center gap-1 text-teal"
-                  aria-label={`Rated ${item.rating} out of 5 stars`}
-                >
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <Star
-                      key={i}
-                      size={14}
-                      fill={i < item.rating ? 'currentColor' : 'none'}
-                      strokeWidth={i < item.rating ? 0 : 1.5}
-                      aria-hidden="true"
-                    />
-                  ))}
-                </div>
+                <StarRating rating={item.rating} size={14} className="flex items-center gap-1 text-teal" />
                 <p className="mt-4 flex-1 text-[15px] leading-relaxed text-[#4a5560]">
                   “{item.text}”
                 </p>

@@ -5,6 +5,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import FadeUp from '../components/ui/FadeUp';
+import SmartImage from '../components/ui/SmartImage';
 import PageMeta from '../components/seo/PageMeta';
 import { BUSINESS } from '../data/business';
 
@@ -69,13 +70,14 @@ const aboutSchema = {
 function VoiceBanner({ image, alt }) {
   return (
     <article className="w-full overflow-hidden bg-white">
-      <img
+      <SmartImage
         src={image}
         alt={alt}
-        width="1920"
-        height="1080"
+        role="banner"
+        width={1920}
+        height={1080}
         loading="lazy"
-        decoding="async"
+        sizes="100vw"
         className="h-auto w-full object-cover object-center"
       />
     </article>

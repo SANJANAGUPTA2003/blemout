@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import FadeUp from '../components/ui/FadeUp';
+import SmartImage from '../components/ui/SmartImage';
 import { CONCERNS } from '../data/storefrontConfig';
 
 export default function ShopByConcern() {
@@ -26,13 +27,14 @@ export default function ShopByConcern() {
             <FadeUp key={concern.id} delay={index * 0.04}>
               <Link to={`/shop-by-concern/${concern.id}`} className="group block">
                 <div className="aspect-square w-full overflow-hidden bg-[#f4f7f6]">
-                  <img
+                  <SmartImage
                     src={concern.image}
                     alt={concern.name}
-                    width="800"
-                    height="800"
+                    role="card"
+                    width={800}
+                    height={800}
                     loading="lazy"
-                    decoding="async"
+                    sizes="(max-width: 640px) 48vw, (max-width: 1024px) 30vw, 18vw"
                     className="h-full w-full object-cover transition-transform duration-500 [@media(hover:hover)]:group-hover:scale-[1.03]"
                   />
                 </div>

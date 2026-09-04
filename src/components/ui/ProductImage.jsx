@@ -35,7 +35,7 @@ function ProductImage({
       ([entry]) => {
         if (entry.isIntersecting) setHoverReady(true);
       },
-      { rootMargin: '160px' }
+      { rootMargin: '48px' }
     );
     io.observe(el);
     return () => io.disconnect();
@@ -66,10 +66,11 @@ function ProductImage({
       <picture>
         {primary.srcSet && <source type="image/webp" srcSet={primary.srcSet} sizes={sizes} />}
         <img
-          src={primary.src}
+          src={primary.webpSrc || primary.src}
           alt={alt}
           width={width}
           height={height}
+          sizes={sizes}
           loading={loading}
           decoding="async"
           fetchPriority={fetchPriority}
@@ -83,11 +84,12 @@ function ProductImage({
         <picture>
           {hover.srcSet && <source type="image/webp" srcSet={hover.srcSet} sizes={sizes} />}
           <img
-            src={hover.src}
+            src={hover.webpSrc || hover.src}
             alt=""
             aria-hidden="true"
             width={width}
             height={height}
+            sizes={sizes}
             loading="lazy"
             decoding="async"
             onError={() => setHoverFailed(true)}

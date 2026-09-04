@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import FadeUp from '../components/ui/FadeUp';
+import SmartImage from '../components/ui/SmartImage';
 import ProductCard from '../components/ui/ProductCard';
 import ProductSkeleton from '../components/ui/ProductSkeleton';
 import ApiMessage from '../components/ui/ApiMessage';
@@ -44,12 +45,15 @@ export default function ConcernCollection() {
               <p className="mt-4 text-[16px] leading-relaxed text-[#4a5560]">{concern.description}</p>
             </div>
             <div className="mx-auto aspect-square w-36 shrink-0 overflow-hidden bg-[#f4f7f6] md:mx-0 md:w-44">
-              <img
+              <SmartImage
                 src={concern.image}
                 alt=""
-                className="h-full w-full object-cover"
+                role="card"
+                width={176}
+                height={176}
                 loading="lazy"
-                decoding="async"
+                sizes="176px"
+                className="h-full w-full object-cover"
               />
             </div>
           </div>

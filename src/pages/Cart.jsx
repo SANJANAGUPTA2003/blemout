@@ -5,7 +5,7 @@ import Button from '../components/ui/Button';
 import ProductPlaceholder from '../components/ui/ProductPlaceholder';
 import { useCart } from '../context/CartContext';
 import { formatPrice } from '../utils/format';
-import { productPath } from '../data/productImages';
+import { productPath, getOptimizedSrc } from '../data/productImages';
 import { getShippingCharge } from '../data/business';
 
 export default function Cart() {
@@ -47,7 +47,7 @@ export default function Cart() {
                   >
                     {item.imageUrl ? (
                       <img
-                        src={item.imageUrl}
+                        src={getOptimizedSrc(item.imageUrl, 'thumb')}
                         alt={item.name}
                         className="w-full h-full border-0 object-contain"
                       />

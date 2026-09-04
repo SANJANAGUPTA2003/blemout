@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import FadeUp from '../ui/FadeUp';
 import Button from '../ui/Button';
+import SmartImage from '../ui/SmartImage';
 import { productPath } from '../../data/productImages';
 
 /**
@@ -28,13 +29,14 @@ export default function HomeEditorialFeature({
           }`}
         >
           <FadeUp>
-            <img
+            <SmartImage
               src={promotionalImage}
               alt={product.name}
-              width="1400"
-              height="933"
+              role="banner"
+              width={1400}
+              height={933}
               loading="lazy"
-              decoding="async"
+              sizes="(max-width: 768px) 100vw, 50vw"
               className="h-auto w-full max-w-full object-contain"
             />
           </FadeUp>

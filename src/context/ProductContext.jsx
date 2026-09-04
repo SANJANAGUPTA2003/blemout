@@ -15,6 +15,7 @@ const TTL_MS = 15 * 60 * 1000;
 const DETAIL_TTL_MS = 30 * 60 * 1000;
 const SLOW_MS = 4500;
 const RETRY_COOLDOWN_MS = 2500;
+const STORAGE_KEY = 'blemout_products_summary_v1';
 
 function cacheKey(params = {}) {
   return JSON.stringify({
@@ -25,12 +26,35 @@ function cacheKey(params = {}) {
   });
 }
 
+function readStoredSummary() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed?.data) && parsed.data.length && Date.now() - parsed.at < TTL_MS * 8) {
+      return parsed;
+    }
+  } catch {
+    /* ignore quota / parse */
+  }
+  return null;
+}
+
+function writeStoredSummary(data) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ data, at: Date.now() }));
+  } catch {
+    /* ignore quota */
+  }
+}
+
 export function ProductProvider({ children }) {
-  const [allProducts, setAllProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const stored = typeof window !== 'undefined' ? readStoredSummary() : null;
+  const [allProducts, setAllProducts] = useState(stored?.data || []);
+  const [loading, setLoading] = useState(!stored?.data?.length);
   const [error, setError] = useState(false);
   const [slow, setSlow] = useState(false);
-  const [lastFetchedAt, setLastFetchedAt] = useState(0);
+  const [lastFetchedAt, setLastFetchedAt] = useState(stored?.at || 0);
 
   const cacheRef = useRef(new Map());
   const inflightRef = useRef(new Map());
@@ -38,6 +62,11 @@ export function ProductProvider({ children }) {
   const detailInflightRef = useRef(new Map());
   const lastRetryRef = useRef(0);
   const abortRef = useRef(null);
+  const paintedRef = useRef(Boolean(stored?.data?.length));
+
+  if (stored?.data?.length && !cacheRef.current.size) {
+    cacheRef.current.set(cacheKey({ view: 'summary' }), { data: stored.data, at: stored.at });
+  }
 
   const fetchSummary = useCallback(async ({ force = false } = {}) => {
     const key = cacheKey({ view: 'summary' });
@@ -61,9 +90,13 @@ export function ProductProvider({ children }) {
     const controller = new AbortController();
     abortRef.current = controller;
 
-    setLoading(true);
+    if (!paintedRef.current) {
+      setLoading(true);
+    }
     setError(false);
     setSlow(false);
+
+    const started = typeof performance !== 'undefined' ? performance.now() : Date.now();
 
     let becameSlow = false;
     const slowTimer = window.setTimeout(() => {
@@ -81,7 +114,13 @@ export function ProductProvider({ children }) {
       })
       .then(({ data }) => {
         const list = Array.isArray(data) ? data : [];
+        const elapsed = (typeof performance !== 'undefined' ? performance.now() : Date.now()) - started;
+        if (import.meta.env.DEV) {
+          console.info(`[BLEMOUT] GET /products?view=summary ${Math.round(elapsed)}ms (${list.length} items)`);
+        }
         cacheRef.current.set(key, { data: list, at: Date.now() });
+        writeStoredSummary(list);
+        paintedRef.current = list.length > 0;
         setAllProducts(list);
         setLastFetchedAt(Date.now());
         setError(false);

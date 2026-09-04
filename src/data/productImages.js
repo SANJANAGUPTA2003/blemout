@@ -63,41 +63,45 @@ export function getHoverImage(product) {
   return images[1] && images[1] !== primary ? images[1] : '';
 }
 
-function derivative(src, role) {
-  if (!src) return '';
-
-  if (/^\/products\/[^/]+\/\d+\.jpg$/i.test(src)) {
-    return src.replace(/\.jpg$/i, `-${role}.webp`);
+function variant(src, role) {
+  if (!src || src.startsWith('data:') || src.startsWith('http://') || src.startsWith('https://')) {
+    return '';
   }
-
-  if (/^\/products\/combos\/.+\.jpg$/i.test(src)) {
-    return src.replace(/\.jpg$/i, `-${role}.webp`);
-  }
-
-  if (/^\/home\/product-details\/.+\.jpg$/i.test(src)) {
-    if (role === 'card') return src.replace(/\.jpg$/i, '-card.webp');
-    return src.replace(/\.jpg$/i, '.webp');
-  }
-
-  return '';
+  if (!/\.(jpe?g|png)$/i.test(src)) return '';
+  return src.replace(/\.(jpe?g|png)$/i, `-${role}.webp`);
 }
 
 export function getResponsiveImage(src, role = 'card') {
   if (!src) return { src: '', webpSrc: '', srcSet: '' };
-  if (!derivative(src, role)) return { src, webpSrc: '', srcSet: '' };
+
+  const thumb = variant(src, 'thumb');
+  const card = variant(src, 'card');
+  const main = variant(src, 'main');
+
+  if (!card) return { src, webpSrc: '', srcSet: '' };
 
   if (role === 'thumb') {
-    const webpSrc = derivative(src, 'thumb');
-    return { src, webpSrc, srcSet: `${webpSrc} 160w` };
+    return { src, webpSrc: thumb || card, srcSet: `${thumb || card} 160w` };
   }
 
-  const card = derivative(src, 'card');
-  const main = derivative(src, 'main');
+  if (role === 'hero' || role === 'banner') {
+    return {
+      src,
+      webpSrc: main || card,
+      srcSet: `${card} 720w, ${main} 1200w`,
+    };
+  }
+
   return {
     src,
     webpSrc: role === 'main' ? main : card,
-    srcSet: `${card} 640w, ${main} 1200w`,
+    srcSet: `${card} 720w, ${main} 1200w`,
   };
+}
+
+export function getOptimizedSrc(src, role = 'card') {
+  const image = getResponsiveImage(src, role);
+  return image.webpSrc || image.src || src || '';
 }
 
 export function getCardImage(product) {

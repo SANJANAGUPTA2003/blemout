@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import FadeUp from '../ui/FadeUp';
+import SmartImage from '../ui/SmartImage';
 
 const items = [
   {
@@ -65,10 +66,15 @@ export default function DiscoveryGallery() {
                     : 'aspect-square'
                 }`}
               >
-                <img
+                <SmartImage
                   src={item.image}
                   alt={item.label}
-                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
+                  role="card"
+                  width={800}
+                  height={800}
+                  loading="lazy"
+                  sizes="(max-width: 768px) 50vw, 25vw"
+                  className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
                 />
                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/25 transition-colors duration-400" />
                 <div className="absolute inset-0 flex items-end justify-center pb-5 opacity-0 group-hover:opacity-100 transition-opacity duration-400">

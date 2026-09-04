@@ -56,7 +56,7 @@ export default function EditorialStory({
                   />
                 )}
                 <img
-                  src={responsiveImage.src}
+                  src={responsiveImage.webpSrc || responsiveImage.src}
                   alt={imageAlt}
                   width="1200"
                   height="1200"

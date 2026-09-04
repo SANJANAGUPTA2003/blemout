@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { X } from 'lucide-react';
 import Button from './ui/Button';
+import SmartImage from './ui/SmartImage';
 
 const DISMISS_KEY = 'blemout_promo_popup_dismissed';
 const START_KEY = 'blemout_promo_timer_started_at';
@@ -122,11 +123,14 @@ export default function PromoCampaignPopup({ blockedByOther }) {
           <X size={18} />
         </button>
         <div className="bg-[#eef4f2] px-3 pt-3 sm:px-4 sm:pt-4">
-          <img
+          <SmartImage
             src="/promo/glow-through-every-season.png"
             alt="Woman outdoors with glowing skin under summer light"
-            width="900"
-            height="900"
+            role="card"
+            width={900}
+            height={900}
+            loading="lazy"
+            sizes="(max-width: 640px) 90vw, 512px"
             className="mx-auto h-auto max-h-[min(52vh,420px)] w-full object-contain object-center"
           />
         </div>

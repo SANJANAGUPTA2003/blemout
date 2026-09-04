@@ -1,9 +1,9 @@
 import { memo } from 'react';
 import { Link } from 'react-router-dom';
-import { Star } from 'lucide-react';
 import ProductImage from './ProductImage';
 import Button from './Button';
 import PriceDisplay from './PriceDisplay';
+import StarRating from './StarRating';
 import { productPath } from '../../data/productImages';
 import {
   getBenefitLine,
@@ -65,11 +65,7 @@ function ProductCard({ product }) {
           </h3>
         </Link>
 
-        <div className="mt-2.5 flex items-center gap-1 text-teal" aria-label="Rated 5 out of 5 stars">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <Star key={i} size={15} fill="currentColor" strokeWidth={0} aria-hidden="true" />
-          ))}
-        </div>
+        <StarRating rating={5} size={15} className="mt-2.5 flex items-center gap-1 text-teal" />
 
         {benefit && (
           <p className="mt-2.5 min-h-[2.6em] text-[15px] leading-relaxed text-[#4a5560] line-clamp-2 md:text-[16px]">

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { CheckCircle, Circle, Package, Truck, ShieldCheck } from 'lucide-react';
 import FadeUp from '../components/ui/FadeUp';
+import SmartImage from '../components/ui/SmartImage';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import api from '../utils/api';
@@ -118,14 +119,15 @@ export default function TrackOrder() {
 
           <FadeUp delay={0.06}>
             <div className="overflow-hidden rounded-2xl bg-[#f4f7f6] p-3 md:p-5">
-              <img
+              <SmartImage
                 src="/track/track-order-banner.png"
                 alt="Customer relaxing outdoors while waiting for a BLEMOUT order"
-                width="1200"
-                height="900"
+                role="banner"
+                width={1200}
+                height={900}
+                loading="lazy"
+                sizes="(max-width: 768px) 100vw, 720px"
                 className="h-auto w-full object-contain object-center"
-                loading="eager"
-                decoding="async"
               />
             </div>
           </FadeUp>

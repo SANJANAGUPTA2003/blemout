@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import FadeUp from '../ui/FadeUp';
+import SmartImage from '../ui/SmartImage';
 import { HOMEPAGE_CONCERNS } from '../../data/homepageConfig';
 
 export default function ShopByConcernHome() {
@@ -20,13 +21,14 @@ export default function ShopByConcernHome() {
               className="group min-w-0"
             >
               <div className="relative aspect-square w-full overflow-hidden bg-[#f4f7f6]">
-                <img
+                <SmartImage
                   src={concern.image}
                   alt={concern.name}
-                  width="800"
-                  height="800"
+                  role="card"
+                  width={800}
+                  height={800}
                   loading="lazy"
-                  decoding="async"
+                  sizes="(max-width: 640px) 48vw, (max-width: 1024px) 30vw, 18vw"
                   className="h-full w-full object-cover transition-transform duration-500 ease-out [@media(hover:hover)]:group-hover:scale-[1.03]"
                 />
               </div>

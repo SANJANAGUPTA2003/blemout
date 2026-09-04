@@ -16,9 +16,9 @@ import {
   Sparkles,
   Sun,
   ZoomIn,
-  Star,
 } from 'lucide-react';
 import FadeUp from '../components/ui/FadeUp';
+import StarRating from '../components/ui/StarRating';
 import Button from '../components/ui/Button';
 import ApiMessage from '../components/ui/ApiMessage';
 import ImageZoomLightbox from '../components/product/ImageZoomLightbox';
@@ -59,10 +59,11 @@ function PdpMainImage({ src, alt, priority }) {
         />
       )}
       <img
-        src={image.src || src}
+        src={image.webpSrc || image.src || src}
         alt={alt}
         width={1200}
         height={1200}
+        sizes="(max-width: 1024px) 100vw, 55vw"
         loading={priority ? 'eager' : 'lazy'}
         decoding="async"
         fetchPriority={priority ? 'high' : 'auto'}
@@ -78,7 +79,7 @@ function PdpThumbImage({ src }) {
     <picture>
       {image.webpSrc && <source type="image/webp" srcSet={image.srcSet || image.webpSrc} />}
       <img
-        src={image.src || src}
+        src={image.webpSrc || image.src || src}
         alt=""
         width={160}
         height={160}
@@ -179,9 +180,10 @@ export default function ProductDetail() {
     if (!images.length) return;
     const next = images[(activeImage + 1) % images.length];
     if (!next || typeof window === 'undefined') return;
+    const image = getResponsiveImage(next, 'main');
     const img = new window.Image();
     img.decoding = 'async';
-    img.src = next;
+    img.src = image.webpSrc || image.src || next;
   }, [images, activeImage]);
 
   const related = useMemo(
@@ -392,11 +394,7 @@ export default function ProductDetail() {
               <h1 className="text-[clamp(1.65rem,2.8vw,2.15rem)] font-bold leading-snug tracking-[-0.02em] text-[#111111] md:text-[32px]">
                 {product.name}
               </h1>
-              <div className="mt-3 flex items-center gap-1 text-teal" aria-label="Rated 5 out of 5 stars">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <Star key={i} size={14} fill="currentColor" strokeWidth={0} aria-hidden="true" />
-                ))}
-              </div>
+              <StarRating rating={5} size={14} className="mt-3 flex items-center gap-1 text-teal" />
               {product.summary && (
                 <p className="mt-4 text-[16px] text-soft-text leading-relaxed">{product.summary}</p>
               )}
@@ -514,7 +512,11 @@ export default function ProductDetail() {
 
       <ImageZoomLightbox
         open={zoomOpen}
-        src={images[activeImage] || product.imageUrl}
+        src={
+          getResponsiveImage(images[activeImage] || product.imageUrl, 'main').webpSrc ||
+          images[activeImage] ||
+          product.imageUrl
+        }
         alt={product.name}
         onClose={() => setZoomOpen(false)}
       />

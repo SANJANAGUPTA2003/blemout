@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { formatPrice } from '../../utils/format';
+import { getOptimizedSrc } from '../../data/productImages';
 
 /**
  * Sticky PDP purchase bar — matches the teal “Added to cart” confirmation styling.
@@ -34,7 +35,7 @@ export default function StickyPurchaseBar({
           {imageUrl && (
             <div className="hidden h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white/95 sm:flex md:h-16 md:w-16">
               <img
-                src={imageUrl}
+                src={getOptimizedSrc(imageUrl, 'thumb')}
                 alt=""
                 width="64"
                 height="64"

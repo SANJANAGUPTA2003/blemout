@@ -3,6 +3,7 @@ import { X } from 'lucide-react';
 import Button from '../ui/Button';
 import PriceDisplay from '../ui/PriceDisplay';
 import { getListingImage, normalizePricing } from '../../data/productDisplay';
+import { getOptimizedSrc } from '../../data/productImages';
 import { useCart } from '../../context/CartContext';
 
 export default function ProductQuickAdd({
@@ -44,7 +45,7 @@ export default function ProductQuickAdd({
   if (typeof window !== 'undefined' && window.innerWidth < 380) return null;
 
   const { sellingPrice, mrp, discount } = normalizePricing(product);
-  const thumb = getListingImage(product);
+  const thumb = getOptimizedSrc(getListingImage(product), 'thumb');
 
   const close = () => {
     sessionStorage.setItem(storageKey, '1');

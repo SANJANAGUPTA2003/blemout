@@ -6,6 +6,7 @@ import { useCart } from '../context/CartContext';
 import { formatPrice } from '../utils/format';
 import Button from './ui/Button';
 import ProductPlaceholder from './ui/ProductPlaceholder';
+import { getOptimizedSrc } from '../data/productImages';
 
 export default function CartDrawer() {
   const {
@@ -103,7 +104,7 @@ export default function CartDrawer() {
                     >
                       <div className="w-20 h-20 shrink-0 border-0 bg-transparent flex items-center justify-center overflow-hidden">
                         {item.imageUrl ? (
-                          <img src={item.imageUrl} alt="" className="w-full h-full object-contain" />
+                          <img src={getOptimizedSrc(item.imageUrl, 'thumb')} alt="" className="w-full h-full object-contain" />
                         ) : (
                           <ProductPlaceholder size="sm" className="rounded-none" />
                         )}
