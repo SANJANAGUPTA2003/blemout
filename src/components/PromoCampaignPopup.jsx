@@ -10,7 +10,19 @@ const SHOWN_KEY = 'blemout_promo_shown_count';
 /** Show at 30s, then 80s, then 120s from first eligible visit. */
 const SHOW_AT_MS = [30000, 80000, 120000];
 
-const BLOCKED = ['/cart', '/checkout', '/order-success', '/track-order', '/admin'];
+const BLOCKED = [
+  '/cart',
+  '/checkout',
+  '/order-success',
+  '/track-order',
+  '/admin',
+  '/shipping-policy',
+  '/return-refund-policy',
+  '/privacy-policy',
+  '/terms-and-conditions',
+  '/return-policy',
+  '/terms',
+];
 
 function isBlockedPath(pathname) {
   return BLOCKED.some((p) => pathname === p || pathname.startsWith(`${p}/`));

@@ -51,8 +51,8 @@ export default function InfoPage({ pageKey }) {
   const page = PAGES[pageKey] || PAGES.faq;
 
   return (
-    <div className="bg-white py-14 md:py-20">
-      <div className="max-w-3xl mx-auto px-5 md:px-8">
+    <div className="w-full min-w-0 overflow-x-hidden bg-white py-14 md:py-20">
+      <div className="mx-auto w-full max-w-[1400px] px-4 sm:px-5 md:px-8 lg:px-10">
         <FadeUp>
           <p className="text-[12px] tracking-[0.2em] uppercase text-teal font-bold mb-3">BLEMOUT</p>
           <h1 className="text-3xl md:text-4xl font-bold text-text tracking-tight">{page.title}</h1>

@@ -19,13 +19,13 @@ function PromoHost() {
 
 export default function Layout() {
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex min-h-screen min-w-0 w-full flex-col overflow-x-hidden">
       <ScrollToTop />
       <CustomCursor />
       <AnnouncementBar />
       <Navbar />
       <ProductProvider>
-        <main className="flex-1">
+        <main className="min-w-0 w-full flex-1">
           <Outlet />
         </main>
       </ProductProvider>
