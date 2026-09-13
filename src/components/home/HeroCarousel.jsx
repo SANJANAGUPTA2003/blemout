@@ -6,9 +6,9 @@ import { HOMEPAGE_HERO_SLIDES } from '../../data/homepageConfig';
 const INTERVAL_MS = 5000;
 const TRANSITION_MS = 600;
 
-/** Intrinsic size of both landing JPEGs in /public/hero (measured 1024×453). */
-const HERO_WIDTH = 1024;
-const HERO_HEIGHT = 453;
+/** Intrinsic size of both original landing JPEGs in /public/hero (measured 3840×1700). */
+const HERO_WIDTH = 3840;
+const HERO_HEIGHT = 1700;
 
 /** Full-bleed landing banners — the image is the section, with no letterbox frame. */
 export default function HeroCarousel() {
