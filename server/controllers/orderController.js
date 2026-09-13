@@ -1,17 +1,61 @@
 import Order from '../models/Order.js';
 import { generateOrderId } from '../utils/orderId.js';
 import { hashPhone, verifyPhone } from '../utils/phoneHash.js';
+import {
+  decrementStock,
+  restoreStock,
+  validateAndPriceCart,
+  validateCustomer,
+} from '../utils/checkout.js';
 
 const TRACKING_ERROR = 'Order not found or details do not match.';
 
 export const createOrder = async (req, res) => {
+  const customerResult = validateCustomer(req.body.customer || req.body);
+  if (customerResult.error) {
+    return res.status(400).json({ message: customerResult.error });
+  }
+
   try {
+    const priced = await validateAndPriceCart(req.body.items);
+    if (priced.error) {
+      return res.status(priced.status || 400).json({ message: priced.error });
+    }
+
     const orderId = await generateOrderId();
-    const hashedPhone = await hashPhone(req.body.phone);
-    const order = await Order.create({ ...req.body, orderId, hashedPhone });
-    res.status(201).json(order);
+    const customer = customerResult.customer;
+    const hashedPhone = await hashPhone(customer.phone);
+
+    await decrementStock(priced.items);
+
+    try {
+      const order = await Order.create({
+        orderId,
+        customerName: customer.name,
+        phone: customer.phone,
+        hashedPhone,
+        email: customer.email,
+        address: customer.address,
+        city: customer.city,
+        state: customer.state,
+        pincode: customer.pincode,
+        items: priced.items,
+        totalAmount: priced.totalAmount,
+        paymentMethod: 'cod',
+        paymentStatus: 'pending',
+        orderStatus: 'pending',
+      });
+
+      return res.status(201).json({
+        orderId: order.orderId,
+        order: { orderId: order.orderId },
+      });
+    } catch (error) {
+      await restoreStock(priced.items);
+      throw error;
+    }
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    return res.status(400).json({ message: error.message || 'Unable to place order.' });
   }
 };
 

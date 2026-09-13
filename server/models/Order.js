@@ -20,8 +20,14 @@ const orderSchema = new mongoose.Schema(
     pincode: { type: String, required: true },
     items: [orderItemSchema],
     totalAmount: { type: Number, required: true },
-    razorpayOrderId: { type: String, default: '' },
+    paymentMethod: {
+      type: String,
+      enum: ['razorpay', 'cod'],
+      default: 'razorpay',
+    },
+    razorpayOrderId: { type: String, default: '', index: true },
     razorpayPaymentId: { type: String, default: '' },
+    razorpaySignature: { type: String, default: '' },
     paymentStatus: {
       type: String,
       enum: ['pending', 'paid', 'failed'],

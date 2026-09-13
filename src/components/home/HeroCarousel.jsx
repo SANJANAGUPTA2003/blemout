@@ -2,10 +2,13 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { HOMEPAGE_HERO_SLIDES } from '../../data/homepageConfig';
-import SmartImage from '../ui/SmartImage';
 
 const INTERVAL_MS = 5000;
 const TRANSITION_MS = 600;
+
+/** Intrinsic size of both landing JPEGs in /public/hero (measured 1024×453). */
+const HERO_WIDTH = 1024;
+const HERO_HEIGHT = 453;
 
 /** Full-bleed landing banners — the image is the section, with no letterbox frame. */
 export default function HeroCarousel() {
@@ -67,19 +70,23 @@ export default function HeroCarousel() {
               className="relative block w-full min-w-full shrink-0 cursor-pointer overflow-hidden"
             >
               {loaded.has(i) ? (
-                <SmartImage
+                <img
                   src={hero.image}
                   alt={hero.alt}
-                  role="hero"
-                  width={1920}
-                  height={1080}
+                  width={HERO_WIDTH}
+                  height={HERO_HEIGHT}
                   loading={i === 0 ? 'eager' : 'lazy'}
                   fetchPriority={i === 0 ? 'high' : 'low'}
-                  sizes="100vw"
-                  className="block h-auto w-full"
+                  decoding={i === 0 ? 'sync' : 'async'}
+                  draggable={false}
+                  className="block h-auto w-full max-w-full"
                 />
               ) : (
-                <div className="aspect-[16/9] w-full bg-white" aria-hidden="true" />
+                <div
+                  className="w-full bg-white"
+                  style={{ aspectRatio: `${HERO_WIDTH} / ${HERO_HEIGHT}` }}
+                  aria-hidden="true"
+                />
               )}
             </Link>
           ))}

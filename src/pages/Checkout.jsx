@@ -11,12 +11,19 @@ import { loadRazorpay } from '../utils/razorpay';
 
 const PAYMENT_UNAVAILABLE_MESSAGE = 'Payment gateway will be activated soon.';
 
+const cartPayload = (items) =>
+  items.map((item) => ({
+    productId: item._id,
+    quantity: item.quantity,
+  }));
+
 export default function Checkout() {
   const { items, cartTotal, clearCart } = useCart();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [checkingPayment, setCheckingPayment] = useState(true);
   const [paymentAvailable, setPaymentAvailable] = useState(true);
+  const [paymentMethod, setPaymentMethod] = useState('razorpay');
   const [error, setError] = useState('');
   const [agreedToPolicies, setAgreedToPolicies] = useState(false);
   const [form, setForm] = useState({
@@ -31,17 +38,123 @@ export default function Checkout() {
 
   const shipping = getShippingCharge(items);
   const total = cartTotal + shipping;
+  const onlinePayDisabled = !paymentAvailable && paymentMethod === 'razorpay';
 
   useEffect(() => {
     api
       .get('/payment/status')
-      .then(({ data }) => setPaymentAvailable(Boolean(data.available)))
-      .catch(() => setPaymentAvailable(false))
+      .then(({ data }) => {
+        const available = Boolean(data.available);
+        setPaymentAvailable(available);
+        if (!available) setPaymentMethod('cod');
+      })
+      .catch(() => {
+        setPaymentAvailable(false);
+        setPaymentMethod('cod');
+      })
       .finally(() => setCheckingPayment(false));
   }, []);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const goToSuccess = (orderId) => {
+    clearCart();
+    navigate('/order-success', {
+      state: { orderId, customerName: form.name, paymentMethod },
+    });
+  };
+
+  const placeCodOrder = async () => {
+    const { data } = await api.post('/orders', {
+      customer: form,
+      items: cartPayload(items),
+    });
+    const orderId = data.orderId || data.order?.orderId;
+    if (!orderId) {
+      throw new Error('Unable to place order.');
+    }
+    goToSuccess(orderId);
+  };
+
+  const startRazorpayCheckout = async () => {
+    const loaded = await loadRazorpay();
+    if (!loaded) {
+      setError('Failed to load payment gateway. Please try again.');
+      setLoading(false);
+      return;
+    }
+
+    const { data: paymentOrder } = await api.post('/payment/create-order', {
+      customer: form,
+      items: cartPayload(items),
+    });
+
+    if (!paymentOrder.available) {
+      setPaymentAvailable(false);
+      setPaymentMethod('cod');
+      setError(paymentOrder.message || PAYMENT_UNAVAILABLE_MESSAGE);
+      setLoading(false);
+      return;
+    }
+
+    const key = import.meta.env.VITE_RAZORPAY_KEY_ID || paymentOrder.key;
+    if (!key) {
+      setError('Payment is not configured. Please try Cash on Delivery or contact support.');
+      setLoading(false);
+      return;
+    }
+
+    const options = {
+      key,
+      amount: paymentOrder.amount,
+      currency: paymentOrder.currency,
+      name: 'BLEMOUT',
+      description: 'Skincare Order',
+      order_id: paymentOrder.id || paymentOrder.order_id,
+      prefill: {
+        name: form.name,
+        email: form.email,
+        contact: form.phone,
+      },
+      theme: { color: '#2DBEAD' },
+      handler: async (response) => {
+        try {
+          const { data } = await api.post('/payment/verify', {
+            razorpay_order_id: response.razorpay_order_id,
+            razorpay_payment_id: response.razorpay_payment_id,
+            razorpay_signature: response.razorpay_signature,
+            orderId: paymentOrder.orderId,
+          });
+
+          const orderId = data.order?.orderId;
+          if (!orderId) {
+            setError('Payment verification failed. Please contact support.');
+            setLoading(false);
+            return;
+          }
+
+          goToSuccess(orderId);
+        } catch {
+          setError('Payment verification failed. Please contact support with your payment details.');
+          setLoading(false);
+        }
+      },
+      modal: {
+        ondismiss: () => {
+          setError('Payment was cancelled. Your order is not confirmed.');
+          setLoading(false);
+        },
+      },
+    };
+
+    const rzp = new window.Razorpay(options);
+    rzp.on('payment.failed', () => {
+      setError('Payment failed. Please try again.');
+      setLoading(false);
+    });
+    rzp.open();
   };
 
   const handleSubmit = async (e) => {
@@ -53,7 +166,7 @@ export default function Checkout() {
       return;
     }
 
-    if (!paymentAvailable) {
+    if (paymentMethod === 'razorpay' && !paymentAvailable) {
       setError(PAYMENT_UNAVAILABLE_MESSAGE);
       return;
     }
@@ -61,80 +174,20 @@ export default function Checkout() {
     setLoading(true);
 
     try {
-      const loaded = await loadRazorpay();
-      if (!loaded) {
-        setError('Failed to load payment gateway. Please try again.');
-        setLoading(false);
+      if (paymentMethod === 'cod') {
+        await placeCodOrder();
         return;
       }
 
-      const { data: paymentOrder } = await api.post('/payment/create-order', {
-        amount: total,
-      });
-
-      if (!paymentOrder.available) {
-        setPaymentAvailable(false);
-        setError(paymentOrder.message || PAYMENT_UNAVAILABLE_MESSAGE);
-        setLoading(false);
-        return;
-      }
-
-      const options = {
-        key: paymentOrder.key,
-        amount: paymentOrder.amount,
-        currency: paymentOrder.currency,
-        name: 'BLEMOUT',
-        description: 'Skincare Order',
-        order_id: paymentOrder.id,
-        prefill: {
-          name: form.name,
-          email: form.email,
-          contact: form.phone,
-        },
-        theme: { color: '#2DBEAD' },
-        handler: async (response) => {
-          try {
-            const { data } = await api.post('/payment/verify', {
-              razorpay_order_id: response.razorpay_order_id,
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_signature: response.razorpay_signature,
-              customer: form,
-              items: items.map((item) => ({
-                productId: item._id,
-                name: item.name,
-                price: item.price,
-                quantity: item.quantity,
-              })),
-              totalAmount: total,
-            });
-
-            clearCart();
-            navigate('/order-success', {
-              state: { orderId: data.order.orderId, customerName: form.name },
-            });
-          } catch {
-            setError('Payment verification failed. Please contact support.');
-          }
-        },
-        modal: {
-          ondismiss: () => setLoading(false),
-        },
-      };
-
-      const rzp = new window.Razorpay(options);
-      rzp.on('payment.failed', () => {
-        setError('Payment failed. Please try again.');
-        setLoading(false);
-      });
-      rzp.open();
+      await startRazorpayCheckout();
     } catch (err) {
       if (err.response?.status === 503) {
         setPaymentAvailable(false);
+        setPaymentMethod('cod');
         setError(err.response?.data?.message || PAYMENT_UNAVAILABLE_MESSAGE);
       } else {
         setError(err.response?.data?.message || 'Something went wrong. Please try again.');
       }
-    } finally {
       setLoading(false);
     }
   };
@@ -207,9 +260,36 @@ export default function Checkout() {
                   </div>
                 </div>
 
+                <div className="mt-5 space-y-2">
+                  <p className="text-sm font-semibold text-text">Payment method</p>
+                  <label className="flex items-center gap-3 text-sm text-gray-600">
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      value="razorpay"
+                      checked={paymentMethod === 'razorpay'}
+                      onChange={() => setPaymentMethod('razorpay')}
+                      disabled={!paymentAvailable}
+                      className="accent-[#2DBEAD]"
+                    />
+                    Pay online (Razorpay)
+                  </label>
+                  <label className="flex items-center gap-3 text-sm text-gray-600">
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      value="cod"
+                      checked={paymentMethod === 'cod'}
+                      onChange={() => setPaymentMethod('cod')}
+                      className="accent-[#2DBEAD]"
+                    />
+                    Cash on Delivery
+                  </label>
+                </div>
+
                 {!checkingPayment && !paymentAvailable && (
                   <div className="mt-4 rounded-xl border border-teal/20 bg-mint-strong/40 px-4 py-3 text-sm text-dark-teal">
-                    {PAYMENT_UNAVAILABLE_MESSAGE}
+                    {PAYMENT_UNAVAILABLE_MESSAGE} You can still place a Cash on Delivery order.
                   </div>
                 )}
 
@@ -263,14 +343,14 @@ export default function Checkout() {
                 <Button
                   type="submit"
                   className="w-full mt-6"
-                  disabled={loading || checkingPayment || !paymentAvailable || !agreedToPolicies}
+                  disabled={loading || checkingPayment || !agreedToPolicies || onlinePayDisabled}
                 >
                   {checkingPayment
                     ? 'Checking payment...'
-                    : !paymentAvailable
-                      ? 'Payment Coming Soon'
-                      : loading
-                        ? 'Processing...'
+                    : loading
+                      ? 'Processing...'
+                      : paymentMethod === 'cod'
+                        ? 'Place COD Order'
                         : 'Pay with Razorpay'}
                 </Button>
               </div>

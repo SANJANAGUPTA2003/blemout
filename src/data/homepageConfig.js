@@ -15,14 +15,14 @@ export const HOMEPAGE_ANNOUNCEMENTS = [
 export const HOMEPAGE_HERO_SLIDES = [
   {
     id: 'hero-landing-1',
-    image: '/hero/blemout-landing-hero.png',
+    image: '/hero/landing-sun-defence-sep13.jpg',
     alt: 'BLEMOUT Advanced Sun Defence everyday — SPF 50+ moisturiser radiance',
     to: '/shop',
     bg: '#8ec8ef',
   },
   {
     id: 'hero-landing-2',
-    image: '/hero/blemout-landing-hero-2.jpg',
+    image: '/hero/landing-combo-12off-sep13.jpg',
     alt: "BLEMOUT — your skin's complete love story, 12% off on combo",
     to: '/limited-picks',
     bg: '#d8efe9',
@@ -116,7 +116,7 @@ export const HOMEPAGE_EDITORIAL = [
   },
   {
     slug: 'blemout-blemishes-repair-cream',
-    promotionalImage: '/home/product-details/repair-cream-feature.jpg',
+    promotionalImage: '/home/product-details/repair-cream-7-actives.jpg',
     imagePosition: 'right',
     eyebrow: 'Repair',
   },
