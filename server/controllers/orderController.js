@@ -9,6 +9,7 @@ import {
 } from '../utils/checkout.js';
 import { isCustomerCancellable } from '../utils/orderCancel.js';
 import { executeOrderCancel, publicCancelPayload } from '../utils/executeOrderCancel.js';
+import { evaluateOrderDeletion } from '../utils/orderDelete.js';
 import { ORDER_STATUS, toPublicTracking } from '../utils/orderStatus.js';
 import { isAllowedAdminStatusUpdate, toAdminOrder } from '../utils/adminOrder.js';
 import { notifyOrderLifecycle } from '../services/notifications/index.js';
@@ -294,6 +295,29 @@ export const shipOrderByAdmin = async (req, res) => {
     }
   } catch {
     return res.status(500).json({ message: 'Unable to create shipment right now.' });
+  }
+};
+
+export const deleteOrderByAdmin = async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id);
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found.' });
+    }
+
+    const decision = evaluateOrderDeletion(order);
+    if (!decision.ok) {
+      return res.status(decision.statusCode || 409).json({ message: decision.message });
+    }
+
+    const orderId = order.orderId;
+    await Order.deleteOne({ _id: order._id });
+    console.info(
+      `[BLEMOUT] DELETE_ORDER ${orderId} admin=${req.admin?.email || req.admin?.id || 'unknown'}`
+    );
+    return res.json({ success: true, orderId });
+  } catch {
+    return res.status(500).json({ message: 'Unable to delete the order right now.' });
   }
 };
 

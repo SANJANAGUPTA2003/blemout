@@ -6,6 +6,8 @@ export default function ConfirmDialog({
   message,
   confirmLabel = 'Confirm',
   cancelLabel = 'Keep Order',
+  loadingLabel = 'Cancelling...',
+  confirmDisabled = false,
   onConfirm,
   onCancel,
   loading = false,
@@ -36,8 +38,14 @@ export default function ConfirmDialog({
           <Button type="button" variant="secondary" className="w-full sm:w-auto" onClick={onCancel} disabled={loading}>
             {cancelLabel}
           </Button>
-          <Button type="button" variant="danger" className="w-full sm:w-auto" onClick={onConfirm} disabled={loading}>
-            {loading ? 'Cancelling...' : confirmLabel}
+          <Button
+            type="button"
+            variant="danger"
+            className="w-full sm:w-auto"
+            onClick={onConfirm}
+            disabled={loading || confirmDisabled}
+          >
+            {loading ? loadingLabel : confirmLabel}
           </Button>
         </div>
       </div>

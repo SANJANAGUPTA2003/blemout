@@ -7,6 +7,7 @@ import {
   cancelOrderByCustomer,
   cancelOrderByAdmin,
   shipOrderByAdmin,
+  deleteOrderByAdmin,
 } from '../controllers/orderController.js';
 import { protect } from '../middleware/auth.js';
 import { rateLimit } from '../middleware/rateLimit.js';
@@ -20,5 +21,6 @@ router.get('/', protect, getOrders);
 router.put('/:id/status', protect, updateOrderStatus);
 router.post('/:id/cancel', protect, cancelOrderByAdmin);
 router.post('/:id/ship', protect, shipOrderByAdmin);
+router.delete('/:id', protect, deleteOrderByAdmin);
 
 export default router;

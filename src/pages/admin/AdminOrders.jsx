@@ -34,6 +34,9 @@ export default function AdminOrders() {
   const [cancelReason, setCancelReason] = useState('');
   const [cancelling, setCancelling] = useState(false);
   const [shipping, setShipping] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleteConfirmId, setDeleteConfirmId] = useState('');
+  const [deleting, setDeleting] = useState(false);
   const [actionError, setActionError] = useState('');
 
   const fetchOrders = () => {
@@ -79,6 +82,16 @@ export default function AdminOrders() {
     ['pending', 'processing'].includes(selected.orderStatus) &&
     !(selected.paymentMethod === 'razorpay' && selected.paymentStatus !== 'paid');
 
+  const canDeleteSelected =
+    selected &&
+    ['pending', 'processing', 'cancelled'].includes(selected.orderStatus) &&
+    selected.paymentStatus !== 'paid' &&
+    selected.refundStatus !== 'PENDING' &&
+    selected.refundStatus !== 'REFUNDED' &&
+    !selected.awbNumber &&
+    !selected.shipmentId &&
+    !isShippedLike(selected.orderStatus);
+
   const confirmAdminCancel = async () => {
     if (!selected) return;
     setCancelling(true);
@@ -115,6 +128,27 @@ export default function AdminOrders() {
       setShipOpen(false);
     } finally {
       setShipping(false);
+    }
+  };
+
+  const confirmDeleteOrder = async () => {
+    if (!selected) return;
+    if (deleteConfirmId.trim().toUpperCase() !== String(selected.orderId).toUpperCase()) {
+      return;
+    }
+    setDeleting(true);
+    setActionError('');
+    try {
+      await api.delete(`/orders/${selected._id}`);
+      setDeleteOpen(false);
+      setDeleteConfirmId('');
+      setSelected(null);
+      fetchOrders();
+    } catch (err) {
+      setActionError(err.response?.data?.message || 'Unable to delete the order right now.');
+      setDeleteOpen(false);
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -321,6 +355,20 @@ export default function AdminOrders() {
                   Cancel Order
                 </Button>
               )}
+              {canDeleteSelected && (
+                <Button
+                  type="button"
+                  variant="danger"
+                  className="w-full"
+                  onClick={() => {
+                    setActionError('');
+                    setDeleteConfirmId('');
+                    setDeleteOpen(true);
+                  }}
+                >
+                  Delete Order
+                </Button>
+              )}
             </div>
           </div>
         </div>
@@ -336,6 +384,7 @@ export default function AdminOrders() {
         }
         confirmLabel="Cancel Order"
         cancelLabel="Keep Order"
+        loadingLabel="Cancelling..."
         loading={cancelling}
         onCancel={() => {
           if (!cancelling) setCancelOpen(false);
@@ -361,6 +410,7 @@ export default function AdminOrders() {
         message="Review the customer, address, products, and payment below. The order is marked shipped only after the shipping provider confirms a shipment with an AWB."
         confirmLabel="Create Shipment"
         cancelLabel="Back"
+        loadingLabel="Creating..."
         loading={shipping}
         onCancel={() => {
           if (!shipping) setShipOpen(false);
@@ -385,6 +435,38 @@ export default function AdminOrders() {
             </p>
           </div>
         )}
+      </ConfirmDialog>
+
+      <ConfirmDialog
+        open={deleteOpen && Boolean(selected)}
+        title={`Delete Order ${selected?.orderId || ''}?`}
+        message="Delete this order permanently? This cannot be undone. This action permanently removes the order record."
+        confirmLabel="Delete Permanently"
+        cancelLabel="Keep Order"
+        loadingLabel="Deleting..."
+        loading={deleting}
+        confirmDisabled={
+          !selected || deleteConfirmId.trim().toUpperCase() !== String(selected.orderId).toUpperCase()
+        }
+        onCancel={() => {
+          if (!deleting) {
+            setDeleteOpen(false);
+            setDeleteConfirmId('');
+          }
+        }}
+        onConfirm={confirmDeleteOrder}
+      >
+        <div className="mt-5">
+          <label className="mb-1.5 block text-[15px] font-medium text-text">
+            Type {selected?.orderId} to confirm deletion
+          </label>
+          <input
+            value={deleteConfirmId}
+            onChange={(e) => setDeleteConfirmId(e.target.value)}
+            placeholder={selected?.orderId || 'Order ID'}
+            className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:border-teal focus:outline-none"
+          />
+        </div>
       </ConfirmDialog>
     </div>
   );
