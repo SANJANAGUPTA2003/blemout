@@ -32,7 +32,13 @@ export default function ExploreMoreProducts() {
           </div>
         </FadeUp>
 
-        {loading ? (
+        {products.length ? (
+          <HomeProductPager>
+            {products.map((product) => (
+              <HomeProductCard key={product._id || product.slug} product={product} />
+            ))}
+          </HomeProductPager>
+        ) : loading ? (
           <div className="grid grid-cols-2 gap-5 md:grid-cols-3 lg:grid-cols-4 md:gap-6 lg:gap-8">
             {Array.from({ length: 4 }).map((_, index) => (
               <div key={`explore-skeleton-${index}`} className="animate-pulse">
@@ -52,13 +58,7 @@ export default function ExploreMoreProducts() {
             }
             onRetry={retry}
           />
-        ) : (
-          <HomeProductPager>
-            {products.map((product) => (
-              <HomeProductCard key={product._id || product.slug} product={product} />
-            ))}
-          </HomeProductPager>
-        )}
+        ) : null}
       </div>
     </section>
   );

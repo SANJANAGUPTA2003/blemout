@@ -13,7 +13,9 @@ const ProductContext = createContext(null);
 
 const TTL_MS = 15 * 60 * 1000;
 const DETAIL_TTL_MS = 30 * 60 * 1000;
-const SLOW_MS = 4500;
+const SLOW_MS = 3000;
+const SUMMARY_TIMEOUT_MS = 8000;
+const AUTO_RETRY_DELAY_MS = 1600;
 const RETRY_COOLDOWN_MS = 2500;
 const STORAGE_KEY = 'blemout_products_summary_v1';
 
@@ -62,6 +64,7 @@ export function ProductProvider({ children }) {
   const detailInflightRef = useRef(new Map());
   const lastRetryRef = useRef(0);
   const abortRef = useRef(null);
+  const autoRetryRef = useRef(false);
   const paintedRef = useRef(Boolean(stored?.data?.length));
 
   if (stored?.data?.length && !cacheRef.current.size) {
@@ -98,10 +101,8 @@ export function ProductProvider({ children }) {
 
     const started = typeof performance !== 'undefined' ? performance.now() : Date.now();
 
-    let becameSlow = false;
     const slowTimer = window.setTimeout(() => {
       if (!controller.signal.aborted) {
-        becameSlow = true;
         setSlow(true);
       }
     }, SLOW_MS);
@@ -110,7 +111,7 @@ export function ProductProvider({ children }) {
       .get('/products', {
         params: { view: 'summary' },
         signal: controller.signal,
-        timeout: 20000,
+        timeout: SUMMARY_TIMEOUT_MS,
       })
       .then(({ data }) => {
         const list = Array.isArray(data) ? data : [];
@@ -121,6 +122,7 @@ export function ProductProvider({ children }) {
         cacheRef.current.set(key, { data: list, at: Date.now() });
         writeStoredSummary(list);
         paintedRef.current = list.length > 0;
+        autoRetryRef.current = false;
         setAllProducts(list);
         setLastFetchedAt(Date.now());
         setError(false);
@@ -129,8 +131,17 @@ export function ProductProvider({ children }) {
       })
       .catch((err) => {
         if (err?.code === 'ERR_CANCELED' || err?.name === 'CanceledError') return [];
-        setError(true);
-        if (becameSlow) setSlow(true);
+        const hasVisible = paintedRef.current;
+        if (!hasVisible) {
+          setError(true);
+          setSlow(true);
+          if (!autoRetryRef.current) {
+            autoRetryRef.current = true;
+            window.setTimeout(() => {
+              fetchSummary({ force: true }).catch(() => {});
+            }, AUTO_RETRY_DELAY_MS);
+          }
+        }
         throw err;
       })
       .finally(() => {

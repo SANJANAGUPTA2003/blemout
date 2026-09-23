@@ -16,6 +16,7 @@ function HomeProductCard({
   benefit,
   displayName,
   cartProducts,
+  priority = false,
 }) {
   const { addToCart } = useCart();
   const sellingPrice = getSellingPrice(product);
@@ -51,7 +52,8 @@ function HomeProductCard({
           alt={name}
           size="lg"
           role="card"
-          loading="lazy"
+          loading={priority ? 'eager' : 'lazy'}
+          fetchPriority={priority ? 'high' : 'auto'}
           fit="contain"
           containerClass="aspect-square"
           className=""

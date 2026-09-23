@@ -2,6 +2,11 @@ import { memo, useEffect, useRef, useState } from 'react';
 import ProductPlaceholder from './ProductPlaceholder';
 import { getResponsiveImage } from '../../data/productImages';
 
+function canHoverFine() {
+  if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return false;
+  return window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+}
+
 function ProductImage({
   src,
   hoverSrc,
@@ -29,6 +34,7 @@ function ProductImage({
 
   useEffect(() => {
     if (!canSwapOnHover) return undefined;
+    if (!canHoverFine()) return undefined;
     const el = wrapRef.current;
     if (!el || typeof IntersectionObserver === 'undefined') return undefined;
     const io = new IntersectionObserver(
@@ -60,7 +66,7 @@ function ProductImage({
         containerClass.includes('aspect-') ? '' : 'aspect-square'
       } ${containerClass}`}
       onPointerEnter={() => {
-        if (canSwapOnHover) setHoverReady(true);
+        if (canSwapOnHover && canHoverFine()) setHoverReady(true);
       }}
     >
       <picture>

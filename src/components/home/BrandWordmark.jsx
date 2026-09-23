@@ -10,16 +10,20 @@ export default function BrandWordmark({ className = '' }) {
           aria-label="BLEMOUT"
         >
           <img
-            src="/logo-left.png"
+            src="/logo-left-main.webp"
             alt=""
+            width={140}
+            height={140}
             className="h-[clamp(56px,8vw,140px)] w-auto shrink-0 object-contain"
             draggable={false}
             loading="lazy"
             decoding="async"
           />
           <img
-            src="/logo-right.png"
+            src="/logo-right-main.webp"
             alt="BLEMOUT"
+            width={720}
+            height={128}
             className="h-[clamp(48px,7vw,128px)] w-auto max-w-[min(70vw,720px)] object-contain object-left"
             draggable={false}
             loading="lazy"

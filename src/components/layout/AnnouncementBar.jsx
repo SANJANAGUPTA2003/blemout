@@ -13,11 +13,11 @@ export default function AnnouncementBar() {
 
   return (
     <div
-      className="announcement-bar bg-teal text-white overflow-hidden"
+      className="announcement-bar relative w-full max-w-full overflow-x-hidden bg-teal text-white"
       role="region"
       aria-label="Site announcements"
     >
-      <div className="announcement-marquee flex w-max whitespace-nowrap py-2.5 will-change-transform">
+      <div className="announcement-marquee flex w-max max-w-none whitespace-nowrap py-2.5 will-change-transform">
         {loop.map((message, index) => (
           <span
             key={`${message}-${index}`}

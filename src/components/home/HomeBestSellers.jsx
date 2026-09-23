@@ -2,13 +2,28 @@ import { useMemo } from 'react';
 import FadeUp from '../ui/FadeUp';
 import HomeProductCard from '../ui/HomeProductCard';
 import HomeProductPager from './HomeProductPager';
+import ApiMessage from '../ui/ApiMessage';
 import { HOMEPAGE_BEST_SELLERS } from '../../data/homepageConfig';
 import { COLLECTION_SLUGS } from '../../data/storefrontConfig';
 import { useProducts } from '../../context/ProductContext';
 import { getListingHoverImage, getListingImage } from '../../data/productDisplay';
 
+function BestSellerSkeleton() {
+  return (
+    <div className="grid grid-cols-2 gap-5 md:grid-cols-3 lg:grid-cols-4 md:gap-6 lg:gap-8">
+      {Array.from({ length: 4 }).map((_, i) => (
+        <div key={i} className="animate-pulse">
+          <div className="aspect-[4/5] rounded-sm bg-[#eef2f1]" />
+          <div className="mt-4 h-4 w-3/4 rounded bg-[#e8eceb]" />
+          <div className="mt-3 h-10 w-full rounded-full bg-[#eef2f1]" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function HomeBestSellers() {
-  const { loading, getBySlug } = useProducts();
+  const { loading, error, slow, retry, getBySlug } = useProducts();
 
   const cards = useMemo(() => {
     const featured = HOMEPAGE_BEST_SELLERS.map((entry) => {
@@ -45,27 +60,6 @@ export default function HomeBestSellers() {
     return [...featured, ...extras];
   }, [getBySlug]);
 
-  if (loading) {
-    return (
-      <section className="bg-white py-16 md:py-24">
-        <div className="mx-auto max-w-[1520px] px-5 md:px-8 lg:px-10 xl:px-12">
-          <div className="mb-10 h-10 w-56 animate-pulse rounded bg-[#eef2f1]" />
-          <div className="grid grid-cols-2 gap-5 md:grid-cols-3 lg:grid-cols-4 md:gap-6 lg:gap-8">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="animate-pulse">
-                <div className="aspect-[4/5] rounded-sm bg-[#eef2f1]" />
-                <div className="mt-4 h-4 w-3/4 rounded bg-[#e8eceb]" />
-                <div className="mt-3 h-10 w-full rounded-full bg-[#eef2f1]" />
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-    );
-  }
-
-  if (!cards.length) return null;
-
   return (
     <section className="relative z-10 bg-white py-16 md:py-24">
       <div className="mx-auto max-w-[1520px] px-5 md:px-8 lg:px-10 xl:px-12">
@@ -75,20 +69,35 @@ export default function HomeBestSellers() {
           </div>
         </FadeUp>
 
-        <HomeProductPager>
-          {cards.map((card) => (
-            <HomeProductCard
-              key={card.key}
-              product={card.product}
-              image={card.image}
-              hoverImage={card.hoverImage}
-              badge={card.badge}
-              benefit={card.benefit}
-              displayName={card.displayName}
-              cartProducts={card.cartProducts}
-            />
-          ))}
-        </HomeProductPager>
+        {cards.length ? (
+          <HomeProductPager>
+            {cards.map((card, i) => (
+              <HomeProductCard
+                key={card.key}
+                product={card.product}
+                image={card.image}
+                hoverImage={card.hoverImage}
+                badge={card.badge}
+                benefit={card.benefit}
+                displayName={card.displayName}
+                cartProducts={card.cartProducts}
+                priority={i < 2}
+              />
+            ))}
+          </HomeProductPager>
+        ) : loading ? (
+          <BestSellerSkeleton />
+        ) : error ? (
+          <ApiMessage
+            type="offline"
+            message={
+              slow
+                ? 'Products are taking a little longer to load. Please wait or retry.'
+                : 'Unable to load products.'
+            }
+            onRetry={retry}
+          />
+        ) : null}
       </div>
     </section>
   );

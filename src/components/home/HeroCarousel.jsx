@@ -1,20 +1,23 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { HOMEPAGE_HERO_SLIDES } from '../../data/homepageConfig';
 
 const INTERVAL_MS = 5000;
 const TRANSITION_MS = 600;
+const APPROACH_MS = 400;
 
-/** Intrinsic size of both original landing JPEGs in /public/hero (measured 3840×1700). */
-const HERO_WIDTH = 3840;
-const HERO_HEIGHT = 1700;
+/** Intrinsic size of the optimized landing banners (same 2.26:1 ratio as the originals). */
+const HERO_WIDTH = 1024;
+const HERO_HEIGHT = 453;
 
 /** Full-bleed landing banners — the image is the section, with no letterbox frame. */
 export default function HeroCarousel() {
   const [index, setIndex] = useState(0);
   const [loaded, setLoaded] = useState(() => new Set([0]));
+  const indexRef = useRef(0);
   const count = HOMEPAGE_HERO_SLIDES.length;
+  indexRef.current = index;
 
   const mark = (i) => {
     setLoaded((prev) => {
@@ -29,68 +32,70 @@ export default function HeroCarousel() {
     setIndex((i) => {
       const next = (i + dir + count) % count;
       mark(next);
-      mark((next + 1) % count);
       return next;
     });
   };
 
   useEffect(() => {
     if (count < 2) return undefined;
-    const warm = window.setTimeout(() => mark(1), 700);
+
+    const approach = window.setTimeout(() => {
+      mark((indexRef.current + 1) % count);
+    }, Math.max(0, INTERVAL_MS - APPROACH_MS));
+
     const id = window.setInterval(() => {
       setIndex((i) => {
         const next = (i + 1) % count;
         mark(next);
-        mark((next + 1) % count);
         return next;
       });
     }, INTERVAL_MS);
+
     return () => {
-      window.clearTimeout(warm);
+      window.clearTimeout(approach);
       window.clearInterval(id);
     };
   }, [count]);
 
   return (
-    <section className="relative z-0 w-full overflow-hidden bg-white">
-      <div className="relative w-full overflow-hidden">
-        <div
-          className="hero-slideshow-track flex w-full"
-          style={{
-            transform: `translate3d(-${index * 100}%, 0, 0)`,
-            transition: `transform ${TRANSITION_MS}ms cubic-bezier(0.25, 0.1, 0.25, 1)`,
-          }}
-        >
-          {HOMEPAGE_HERO_SLIDES.map((hero, i) => (
-            <Link
-              key={hero.id}
-              to={hero.to}
-              aria-label={hero.alt}
-              tabIndex={i === index ? 0 : -1}
-              className="relative block w-full min-w-full shrink-0 cursor-pointer overflow-hidden"
-            >
-              {loaded.has(i) ? (
-                <img
-                  src={hero.image}
-                  alt={hero.alt}
-                  width={HERO_WIDTH}
-                  height={HERO_HEIGHT}
-                  loading={i === 0 ? 'eager' : 'lazy'}
-                  fetchPriority={i === 0 ? 'high' : 'low'}
-                  decoding={i === 0 ? 'sync' : 'async'}
-                  draggable={false}
-                  className="block h-auto w-full max-w-full"
-                />
-              ) : (
-                <div
-                  className="w-full bg-white"
-                  style={{ aspectRatio: `${HERO_WIDTH} / ${HERO_HEIGHT}` }}
-                  aria-hidden="true"
-                />
-              )}
-            </Link>
-          ))}
-        </div>
+    <section className="relative z-0 w-full min-w-0 max-w-full overflow-x-hidden bg-white">
+      <div
+        className="relative w-full min-w-0 max-w-full overflow-hidden"
+        style={{ aspectRatio: `${HERO_WIDTH} / ${HERO_HEIGHT}` }}
+      >
+        {HOMEPAGE_HERO_SLIDES.map((hero, i) => (
+          <Link
+            key={hero.id}
+            to={hero.to}
+            aria-label={hero.alt}
+            tabIndex={i === index ? 0 : -1}
+            className="hero-slideshow-track absolute inset-0 block min-w-0 w-full max-w-full cursor-pointer overflow-hidden"
+            style={{
+              transform: `translate3d(${(i - index) * 100}%, 0, 0)`,
+              transition: `transform ${TRANSITION_MS}ms cubic-bezier(0.25, 0.1, 0.25, 1)`,
+            }}
+          >
+            {loaded.has(i) ? (
+              <img
+                src={hero.image}
+                alt={hero.alt}
+                width={HERO_WIDTH}
+                height={HERO_HEIGHT}
+                loading={i === 0 ? 'eager' : 'lazy'}
+                fetchPriority={i === 0 ? 'high' : 'low'}
+                decoding="async"
+                draggable={false}
+                className="block h-full w-full max-w-full object-cover"
+              />
+            ) : (
+              <div
+                className="h-full w-full max-w-full"
+                style={{ backgroundColor: hero.bg || '#ffffff' }}
+                aria-hidden="true"
+              />
+            )}
+          </Link>
+        ))}
 
         {count > 1 && (
           <>

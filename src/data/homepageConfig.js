@@ -15,14 +15,14 @@ export const HOMEPAGE_ANNOUNCEMENTS = [
 export const HOMEPAGE_HERO_SLIDES = [
   {
     id: 'hero-landing-1',
-    image: '/hero/BLEMOUT%20landing%20page%201.jpg.jpeg',
+    image: '/hero/landing-sun-defence-sep2026.jpg',
     alt: 'BLEMOUT Advanced Sun Defence everyday — SPF 50+ moisturiser radiance',
     to: '/shop',
     bg: '#8ec8ef',
   },
   {
     id: 'hero-landing-2',
-    image: '/hero/BLEMOUT%20landing%20page%202.jpg.jpeg',
+    image: '/hero/landing-combo-12off-sep2026.jpg',
     alt: "BLEMOUT — your skin's complete love story, 12% off on combo",
     to: '/limited-picks',
     bg: '#d8efe9',

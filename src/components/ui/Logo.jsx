@@ -1,7 +1,17 @@
 import { Link } from 'react-router-dom';
 
-function LogoImage({ src, alt, className }) {
-  return <img src={src} alt={alt} className={className} draggable={false} />;
+function LogoImage({ src, alt, className, width, height }) {
+  return (
+    <img
+      src={src}
+      alt={alt}
+      className={className}
+      width={width}
+      height={height}
+      draggable={false}
+      decoding="async"
+    />
+  );
 }
 
 function goHomeTop(e) {
@@ -23,13 +33,17 @@ export default function Logo({ className = '', variant = 'navbar' }) {
         style={{ width: 'clamp(132px, 16vw, 176px)' }}
       >
         <LogoImage
-          src="/logo-left.png"
+          src="/logo-left-card.webp"
           alt=""
+          width={44}
+          height={44}
           className="h-9 w-9 sm:h-10 sm:w-10 md:h-11 md:w-11 object-contain shrink-0"
         />
         <LogoImage
-          src="/logo-right.png"
+          src="/logo-right-card.webp"
           alt="BLEMOUT"
+          width={176}
+          height={36}
           className="h-7 sm:h-8 md:h-9 w-auto flex-1 min-w-0 object-contain object-left"
         />
       </Link>
@@ -46,13 +60,17 @@ export default function Logo({ className = '', variant = 'navbar' }) {
         aria-label="BLEMOUT home"
       >
         <LogoImage
-          src="/logo-left.png"
+          src="/logo-left-card.webp"
           alt=""
+          width={40}
+          height={40}
           className="h-9 w-9 md:h-10 md:w-10 object-contain shrink-0"
         />
         <LogoImage
-          src="/logo-right.png"
+          src="/logo-right-card.webp"
           alt="BLEMOUT"
+          width={176}
+          height={32}
           className="h-7 md:h-8 w-auto max-w-[11rem] object-contain object-left"
         />
       </Link>
@@ -62,13 +80,17 @@ export default function Logo({ className = '', variant = 'navbar' }) {
   return (
     <Link to="/" onClick={goHomeTop} className={`inline-flex items-center gap-2.5 shrink-0 ${className}`} aria-label="BLEMOUT home">
       <LogoImage
-        src="/logo-left.png"
+        src="/logo-left-card.webp"
         alt=""
+        width={32}
+        height={32}
         className="h-8 w-8 object-contain shrink-0"
       />
       <LogoImage
-        src="/logo-right.png"
+        src="/logo-right-card.webp"
         alt="BLEMOUT"
+        width={160}
+        height={28}
         className="h-7 w-auto max-w-[10rem] object-contain object-left"
       />
     </Link>
