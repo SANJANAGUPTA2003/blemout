@@ -8,7 +8,7 @@ import { buildOrderTrackingMessage, buildWhatsAppShareUrl } from '../utils/order
 export default function OrderSuccess() {
   const location = useLocation();
   const orderId = location.state?.orderId || '';
-  const customerName = location.state?.customerName || '';
+  const productName = location.state?.productName || 'BLEMOUT Face Wash';
   const [copied, setCopied] = useState(false);
 
   const copyOrderId = async () => {
@@ -19,7 +19,13 @@ export default function OrderSuccess() {
   };
 
   const whatsappUrl = orderId
-    ? buildWhatsAppShareUrl(buildOrderTrackingMessage({ orderId, customerName }))
+    ? buildWhatsAppShareUrl(
+        buildOrderTrackingMessage({
+          orderId,
+          productName,
+          origin: window.location.origin,
+        })
+      )
     : null;
 
   return (
@@ -36,14 +42,9 @@ export default function OrderSuccess() {
             <div className="mt-6 bg-mint-strong/25 rounded-2xl p-6">
               <p className="text-sm text-soft-text">Your Secure Order ID</p>
               <p className="text-2xl font-bold text-teal tracking-wider mt-1">{orderId}</p>
-              <button
-                type="button"
-                onClick={copyOrderId}
-                className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-dark-teal hover:text-teal transition-colors"
-              >
-                <Copy size={16} />
-                {copied ? 'Copied!' : 'Copy Order ID'}
-              </button>
+              {copied ? (
+                <p className="mt-4 text-sm font-medium text-dark-teal">Order ID copied</p>
+              ) : null}
             </div>
           ) : (
             <p className="mt-6 text-sm text-soft-text">Your order confirmation details will arrive shortly.</p>
@@ -53,15 +54,21 @@ export default function OrderSuccess() {
             Save this Order ID. You will need it along with your phone number to track your order.
           </p>
 
-          <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
+          <div className="mt-8 flex flex-col sm:flex-row flex-wrap gap-3 justify-center">
             {orderId && (
               <Link to={`/track-order?orderId=${encodeURIComponent(orderId)}`}>
                 <Button className="w-full sm:w-auto">Track Order</Button>
               </Link>
             )}
+            {orderId && (
+              <Button type="button" variant="secondary" className="w-full sm:w-auto gap-2" onClick={copyOrderId}>
+                <Copy size={16} />
+                {copied ? 'Copied!' : 'Share Order ID'}
+              </Button>
+            )}
             {whatsappUrl && (
               <a href={whatsappUrl} target="_blank" rel="noopener noreferrer">
-                <Button variant="secondary" className="w-full sm:w-auto gap-2">
+                <Button type="button" variant="secondary" className="w-full sm:w-auto gap-2">
                   <MessageCircle size={16} />
                   Share on WhatsApp
                 </Button>

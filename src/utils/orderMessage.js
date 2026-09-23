@@ -1,17 +1,32 @@
-export function buildOrderTrackingMessage({ orderId, customerName = 'there' }) {
-  const firstName = customerName.split(' ')[0] || 'there';
-  const trackUrl = `${window.location.origin}/track-order?orderId=${encodeURIComponent(orderId)}`;
+export function storefrontTrackUrl(orderId, origin = '') {
+  const base = String(origin || 'https://www.blemout.com').replace(/\/$/, '');
+  return `${base}/track-order?orderId=${encodeURIComponent(orderId)}`;
+}
 
-  return `Hi ${firstName}, your BLEMOUT order has been confirmed.
+export function buildCustomerWhatsAppShareMessage({
+  orderId,
+  productName = 'BLEMOUT Face Wash',
+  origin,
+}) {
+  const trackUrl = storefrontTrackUrl(orderId, origin);
+  return `🎉 My BLEMOUT order has been placed!
 
 Order ID: ${orderId}
 
-Track your order here:
-${trackUrl}
+Product: ${productName}
 
-Use your Order ID and phone number to check status.`;
+Track my order:
+${trackUrl}`;
 }
 
 export function buildWhatsAppShareUrl(message) {
   return `https://wa.me/?text=${encodeURIComponent(message)}`;
+}
+
+export function buildOrderTrackingMessage({ orderId, customerName = 'there', productName, origin }) {
+  return buildCustomerWhatsAppShareMessage({
+    orderId,
+    productName: productName || 'BLEMOUT Face Wash',
+    origin: origin || (typeof window !== 'undefined' ? window.location.origin : 'https://www.blemout.com'),
+  });
 }

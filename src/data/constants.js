@@ -148,6 +148,15 @@ export const orderStatuses = [
   { key: 'processing', label: 'Processing' },
   { key: 'shipped', label: 'Shipped' },
   { key: 'delivered', label: 'Delivered' },
+  { key: 'cancelled', label: 'Cancelled' },
+];
+
+export const customerCancelReasons = [
+  'Changed my mind',
+  'Ordered by mistake',
+  'Found another product',
+  'Delivery time is too long',
+  'Other',
 ];
 
 export const routineSuggestions = {

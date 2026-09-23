@@ -1,10 +1,12 @@
-import crypto from 'crypto';
 import Razorpay from 'razorpay';
 import Order from '../models/Order.js';
 import { generateOrderId } from '../utils/orderId.js';
 import { hashPhone } from '../utils/phoneHash.js';
 import { isRazorpayConfigured, PAYMENT_UNAVAILABLE_MESSAGE } from '../utils/razorpayConfig.js';
-import { decrementStock, validateAndPriceCart, validateCustomer } from '../utils/checkout.js';
+import { validateAndPriceCart, validateCustomer } from '../utils/checkout.js';
+import { capturePaidOrder } from '../utils/capturePaidOrder.js';
+import { paymentMatchesOrder } from '../utils/paymentCapture.js';
+import { expectedCheckoutSignature, timingSafeEqualString } from '../utils/secureCompare.js';
 
 const getRazorpay = () =>
   new Razorpay({
@@ -51,7 +53,18 @@ export const createPaymentOrder = async (req, res) => {
     const customer = customerResult.customer;
     const hashedPhone = await hashPhone(customer.phone);
 
-    const blemoutOrder = await Order.create({
+    let razorpayOrder;
+    try {
+      razorpayOrder = await getRazorpay().orders.create({
+        amount: priced.amountPaise,
+        currency: 'INR',
+        receipt: orderId,
+      });
+    } catch (error) {
+      return res.status(502).json({ message: razorpayClientMessage(error) });
+    }
+
+    await Order.create({
       orderId,
       customerName: customer.name,
       phone: customer.phone,
@@ -66,21 +79,9 @@ export const createPaymentOrder = async (req, res) => {
       paymentMethod: 'razorpay',
       paymentStatus: 'pending',
       orderStatus: 'pending',
+      razorpayOrderId: razorpayOrder.id,
+      stockDecremented: false,
     });
-
-    let razorpayOrder;
-    try {
-      razorpayOrder = await getRazorpay().orders.create({
-        amount: priced.amountPaise,
-        currency: 'INR',
-        receipt: orderId,
-      });
-    } catch (error) {
-      return res.status(502).json({ message: razorpayClientMessage(error) });
-    }
-
-    blemoutOrder.razorpayOrderId = razorpayOrder.id;
-    await blemoutOrder.save();
 
     return res.json({
       available: true,
@@ -95,6 +96,16 @@ export const createPaymentOrder = async (req, res) => {
     return res.status(500).json({ message: 'Unable to create payment order. Please try again.' });
   }
 };
+
+async function fetchPaymentSafely(paymentId) {
+  try {
+    const payment = await getRazorpay().payments.fetch(paymentId);
+    return { ok: true, payment };
+  } catch (error) {
+    console.info('[BLEMOUT payment] gateway lookup failed:', error.message);
+    return { ok: false };
+  }
+}
 
 export const verifyPayment = async (req, res) => {
   if (!isRazorpayConfigured()) {
@@ -137,38 +148,36 @@ export const verifyPayment = async (req, res) => {
       return res.status(400).json({ message: 'Payment does not match this order.' });
     }
 
-    if (order.paymentStatus === 'paid') {
-      return res.json({
-        message: 'Payment verified',
-        order: { orderId: order.orderId },
-      });
-    }
-
-    const expectedSignature = crypto
-      .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
-      .update(`${serverRazorpayOrderId}|${razorpay_payment_id}`)
-      .digest('hex');
-
-    if (expectedSignature !== razorpay_signature) {
-      order.paymentStatus = 'failed';
-      await order.save();
+    const expectedSignature = expectedCheckoutSignature(
+      serverRazorpayOrderId,
+      razorpay_payment_id,
+      process.env.RAZORPAY_KEY_SECRET
+    );
+    if (!timingSafeEqualString(expectedSignature, razorpay_signature)) {
       return res.status(400).json({ message: 'Invalid payment signature.' });
     }
 
-    order.razorpayPaymentId = razorpay_payment_id;
-    order.razorpaySignature = razorpay_signature;
-    order.paymentStatus = 'paid';
-    await order.save();
+    const fetched = await fetchPaymentSafely(razorpay_payment_id);
+    let paymentEntity = fetched.ok ? fetched.payment : null;
+    if (paymentEntity) {
+      const match = paymentMatchesOrder(order, paymentEntity);
+      if (!match.ok) {
+        return res.status(400).json({ message: 'Payment does not match this order.' });
+      }
+    }
 
-    try {
-      await decrementStock(order.items);
-    } catch {
-      // Keep the order paid if money was captured; stock is an ops follow-up.
+    const result = await capturePaidOrder(order, {
+      paymentId: razorpay_payment_id,
+      signature: razorpay_signature,
+      paymentEntity,
+    });
+    if (!result.ok) {
+      return res.status(result.statusCode || 400).json({ message: result.message });
     }
 
     return res.json({
       message: 'Payment verified',
-      order: { orderId: order.orderId },
+      order: { orderId: result.order.orderId },
     });
   } catch {
     return res.status(500).json({ message: 'Unable to verify payment. Please try again.' });

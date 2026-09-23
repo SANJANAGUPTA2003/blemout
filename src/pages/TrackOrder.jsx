@@ -1,28 +1,46 @@
 import { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { CheckCircle, Circle, Package, Truck, ShieldCheck } from 'lucide-react';
+import { CheckCircle, Circle, Package, Truck, ShieldCheck, Ban, MapPin } from 'lucide-react';
 import FadeUp from '../components/ui/FadeUp';
 import SmartImage from '../components/ui/SmartImage';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
+import ConfirmDialog from '../components/ui/ConfirmDialog';
 import api from '../utils/api';
 import { formatDate } from '../utils/format';
+import { customerCancelReasons } from '../data/constants';
 
 const TRACKING_ERROR = 'Order not found or details do not match.';
 
 const steps = [
-  { key: 'placed', label: 'Order Placed', icon: Package },
-  { key: 'processing', label: 'Processing', icon: Circle },
+  { key: 'pending', label: 'Placed', icon: Package },
+  { key: 'processing', label: 'Confirmed', icon: Circle },
   { key: 'shipped', label: 'Shipped', icon: Truck },
+  { key: 'in_transit', label: 'In Transit', icon: Truck },
+  { key: 'out_for_delivery', label: 'Out for Delivery', icon: MapPin },
   { key: 'delivered', label: 'Delivered', icon: CheckCircle },
 ];
 
-function statusIndex(status = '') {
-  const value = status.toLowerCase();
-  if (value.includes('deliver')) return 3;
-  if (value.includes('ship')) return 2;
-  if (value.includes('process') || value.includes('confirm')) return 1;
-  return 0;
+function statusLabel(order) {
+  if (order?.statusLabel) return order.statusLabel;
+  const value = String(order?.orderStatus || order?.status || '').toLowerCase();
+  if (value === 'cancelled') return 'Cancelled';
+  if (value === 'delivered') return 'Delivered';
+  if (value === 'out_for_delivery') return 'Out for Delivery';
+  if (value === 'in_transit') return 'In Transit';
+  if (value === 'shipped') return 'Shipped';
+  if (value === 'processing') return 'Confirmed';
+  if (value === 'pending') return 'Placed';
+  return value || 'Placed';
+}
+
+function paymentLabel(order) {
+  const method = String(order?.paymentMethod || '').toLowerCase();
+  const status = String(order?.paymentStatus || '').toLowerCase();
+  if (method === 'cod') return status === 'paid' ? 'COD (collected)' : 'Cash on delivery';
+  if (status === 'paid') return 'Paid online';
+  if (status === 'failed') return 'Payment failed';
+  return 'Payment pending';
 }
 
 export default function TrackOrder() {
@@ -32,6 +50,10 @@ export default function TrackOrder() {
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [notice, setNotice] = useState('');
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [cancelReason, setCancelReason] = useState('');
+  const [cancelling, setCancelling] = useState(false);
 
   useEffect(() => {
     const id = searchParams.get('orderId');
@@ -50,6 +72,7 @@ export default function TrackOrder() {
 
     setLoading(true);
     setError('');
+    setNotice('');
     setOrder(null);
 
     try {
@@ -65,7 +88,39 @@ export default function TrackOrder() {
     }
   };
 
-  const activeStep = order ? statusIndex(order.status) : -1;
+  const confirmCancel = async () => {
+    setCancelling(true);
+    setError('');
+    try {
+      const { data } = await api.post('/orders/cancel', {
+        orderId: orderId.trim().toUpperCase(),
+        phone: phone.trim(),
+        reason: cancelReason,
+      });
+      setOrder((prev) => ({
+        ...prev,
+        ...data,
+        canCancel: false,
+        orderStatus: data.orderStatus || 'cancelled',
+        status: data.orderStatus || 'cancelled',
+      }));
+      setNotice(data.message || 'Your order has been cancelled successfully.');
+      setConfirmOpen(false);
+      setCancelReason('');
+    } catch (err) {
+      setError(
+        err.response?.data?.message || "We couldn't cancel the order right now. Please try again."
+      );
+      setConfirmOpen(false);
+    } finally {
+      setCancelling(false);
+    }
+  };
+
+  const currentStatus = order?.orderStatus || order?.status || '';
+  const cancelled = String(currentStatus).toLowerCase() === 'cancelled';
+  const timeline = Array.isArray(order?.timeline) && order.timeline.length ? order.timeline : steps;
+  const canCancel = Boolean(order?.canCancel) && !cancelled;
 
   return (
     <div className="bg-white">
@@ -103,6 +158,7 @@ export default function TrackOrder() {
                 type="tel"
               />
               {error && <p className="text-[15px] text-red-500">{error}</p>}
+              {notice && <p className="text-[15px] text-dark-teal">{notice}</p>}
               <Button type="submit" disabled={loading} className="w-full sm:w-auto">
                 {loading ? 'Verifying...' : 'Track Order'}
               </Button>
@@ -150,29 +206,84 @@ export default function TrackOrder() {
                     </p>
                   )}
                 </div>
-                <p className="text-[15px] font-semibold capitalize text-teal">
-                  {order.status || 'Placed'}
+                <p
+                  className={`text-[15px] font-semibold ${
+                    cancelled ? 'text-red-600' : 'text-teal'
+                  }`}
+                >
+                  {statusLabel(order)}
                 </p>
               </div>
 
-              <div className="grid gap-4 sm:grid-cols-4">
-                {steps.map((step, i) => {
-                  const Icon = step.icon;
-                  const done = i <= activeStep;
-                  return (
-                    <div
-                      key={step.key}
-                      className={`p-4 border ${done ? 'border-teal/40 bg-[#f7faf9]' : 'border-gray-100'}`}
-                    >
-                      <Icon size={18} className={done ? 'text-teal' : 'text-soft-text'} />
-                      <p
-                        className={`mt-3 text-[15px] font-semibold ${done ? 'text-text' : 'text-soft-text'}`}
+              {cancelled ? (
+                <div className="border border-red-100 bg-[#fff7f7] p-4">
+                  <Ban size={18} className="text-red-500" />
+                  <p className="mt-3 text-[15px] font-semibold text-[#222222]">Cancelled</p>
+                  <p className="mt-1 text-[15px] text-[#4a5560]">
+                    This order is no longer active.
+                    {order.cancelledAt ? ` Cancelled on ${formatDate(order.cancelledAt)}.` : ''}
+                  </p>
+                  {order.refundStatus === 'PENDING' && (
+                    <p className="mt-2 text-[14px] text-[#4a5560]">
+                      If you paid online, a refund will be processed to your original payment method.
+                    </p>
+                  )}
+                  {order.refundStatus === 'REFUNDED' && (
+                    <p className="mt-2 text-[14px] text-[#4a5560]">
+                      A refund has been initiated to your original payment method.
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {timeline.map((step) => {
+                    const meta = steps.find((s) => s.key === step.key) || steps[0];
+                    const Icon = meta.icon;
+                    const done = Boolean(step.complete);
+                    return (
+                      <div
+                        key={step.key}
+                        className={`p-4 border ${done ? 'border-teal/40 bg-[#f7faf9]' : 'border-gray-100'}`}
                       >
-                        {step.label}
-                      </p>
-                    </div>
-                  );
-                })}
+                        <Icon size={18} className={done ? 'text-teal' : 'text-soft-text'} />
+                        <p
+                          className={`mt-3 text-[15px] font-semibold ${done ? 'text-text' : 'text-soft-text'}`}
+                        >
+                          {step.label || meta.label}
+                        </p>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              <div className="mt-10 space-y-2 text-[15px] text-[#4a5560]">
+                <p>
+                  <span className="font-semibold text-[#222222]">Payment:</span> {paymentLabel(order)}
+                </p>
+                {order.courier ? (
+                  <p>
+                    <span className="font-semibold text-[#222222]">Courier:</span> {order.courier}
+                  </p>
+                ) : null}
+                {(order.awbNumber || order.trackingNumber) ? (
+                  <p>
+                    <span className="font-semibold text-[#222222]">AWB / Tracking:</span>{' '}
+                    {order.awbNumber || order.trackingNumber}
+                  </p>
+                ) : null}
+                {order.trackingUrl ? (
+                  <p>
+                    <a
+                      href={order.trackingUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-semibold text-dark-teal hover:text-teal"
+                    >
+                      Open courier tracking
+                    </a>
+                  </p>
+                ) : null}
               </div>
 
               {order.items?.length > 0 && (
@@ -193,6 +304,14 @@ export default function TrackOrder() {
                 </div>
               )}
 
+              {canCancel && (
+                <div className="mt-8">
+                  <Button type="button" variant="outline" className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700 hover:border-red-300" onClick={() => setConfirmOpen(true)}>
+                    Cancel Order
+                  </Button>
+                </div>
+              )}
+
               <p className="mt-8 text-[15px] text-[#4a5560]">
                 Need help?{' '}
                 <Link to="/contact" className="font-semibold text-dark-teal hover:text-teal">
@@ -203,6 +322,37 @@ export default function TrackOrder() {
           </FadeUp>
         )}
       </div>
+
+      <ConfirmDialog
+        open={confirmOpen}
+        title="Are you sure you want to cancel this order?"
+        message="This cannot be undone. Eligible paid orders will be reviewed for a refund to the original payment method."
+        confirmLabel="Cancel Order"
+        cancelLabel="Keep Order"
+        loading={cancelling}
+        onCancel={() => {
+          if (!cancelling) setConfirmOpen(false);
+        }}
+        onConfirm={confirmCancel}
+      >
+        <div className="mt-5">
+          <label className="mb-1.5 block text-[15px] font-medium text-text">
+            Reason <span className="font-normal text-soft-text">(optional)</span>
+          </label>
+          <select
+            value={cancelReason}
+            onChange={(e) => setCancelReason(e.target.value)}
+            className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3.5 text-[15px] text-text focus:border-teal focus:outline-none focus:ring-2 focus:ring-light-teal"
+          >
+            <option value="">Select a reason</option>
+            {customerCancelReasons.map((reason) => (
+              <option key={reason} value={reason}>
+                {reason}
+              </option>
+            ))}
+          </select>
+        </div>
+      </ConfirmDialog>
     </div>
   );
 }

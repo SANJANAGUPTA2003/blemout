@@ -3,10 +3,24 @@ import { Eye, X } from 'lucide-react';
 import FadeUp from '../../components/ui/FadeUp';
 import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
+import ConfirmDialog from '../../components/ui/ConfirmDialog';
 import { formatPrice, formatDate } from '../../utils/format';
 import api from '../../utils/api';
 
-const statusOptions = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
+const statusOptions = ['pending', 'processing'];
+const statusLabels = {
+  pending: 'placed',
+  processing: 'confirmed',
+  shipped: 'shipped',
+  in_transit: 'in transit',
+  out_for_delivery: 'out for delivery',
+  delivered: 'delivered',
+  cancelled: 'cancelled',
+};
+
+function isShippedLike(status) {
+  return ['shipped', 'in_transit', 'out_for_delivery'].includes(status);
+}
 
 export default function AdminOrders() {
   const [orders, setOrders] = useState([]);
@@ -15,6 +29,12 @@ export default function AdminOrders() {
   const [trackingNumber, setTrackingNumber] = useState('');
   const [estimatedDelivery, setEstimatedDelivery] = useState('');
   const [adminNotes, setAdminNotes] = useState('');
+  const [cancelOpen, setCancelOpen] = useState(false);
+  const [shipOpen, setShipOpen] = useState(false);
+  const [cancelReason, setCancelReason] = useState('');
+  const [cancelling, setCancelling] = useState(false);
+  const [shipping, setShipping] = useState(false);
+  const [actionError, setActionError] = useState('');
 
   const fetchOrders = () => {
     api.get('/orders').then(({ data }) => setOrders(data)).finally(() => setLoading(false));
@@ -30,9 +50,13 @@ export default function AdminOrders() {
   };
 
   const updateStatus = async (orderId, status) => {
-    await api.put(`/orders/${orderId}/status`, { status });
-    fetchOrders();
-    if (selected) setSelected({ ...selected, orderStatus: status });
+    try {
+      await api.put(`/orders/${orderId}/status`, { status });
+      fetchOrders();
+      if (selected) setSelected({ ...selected, orderStatus: status });
+    } catch (err) {
+      setActionError(err.response?.data?.message || 'Unable to update order status.');
+    }
   };
 
   const saveTrackingDetails = async () => {
@@ -46,10 +70,60 @@ export default function AdminOrders() {
     fetchOrders();
   };
 
+  const canCancelSelected =
+    selected &&
+    ['pending', 'processing', 'shipped', 'in_transit', 'out_for_delivery'].includes(selected.orderStatus);
+
+  const canShipSelected =
+    selected &&
+    ['pending', 'processing'].includes(selected.orderStatus) &&
+    !(selected.paymentMethod === 'razorpay' && selected.paymentStatus !== 'paid');
+
+  const confirmAdminCancel = async () => {
+    if (!selected) return;
+    setCancelling(true);
+    setActionError('');
+    try {
+      const { data } = await api.post(`/orders/${selected._id}/cancel`, {
+        reason: cancelReason,
+      });
+      setSelected(data.order);
+      setCancelOpen(false);
+      setCancelReason('');
+      fetchOrders();
+    } catch (err) {
+      setActionError(err.response?.data?.message || "We couldn't cancel the order right now. Please try again.");
+      setCancelOpen(false);
+    } finally {
+      setCancelling(false);
+    }
+  };
+
+  const confirmShipOrder = async () => {
+    if (!selected) return;
+    setShipping(true);
+    setActionError('');
+    try {
+      const { data } = await api.post(`/orders/${selected._id}/ship`);
+      setSelected(data.order);
+      setShipOpen(false);
+      fetchOrders();
+    } catch (err) {
+      setActionError(
+        err.response?.data?.message || 'Unable to create shipment. The order was not marked as shipped.'
+      );
+      setShipOpen(false);
+    } finally {
+      setShipping(false);
+    }
+  };
+
   const statusColor = {
     pending: 'bg-yellow-50 text-yellow-600',
     processing: 'bg-blue-50 text-blue-600',
     shipped: 'bg-purple-50 text-purple-600',
+    in_transit: 'bg-purple-50 text-purple-600',
+    out_for_delivery: 'bg-indigo-50 text-indigo-600',
     delivered: 'bg-green-50 text-green-600',
     cancelled: 'bg-red-50 text-red-600',
   };
@@ -92,8 +166,8 @@ export default function AdminOrders() {
                         </span>
                       </td>
                       <td className="p-4">
-                        <span className={`px-2 py-1 rounded-full text-xs capitalize ${statusColor[order.orderStatus]}`}>
-                          {order.orderStatus}
+                        <span className={`px-2 py-1 rounded-full text-xs capitalize ${statusColor[order.orderStatus] || 'bg-gray-50 text-gray-600'}`}>
+                          {statusLabels[order.orderStatus] || order.orderStatus}
                         </span>
                       </td>
                       <td className="p-4 text-soft-text">{formatDate(order.createdAt)}</td>
@@ -145,9 +219,47 @@ export default function AdminOrders() {
                 </div>
               </div>
               <div>
+                <p className="text-soft-text">Payment</p>
+                <p className="font-medium capitalize">
+                  {selected.paymentMethod} · {selected.paymentStatus}
+                </p>
+              </div>
+              <div>
                 <p className="text-soft-text">Razorpay Payment ID</p>
                 <p className="font-mono text-xs">{selected.razorpayPaymentId || 'N/A'}</p>
               </div>
+              <div>
+                <p className="text-soft-text">Shipment</p>
+                <p className="font-medium capitalize">{selected.shipmentStatus || selected.orderStatus}</p>
+                {selected.courier ? <p>Courier: {selected.courier}</p> : null}
+                {selected.awbNumber || selected.trackingNumber ? (
+                  <p>AWB: {selected.awbNumber || selected.trackingNumber}</p>
+                ) : null}
+                {selected.trackingUrl ? (
+                  <a
+                    href={selected.trackingUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-teal hover:underline"
+                  >
+                    Tracking URL
+                  </a>
+                ) : null}
+              </div>
+              <div>
+                <p className="text-soft-text">Refund status</p>
+                <p className="font-medium">{selected.refundStatus || 'NOT_APPLICABLE'}</p>
+              </div>
+              {selected.orderStatus === 'cancelled' && (
+                <div className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
+                  <p className="font-semibold">Cancelled</p>
+                  {selected.cancelledAt && <p>Date: {formatDate(selected.cancelledAt)}</p>}
+                  {selected.cancelledBy && <p>Cancelled by: {selected.cancelledBy}</p>}
+                  {selected.cancellationReason && <p>Reason: {selected.cancellationReason}</p>}
+                </div>
+              )}
+              {actionError && <p className="text-sm text-red-500">{actionError}</p>}
+              {selected.orderStatus === 'pending' && (
               <div>
                 <label className="block text-soft-text mb-1">Update Status</label>
                 <select
@@ -156,10 +268,11 @@ export default function AdminOrders() {
                   className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-teal capitalize"
                 >
                   {statusOptions.map((s) => (
-                    <option key={s} value={s}>{s}</option>
+                    <option key={s} value={s}>{statusLabels[s] || s}</option>
                   ))}
                 </select>
               </div>
+              )}
               <Input
                 label="Tracking Number"
                 value={trackingNumber}
@@ -183,10 +296,96 @@ export default function AdminOrders() {
               <Button type="button" onClick={saveTrackingDetails} className="w-full">
                 Save Tracking Details
               </Button>
+              {canShipSelected && (
+                <Button
+                  type="button"
+                  className="w-full"
+                  onClick={() => {
+                    setActionError('');
+                    setShipOpen(true);
+                  }}
+                >
+                  Ship Order
+                </Button>
+              )}
+              {canCancelSelected && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full border-red-200 text-red-600 hover:border-red-300 hover:bg-red-50 hover:text-red-700"
+                  onClick={() => {
+                    setActionError('');
+                    setCancelOpen(true);
+                  }}
+                >
+                  Cancel Order
+                </Button>
+              )}
             </div>
           </div>
         </div>
       )}
+
+      <ConfirmDialog
+        open={cancelOpen && Boolean(selected)}
+        title={`Cancel order ${selected?.orderId || ''}?`}
+        message={
+          isShippedLike(selected?.orderStatus)
+            ? 'This order has already been shipped. Cancelling here does not automatically recall the courier. Confirm only if you still need to cancel fulfilment.'
+            : 'Are you sure you want to cancel this order? Stock will be restored if it was deducted.'
+        }
+        confirmLabel="Cancel Order"
+        cancelLabel="Keep Order"
+        loading={cancelling}
+        onCancel={() => {
+          if (!cancelling) setCancelOpen(false);
+        }}
+        onConfirm={confirmAdminCancel}
+      >
+        <div className="mt-5">
+          <label className="mb-1.5 block text-[15px] font-medium text-text">
+            Reason <span className="font-normal text-soft-text">(optional)</span>
+          </label>
+          <input
+            value={cancelReason}
+            onChange={(e) => setCancelReason(e.target.value)}
+            placeholder="e.g. Customer request"
+            className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:border-teal focus:outline-none"
+          />
+        </div>
+      </ConfirmDialog>
+
+      <ConfirmDialog
+        open={shipOpen && Boolean(selected)}
+        title={`Ship order ${selected?.orderId || ''}?`}
+        message="Review the customer, address, products, and payment below. The order is marked shipped only after the shipping provider confirms a shipment with an AWB."
+        confirmLabel="Create Shipment"
+        cancelLabel="Back"
+        loading={shipping}
+        onCancel={() => {
+          if (!shipping) setShipOpen(false);
+        }}
+        onConfirm={confirmShipOrder}
+      >
+        {selected && (
+          <div className="mt-5 space-y-2 text-sm text-soft-text">
+            <p><span className="font-medium text-text">Customer:</span> {selected.customerName}</p>
+            <p>
+              <span className="font-medium text-text">Address:</span> {selected.address}, {selected.city}, {selected.state} - {selected.pincode}
+            </p>
+            <p>
+              <span className="font-medium text-text">Products:</span>{' '}
+              {selected.items?.map((item) => `${item.name} × ${item.quantity}`).join(', ')}
+            </p>
+            <p>
+              <span className="font-medium text-text">Amount:</span> {formatPrice(selected.totalAmount)}
+            </p>
+            <p>
+              <span className="font-medium text-text">Payment:</span> {selected.paymentMethod} · {selected.paymentStatus}
+            </p>
+          </div>
+        )}
+      </ConfirmDialog>
     </div>
   );
 }

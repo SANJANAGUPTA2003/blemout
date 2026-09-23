@@ -5,7 +5,8 @@
   "scripts": {
     "start": "node index.js",
     "dev": "node --watch index.js",
-    "seed": "node scripts/seed.js"
+    "seed": "node scripts/seed.js",
+    "test": "node utils/orderCancel.test.js && node utils/orderLifecycle.test.js"
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",

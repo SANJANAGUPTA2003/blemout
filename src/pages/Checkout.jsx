@@ -62,7 +62,12 @@ export default function Checkout() {
   const goToSuccess = (orderId) => {
     clearCart();
     navigate('/order-success', {
-      state: { orderId, customerName: form.name, paymentMethod },
+      state: {
+        orderId,
+        customerName: form.name,
+        paymentMethod,
+        productName: items[0]?.name || 'BLEMOUT Face Wash',
+      },
     });
   };
 
