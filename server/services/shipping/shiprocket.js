@@ -21,7 +21,26 @@ async function shiprocketLogin() {
   }
   return { ok: true, token: data.token };
 }
+export async function testShiprocketConnection() {
+  if (!isShippingConfigured()) {
+    return {
+      ok: false,
+      code: 'not_configured',
+      message: 'Shiprocket email or password is missing.',
+    };
+  }
 
+  const auth = await shiprocketLogin();
+
+  if (!auth.ok) {
+    return auth;
+  }
+
+  return {
+    ok: true,
+    message: 'Shiprocket connected successfully.',
+  };
+}
 async function shiprocketRequest(path, { method = 'GET', token, body } = {}) {
   const response = await fetch(`${API}${path}`, {
     method,
