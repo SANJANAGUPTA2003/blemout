@@ -46,6 +46,12 @@ const orderSchema = new mongoose.Schema(
       ],
       default: 'pending',
     },
+    shippingPackage: {
+  lengthCm: { type: Number, default: null, min: 0 },
+  breadthCm: { type: Number, default: null, min: 0 },
+  heightCm: { type: Number, default: null, min: 0 },
+  weightKg: { type: Number, default: null, min: 0 },
+},
     trackingNumber: { type: String, default: '' },
     estimatedDelivery: { type: Date, default: null },
     adminNotes: { type: String, default: '' },
