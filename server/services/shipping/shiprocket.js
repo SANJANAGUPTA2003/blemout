@@ -96,8 +96,28 @@ export function createShiprocketProvider() {
       let trackingUrl = '';
       let createdData = null;
 
-      if (!shipmentId) {
-        const payload = {
+     if (!shipmentId) {
+  const packageDetails = order.shippingPackage || {};
+
+  const length = Number(packageDetails.lengthCm);
+  const breadth = Number(packageDetails.breadthCm);
+  const height = Number(packageDetails.heightCm);
+  const weight = Number(packageDetails.weightKg);
+
+  if (
+    ![length, breadth, height, weight].every(
+      (value) => Number.isFinite(value) && value > 0
+    )
+  ) {
+    return {
+      ok: false,
+      code: 'package_details_missing',
+      message: 'Enter valid package dimensions and weight before creating the shipment.',
+    };
+  }
+
+  const payload = {
+          
           order_id: order.orderId,
           order_date: new Date(order.createdAt || Date.now()).toISOString().slice(0, 19).replace('T', ' '),
           pickup_location: pickup.location,
@@ -119,10 +139,10 @@ export function createShiprocketProvider() {
           })),
           payment_method: order.paymentMethod === 'cod' ? 'COD' : 'Prepaid',
           sub_total: order.totalAmount,
-          length: 10,
-          breadth: 10,
-          height: 10,
-          weight: 0.5,
+          length,
+          breadth,
+          height,
+          weight
         };
 
         const created = await shiprocketRequest('/orders/create/adhoc', {
