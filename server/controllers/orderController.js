@@ -227,43 +227,95 @@ export const cancelOrderByAdmin = async (req, res) => {
 export const shipOrderByAdmin = async (req, res) => {
   try {
     const order = await Order.findById(req.params.id);
-    if (!order) return res.status(404).json({ message: 'Order not found' });
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
 
     if (order.orderStatus === ORDER_STATUS.CANCELLED) {
       return res.status(409).json({ message: 'Cancelled orders cannot be shipped.' });
     }
+
     if (order.orderStatus === ORDER_STATUS.DELIVERED) {
       return res.status(409).json({ message: 'This order has already been delivered.' });
     }
+
     if (order.paymentMethod === 'razorpay' && order.paymentStatus !== 'paid') {
       return res.status(409).json({ message: 'Unpaid online orders cannot be shipped.' });
     }
 
+    // Validate package details received from the admin dashboard.
+    const packageDetails = req.body?.shippingPackage || {};
+
+    const dimensions = {
+      lengthCm: Number(packageDetails.lengthCm),
+      breadthCm: Number(packageDetails.breadthCm),
+      heightCm: Number(packageDetails.heightCm),
+      weightKg: Number(packageDetails.weightKg),
+    };
+
+    if (
+      !Object.values(dimensions).every(
+        (value) => Number.isFinite(value) && value > 0
+      )
+    ) {
+      return res.status(400).json({
+        message: 'Enter valid package dimensions and weight before creating the shipment.',
+      });
+    }
+
+    // Claim the shipment and save package details atomically.
     const claimed = await Order.findOneAndUpdate(
       shipClaimFilter(order._id),
-      { $set: { shippingLock: true } },
+      {
+        $set: {
+          shippingLock: true,
+          shippingPackage: dimensions,
+        },
+      },
       { new: true }
     );
+
     if (!claimed) {
       const latest = await Order.findById(order._id);
+
       if (latest?.awbNumber) {
-        return res.status(409).json({ message: 'This order already has a shipment.' });
+        return res.status(409).json({
+          message: 'This order already has a shipment.',
+        });
       }
+
       if (latest?.shippingLock) {
-        return res.status(409).json({ message: 'A shipment is already being created for this order.' });
+        return res.status(409).json({
+          message: 'A shipment is already being created for this order.',
+        });
       }
-      return res.status(409).json({ message: 'This order cannot be shipped.' });
+
+      return res.status(409).json({
+        message: 'This order cannot be shipped.',
+      });
     }
 
     try {
       const provider = getShippingProvider();
       const result = await provider.createShipment(claimed);
+
       if (!result.ok) {
         claimed.shippingLock = false;
-        if (result.shipmentId) claimed.shipmentId = result.shipmentId;
-        if (result.providerOrderId) claimed.providerOrderId = String(result.providerOrderId);
-        if (result.provider || provider.name) claimed.shippingProvider = result.provider || provider.name;
+
+        if (result.shipmentId) {
+          claimed.shipmentId = result.shipmentId;
+        }
+
+        if (result.providerOrderId) {
+          claimed.providerOrderId = String(result.providerOrderId);
+        }
+
+        if (result.provider || provider.name) {
+          claimed.shippingProvider = result.provider || provider.name;
+        }
+
         await claimed.save();
+
         return res.status(503).json({
           message: result.message || 'Unable to create shipment.',
           configured: isShippingConfigured(),
@@ -276,11 +328,16 @@ export const shipOrderByAdmin = async (req, res) => {
       claimed.trackingNumber = result.awb;
       claimed.trackingUrl = result.trackingUrl || '';
       claimed.shipmentId = result.shipmentId || claimed.shipmentId || '';
-      if (result.providerOrderId) claimed.providerOrderId = String(result.providerOrderId);
+
+      if (result.providerOrderId) {
+        claimed.providerOrderId = String(result.providerOrderId);
+      }
+
       claimed.shipmentStatus = ORDER_STATUS.SHIPPED;
       claimed.lastShipmentStatus = ORDER_STATUS.SHIPPED;
       claimed.orderStatus = ORDER_STATUS.SHIPPED;
       claimed.shippingLock = false;
+
       await claimed.save();
 
       notifyOrderLifecycle(claimed, 'shipped').catch(() => {});
@@ -290,11 +347,19 @@ export const shipOrderByAdmin = async (req, res) => {
         order: toAdminOrder(claimed),
       });
     } catch {
-      await Order.updateOne({ _id: claimed._id }, { $set: { shippingLock: false } });
-      return res.status(500).json({ message: 'Unable to create shipment right now.' });
+      await Order.updateOne(
+        { _id: claimed._id },
+        { $set: { shippingLock: false } }
+      );
+
+      return res.status(500).json({
+        message: 'Unable to create shipment right now.',
+      });
     }
   } catch {
-    return res.status(500).json({ message: 'Unable to create shipment right now.' });
+    return res.status(500).json({
+      message: 'Unable to create shipment right now.',
+    });
   }
 };
 
