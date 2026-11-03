@@ -3,7 +3,29 @@ export function shipClaimFilter(orderMongoId) {
     _id: orderMongoId,
     orderStatus: { $in: ['pending', 'processing'] },
     shippingLock: { $ne: true },
-    $or: [{ awbNumber: '' }, { awbNumber: null }, { awbNumber: { $exists: false } }],
+    $and: [
+      {
+        $or: [
+          { awbNumber: '' },
+          { awbNumber: null },
+          { awbNumber: { $exists: false } },
+        ],
+      },
+      {
+        $or: [
+          { shipmentId: '' },
+          { shipmentId: null },
+          { shipmentId: { $exists: false } },
+        ],
+      },
+      {
+        $or: [
+          { providerOrderId: '' },
+          { providerOrderId: null },
+          { providerOrderId: { $exists: false } },
+        ],
+      },
+    ],
   };
 }
 
@@ -12,7 +34,10 @@ export function shouldRetryExistingShipment(order) {
 }
 
 export function pickupLocationOrError() {
-  const location = String(process.env.SHIPROCKET_PICKUP_LOCATION || '').trim();
+  const location = String(
+    process.env.SHIPROCKET_PICKUP_LOCATION || ''
+  ).trim();
+
   if (!location) {
     return {
       ok: false,
@@ -21,5 +46,6 @@ export function pickupLocationOrError() {
         'SHIPROCKET_PICKUP_LOCATION is not configured. Set it to the exact pickup name from the Shiprocket dashboard.',
     };
   }
+
   return { ok: true, location };
 }
