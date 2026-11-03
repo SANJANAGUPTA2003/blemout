@@ -14,7 +14,7 @@ import { ORDER_STATUS, toPublicTracking } from '../utils/orderStatus.js';
 import { isAllowedAdminStatusUpdate, toAdminOrder } from '../utils/adminOrder.js';
 import { notifyOrderLifecycle } from '../services/notifications/index.js';
 import { getShippingProvider, isShippingConfigured } from '../services/shipping/index.js';
-import { shipClaimFilter } from '../utils/shipClaim.js';
+import {   shipClaimFilter,   shouldRetryExistingShipment, } from '../utils/shipClaim.js';
 
 const TRACKING_ERROR = 'Order not found or details do not match.';
 
