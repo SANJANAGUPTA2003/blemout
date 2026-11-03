@@ -91,6 +91,14 @@ export function createShiprocketProvider() {
 
       let shipmentId = String(order.shipmentId || '').trim();
       let providerOrderId = String(order.providerOrderId || '').trim();
+      if (providerOrderId && !shipmentId && !order.awbNumber) {
+  return {
+    ok: false,
+    code: 'shipment_needs_verification',
+    message: 'A Shiprocket order may already exist. Verify it in Shiprocket before attempting to create another shipment.',
+    providerOrderId,
+  };
+}
       let awb = '';
       let courier = '';
       let trackingUrl = '';
@@ -189,7 +197,7 @@ export function createShiprocketProvider() {
       return {
         ok: true,
         provider: 'shiprocket',
-        shipmentId: String(shipmentId || providerOrderId || ''),
+        shipmentId: String(shipmentId || ''),
         providerOrderId,
         awb,
         courier,
