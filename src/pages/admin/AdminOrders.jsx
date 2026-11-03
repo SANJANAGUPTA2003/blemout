@@ -34,6 +34,18 @@ export default function AdminOrders() {
   const [cancelReason, setCancelReason] = useState('');
   const [cancelling, setCancelling] = useState(false);
   const [shipping, setShipping] = useState(false);
+  const [packageDetails, setPackageDetails] = useState({
+  lengthCm: '',
+  breadthCm: '',
+  heightCm: '',
+  weightKg: '',
+});
+  const [packageDetails, setPackageDetails] = useState({
+  lengthCm: '',
+  breadthCm: '',
+  heightCm: '',
+  weightKg: '',
+});
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteConfirmId, setDeleteConfirmId] = useState('');
   const [deleting, setDeleting] = useState(false);
@@ -45,12 +57,19 @@ export default function AdminOrders() {
 
   useEffect(() => { fetchOrders(); }, []);
 
-  const openOrder = (order) => {
-    setSelected(order);
-    setTrackingNumber(order.trackingNumber || '');
-    setEstimatedDelivery(order.estimatedDelivery ? order.estimatedDelivery.slice(0, 10) : '');
-    setAdminNotes(order.adminNotes || '');
-  };
+ const openOrder = (order) => {
+  setSelected(order);
+  setTrackingNumber(order.trackingNumber || '');
+  setEstimatedDelivery(order.estimatedDelivery ? order.estimatedDelivery.slice(0, 10) : '');
+  setAdminNotes(order.adminNotes || '');
+
+  setPackageDetails({
+    lengthCm: order.shippingPackage?.lengthCm ?? '',
+    breadthCm: order.shippingPackage?.breadthCm ?? '',
+    heightCm: order.shippingPackage?.heightCm ?? '',
+    weightKg: order.shippingPackage?.weightKg ?? '',
+  });
+};
 
   const updateStatus = async (orderId, status) => {
     try {
@@ -112,25 +131,44 @@ export default function AdminOrders() {
     }
   };
 
-  const confirmShipOrder = async () => {
-    if (!selected) return;
-    setShipping(true);
-    setActionError('');
-    try {
-      const { data } = await api.post(`/orders/${selected._id}/ship`);
-      setSelected(data.order);
-      setShipOpen(false);
-      fetchOrders();
-    } catch (err) {
-      setActionError(
-        err.response?.data?.message || 'Unable to create shipment. The order was not marked as shipped.'
-      );
-      setShipOpen(false);
-    } finally {
-      setShipping(false);
-    }
+  cconst confirmShipOrder = async () => {
+  if (!selected) return;
+
+  const dimensions = {
+    lengthCm: Number(packageDetails.lengthCm),
+    breadthCm: Number(packageDetails.breadthCm),
+    heightCm: Number(packageDetails.heightCm),
+    weightKg: Number(packageDetails.weightKg),
   };
 
+  if (!Object.values(dimensions).every(
+    (value) => Number.isFinite(value) && value > 0
+  )) {
+    setActionError('Please enter valid package dimensions and weight.');
+    return;
+  }
+
+  setShipping(true);
+  setActionError('');
+
+  try {
+    const { data } = await api.post(`/orders/${selected._id}/ship`, {
+      shippingPackage: dimensions,
+    });
+
+    setSelected(data.order);
+    setShipOpen(false);
+    fetchOrders();
+  } catch (err) {
+    setActionError(
+      err.response?.data?.message ||
+      'Unable to create shipment. The order was not marked as shipped.'
+    );
+    setShipOpen(false);
+  } finally {
+    setShipping(false);
+  }
+};
   const confirmDeleteOrder = async () => {
     if (!selected) return;
     if (deleteConfirmId.trim().toUpperCase() !== String(selected.orderId).toUpperCase()) {
@@ -433,6 +471,43 @@ export default function AdminOrders() {
             <p>
               <span className="font-medium text-text">Payment:</span> {selected.paymentMethod} · {selected.paymentStatus}
             </p>
+            <div className="mt-4 grid grid-cols-2 gap-3">
+  <Input
+    label="Length (cm)"
+    type="number"
+    value={packageDetails.lengthCm}
+    onChange={(e) =>
+      setPackageDetails({ ...packageDetails, lengthCm: e.target.value })
+    }
+  />
+
+  <Input
+    label="Breadth (cm)"
+    type="number"
+    value={packageDetails.breadthCm}
+    onChange={(e) =>
+      setPackageDetails({ ...packageDetails, breadthCm: e.target.value })
+    }
+  />
+
+  <Input
+    label="Height (cm)"
+    type="number"
+    value={packageDetails.heightCm}
+    onChange={(e) =>
+      setPackageDetails({ ...packageDetails, heightCm: e.target.value })
+    }
+  />
+
+  <Input
+    label="Weight (kg)"
+    type="number"
+    value={packageDetails.weightKg}
+    onChange={(e) =>
+      setPackageDetails({ ...packageDetails, weightKg: e.target.value })
+    }
+  />
+</div>
           </div>
         )}
       </ConfirmDialog>
