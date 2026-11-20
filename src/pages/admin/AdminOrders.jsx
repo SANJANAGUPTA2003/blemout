@@ -40,12 +40,6 @@ export default function AdminOrders() {
   heightCm: '',
   weightKg: '',
 });
-  const [packageDetails, setPackageDetails] = useState({
-  lengthCm: '',
-  breadthCm: '',
-  heightCm: '',
-  weightKg: '',
-});
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteConfirmId, setDeleteConfirmId] = useState('');
   const [deleting, setDeleting] = useState(false);
