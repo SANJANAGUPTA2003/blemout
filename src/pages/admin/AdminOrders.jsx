@@ -131,7 +131,7 @@ export default function AdminOrders() {
     }
   };
 
-  cconst confirmShipOrder = async () => {
+  const confirmShipOrder = async () => {
   if (!selected) return;
 
   const dimensions = {
