@@ -1,3 +1,419 @@
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useParams, useNavigate, Link } from 'react-router-dom';
+import {
+  Minus,
+  Plus,
+  ShoppingBag,
+  ShieldCheck,
+  Truck,
+  ChevronLeft,
+  ChevronRight,
+  Droplet,
+  FlaskConical,
+  Heart,
+  Leaf,
+  Shield,
+  Sparkles,
+  Sun,
+  ZoomIn,
+} from 'lucide-react';
+import FadeUp from '../components/ui/FadeUp';
+import StarRating from '../components/ui/StarRating';
+import Button from '../components/ui/Button';
+import ApiMessage from '../components/ui/ApiMessage';
+import ImageZoomLightbox from '../components/product/ImageZoomLightbox';
+import StickyPurchaseBar from '../components/product/StickyPurchaseBar';
+import ProductQuickAdd from '../components/product/ProductQuickAdd';
+import ProductRecommendCarousel from '../components/product/ProductRecommendCarousel';
+import { useCart } from '../context/CartContext';
+import { useProducts } from '../context/ProductContext';
+import { getResponsiveImage, normalizeProductContent } from '../data/productImages';
+import { getDetailGallery, getProductBadge } from '../data/productDisplay';
+import { getComboIncludedLabels } from '../data/storefrontConfig';
+import { getRecommendedProducts } from '../data/productRecommendations';
+import { getFullIngredients } from '../data/productIngredients';
+import { calcDiscountPercent, getSellingPrice } from '../data/business';
+import PriceDisplay from '../components/ui/PriceDisplay';
+
+const ICONS = { Droplet, FlaskConical, Heart, Leaf, Shield, Sparkles, Sun };
+
+const accordionDefs = [
+  { key: 'overview', label: 'Overview' },
+  { key: 'benefits', label: 'Benefits' },
+  { key: 'highlights', label: 'Key Ingredients' },
+  { key: 'howToUse', label: 'How to Use' },
+  { key: 'ingredients', label: 'Full Ingredient List' },
+  { key: 'precautions', label: 'Precautions' },
+  { key: 'faqs', label: 'FAQs' },
+];
+
+function PdpMainImage({ src, alt, priority }) {
+  const image = getResponsiveImage(src, 'main');
+  return (
+    <picture>
+      {image.srcSet && (
+        <source
+          type="image/webp"
+          srcSet={image.srcSet}
+          sizes="(max-width: 1024px) 100vw, 55vw"
+        />
+      )}
+      <img
+        src={image.webpSrc || image.src || src}
+        alt={alt}
+        width={1200}
+        height={1200}
+        sizes="(max-width: 1024px) 100vw, 55vw"
+        loading={priority ? 'eager' : 'lazy'}
+        decoding="async"
+        fetchPriority={priority ? 'high' : 'auto'}
+        className="w-full h-full object-contain"
+      />
+    </picture>
+  );
+}
+
+function PdpThumbImage({ src }) {
+  const image = getResponsiveImage(src, 'thumb');
+  return (
+    <picture>
+      {image.webpSrc && <source type="image/webp" srcSet={image.srcSet || image.webpSrc} />}
+      <img
+        src={image.webpSrc || image.src || src}
+        alt=""
+        width={160}
+        height={160}
+        loading="lazy"
+        decoding="async"
+        className="w-full h-full object-contain"
+      />
+    </picture>
+  );
+}
+
+export default function ProductDetail() {
+  const { slug } = useParams();
+  const navigate = useNavigate();
+  const { addToCart, isDrawerOpen } = useCart();
+  const { products: summaryProducts, getProductBySlug, getBySlug, slow } = useProducts();
+  const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [quantity, setQuantity] = useState(1);
+  const [activeImage, setActiveImage] = useState(0);
+  const [openAccordion, setOpenAccordion] = useState('overview');
+  const [touchX, setTouchX] = useState(null);
+  const [zoomOpen, setZoomOpen] = useState(false);
+  const [quickAddOpen, setQuickAddOpen] = useState(false);
+  const purchaseRef = useRef(null);
+
+  // Instant paint from summary cache when available
+  useEffect(() => {
+    const cached = getBySlug?.(slug);
+    if (cached) {
+      setProduct((prev) => prev?.slug === slug ? prev : normalizeProductContent(cached));
+      setLoading(false);
+    } else {
+      setLoading(true);
+    }
+    setError(null);
+    setActiveImage(0);
+    setQuantity(1);
+    setOpenAccordion('overview');
+
+    let active = true;
+    getProductBySlug(slug)
+      .then((data) => {
+        if (!active) return;
+        if (!data) {
+          if (!cached) {
+            setProduct(null);
+            setError('notfound');
+          }
+          return;
+        }
+        setProduct(normalizeProductContent(data));
+        setError(null);
+      })
+      .catch((err) => {
+        if (!active) return;
+        if (!cached) {
+          setProduct(null);
+          setError(err.response?.status === 404 ? 'notfound' : 'offline');
+        }
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [slug, getProductBySlug, getBySlug]);
+
+  const fetchProduct = useCallback(() => {
+    setLoading(true);
+    setError(null);
+    return getProductBySlug(slug)
+      .then((data) => {
+        if (!data) {
+          setProduct(null);
+          setError('notfound');
+          return;
+        }
+        setProduct(normalizeProductContent(data));
+        setActiveImage(0);
+        setQuantity(1);
+        setOpenAccordion('overview');
+      })
+      .catch((err) => {
+        setProduct(null);
+        setError(err.response?.status === 404 ? 'notfound' : 'offline');
+      })
+      .finally(() => setLoading(false));
+  }, [slug, getProductBySlug]);
+
+  const images = useMemo(() => (product ? getDetailGallery(product) : []), [product]);
+
+  // Prefetch next gallery image for faster swipe
+  useEffect(() => {
+    if (!images.length) return;
+    const next = images[(activeImage + 1) % images.length];
+    if (!next || typeof window === 'undefined') return;
+    const image = getResponsiveImage(next, 'main');
+    const img = new window.Image();
+    img.decoding = 'async';
+    img.src = image.webpSrc || image.src || next;
+  }, [images, activeImage]);
+
+  const related = useMemo(
+    () => getRecommendedProducts(product, summaryProducts),
+    [product, summaryProducts]
+  );
+
+  if (loading) {
+    return (
+      <div className="mx-auto max-w-[1400px] px-5 py-10 min-[1920px]:max-w-[1600px] md:px-8 md:py-12 lg:px-10">
+        <div className="grid lg:grid-cols-[1.15fr_0.85fr] gap-8 md:grid-cols-2 md:gap-10 lg:gap-12">
+          <div className="aspect-square rounded-sm bg-[#eef2f1] animate-pulse" />
+          <div className="space-y-4 pt-2">
+            <div className="h-4 w-24 rounded bg-[#eef2f1] animate-pulse" />
+            <div className="h-10 w-3/4 rounded bg-[#e8eceb] animate-pulse" />
+            <div className="h-20 w-full rounded bg-[#eef2f1] animate-pulse" />
+            <div className="h-8 w-32 rounded bg-[#e8eceb] animate-pulse" />
+          </div>
+        </div>
+        {slow && (
+          <p className="mt-8 text-center text-sm text-[#4a5560]">
+            Products are taking a little longer to load. Please wait or retry.
+          </p>
+        )}
+      </div>
+    );
+  }
+
+  if (error || !product) {
+    return (
+      <div className="py-32">
+        <ApiMessage
+          type={error === 'offline' ? 'offline' : 'empty'}
+          message={
+            error === 'offline'
+              ? slow
+                ? 'Products are taking a little longer to load. Please wait or retry.'
+                : 'Unable to load this product. Check that the backend and MongoDB are running.'
+              : 'Product not found.'
+          }
+          onRetry={error === 'offline' ? fetchProduct : undefined}
+        />
+        <div className="text-center mt-4">
+          <Link to="/shop" className="text-sm text-teal hover:text-dark-teal transition-colors">
+            ← Back to Shop
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const sellingPrice = getSellingPrice(product);
+  const mrp = product.mrp && product.mrp > sellingPrice ? product.mrp : null;
+  const discount =
+    product.discountPercentage > 0
+      ? product.discountPercentage
+      : calcDiscountPercent(mrp, sellingPrice);
+  const badge = getProductBadge(product);
+  const isCombo = Boolean(product.isCombo || product.category === 'Combo');
+  const includedLabels =
+    (product.includedProducts || product.comboItems)?.length > 0
+      ? product.includedProducts || product.comboItems
+      : getComboIncludedLabels(product.slug);
+  const maxQty = product.stock > 0 ? product.stock : 99;
+
+  const goImage = (dir) => {
+    if (!images.length) return;
+    setActiveImage((i) => (i + dir + images.length) % images.length);
+  };
+
+  const handleAddToCart = () => addToCart({ ...product, price: sellingPrice }, quantity);
+  const handleBuyNow = () => {
+    addToCart({ ...product, price: sellingPrice }, quantity);
+    navigate('/checkout');
+  };
+
+  const accordionContent = {
+    overview: product.summary || product.description || 'Details coming soon.',
+    benefits: product.benefits.length ? (
+      <ul className="space-y-2">
+        {product.benefits.map((b) => (
+          <li key={b} className="flex gap-2">
+            <span className="text-teal">•</span>
+            <span>{b}</span>
+          </li>
+        ))}
+      </ul>
+    ) : (
+      'Details coming soon.'
+    ),
+    highlights: product.ingredientHighlights.length ? (
+      <div className="grid sm:grid-cols-2 gap-4">
+        {product.ingredientHighlights.map((item) => {
+          const Icon = ICONS[item.icon] || Sparkles;
+          return (
+            <div key={item.name} className="flex gap-3 items-start">
+              <span className="w-10 h-10 rounded-full bg-[#f5f8f7] flex items-center justify-center text-teal shrink-0">
+                <Icon size={18} strokeWidth={1.75} />
+              </span>
+              <div>
+                <p className="text-sm font-semibold text-text">{item.name}</p>
+                <p className="mt-1 text-sm text-soft-text leading-relaxed">{item.explanation}</p>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    ) : (
+      product.ingredients || 'See packaging for key ingredients.'
+    ),
+    howToUse: product.howToUse || 'Details coming soon.',
+    ingredients: getFullIngredients(product) || 'See product packaging.',
+    precautions: product.precautions || 'For external use only. Discontinue if irritation occurs.',
+    faqs: product.faqs.length ? (
+      <div className="space-y-4">
+        {product.faqs.map((faq) => (
+          <div key={faq.question}>
+            <p className="font-semibold text-text">{faq.question}</p>
+            <p className="mt-1 text-soft-text">{faq.answer}</p>
+          </div>
+        ))}
+      </div>
+    ) : null,
+  };
+
+  return (
+    <div className="bg-white">
+      <div className="mx-auto max-w-[1400px] px-5 py-10 min-[1920px]:max-w-[1600px] md:px-8 md:py-12 lg:px-10">
+        <FadeUp>
+          <div className="grid items-start gap-8 md:grid-cols-2 lg:gap-12">
+            <div>
+              <div
+                className={`relative flex items-center justify-center overflow-hidden border-0 ${
+                  isCombo
+                    ? 'h-[min(58vw,680px)] max-h-[680px] min-h-[240px] w-full'
+                    : 'aspect-square'
+                }`}
+                onTouchStart={(e) => setTouchX(e.changedTouches[0]?.clientX ?? null)}
+                onTouchEnd={(e) => {
+                  const end = e.changedTouches[0]?.clientX;
+                  if (touchX == null || end == null) return;
+                  const delta = end - touchX;
+                  if (Math.abs(delta) < 40) return;
+                  goImage(delta < 0 ? 1 : -1);
+                }}
+              >
+                <PdpMainImage
+                  src={images[activeImage] || product.imageUrl}
+                  alt={product.name}
+                  priority={activeImage === 0}
+                />
+                <button
+                  type="button"
+                  aria-label="Zoom image"
+                  onClick={() => setZoomOpen(true)}
+                  className="absolute right-3 top-3 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/95 text-[#222222]"
+                >
+                  <ZoomIn size={18} />
+                </button>
+                {images.length > 1 && (
+                  <>
+                    <button
+                      type="button"
+                      aria-label="Previous image"
+                      onClick={() => goImage(-1)}
+                      className="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/95 text-[#222222] flex items-center justify-center hover:bg-white"
+                    >
+                      <ChevronLeft size={18} />
+                    </button>
+                    <button
+                      type="button"
+                      aria-label="Next image"
+                      onClick={() => goImage(1)}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/95 text-[#222222] flex items-center justify-center hover:bg-white"
+                    >
+                      <ChevronRight size={18} />
+                    </button>
+                  </>
+                )}
+              </div>
+              {images.length > 1 && (
+                <div className="mt-3 flex gap-2.5 overflow-x-auto pb-1">
+                  {images.map((img, i) => (
+                    <button
+                      key={img + i}
+                      type="button"
+                      onClick={() => setActiveImage(i)}
+                      className={`shrink-0 aspect-square w-[72px] md:w-20 border-0 bg-[#fafafa] p-0 flex items-center justify-center overflow-hidden transition-opacity ${
+                        activeImage === i ? 'opacity-100 ring-1 ring-teal' : 'opacity-45 hover:opacity-80'
+                      }`}
+                    >
+                      <PdpThumbImage src={img} />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="lg:pt-2">
+              {badge && (
+                <p className="mb-3 inline-block rounded-[2px] bg-[#9fd9cf] px-2.5 py-1 text-[11px] font-bold tracking-[0.12em] text-[#1f5c56]">
+                  {badge}
+                </p>
+              )}
+              <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.16em] text-teal md:text-[12px]">
+                {product.category}
+              </p>
+              <h1 className="text-[clamp(1.65rem,2.8vw,2.15rem)] font-bold leading-snug tracking-[-0.02em] text-[#111111] md:text-[32px]">
+                {product.name}
+              </h1>
+              <StarRating rating={5} size={14} className="mt-3 flex items-center gap-1 text-teal" />
+              {product.summary && (
+                <p className="mt-4 text-[16px] text-soft-text leading-relaxed">{product.summary}</p>
+              )}
+
+              <div className="mt-6">
+                <PriceDisplay
+                  sellingPrice={sellingPrice}
+                  mrp={mrp}
+                  discount={discount}
+                  size="pdp"
+                />
+              </div>
+
+              {product.size && (
+                <p className="mt-4 text-[15px] text-soft-text">
+                  Size: <span className="text-text font-semibold">{product.size}</span>
+                </p>
+              )}
+              {product.skinType && (
                 <p className="mt-2 text-[15px] text-soft-text">
                   Suitable for: <span className="text-text font-semibold">{product.skinType}</span>
                 </p>
