@@ -1,96 +1,122 @@
-import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
-import {
-  Minus,
-  Plus,
-  ShoppingBag,
-  ShieldCheck,
-  Truck,
-  ChevronLeft,
-  ChevronRight,
-  Droplet,
-  FlaskConical,
-  Heart,
-  Leaf,
-  Shield,
-  Sparkles,
-  Sun,
-  ZoomIn,
-} from 'lucide-react';
-import FadeUp from '../components/ui/FadeUp';
-import StarRating from '../components/ui/StarRating';
-import Button from '../components/ui/Button';
-import ApiMessage from '../components/ui/ApiMessage';
-import ImageZoomLightbox from '../components/product/ImageZoomLightbox';
-import StickyPurchaseBar from '../components/product/StickyPurchaseBar';
-import ProductQuickAdd from '../components/product/ProductQuickAdd';
-import ProductRecommendCarousel from '../components/product/ProductRecommendCarousel';
-import { useCart } from '../context/CartContext';
-import { useProducts } from '../context/ProductContext';
-import { getResponsiveImage, normalizeProductContent } from '../data/productImages';
-import { getDetailGallery, getProductBadge } from '../data/productDisplay';
-import { getComboIncludedLabels } from '../data/storefrontConfig';
-import { getRecommendedProducts } from '../data/productRecommendations';
-import { getFullIngredients } from '../data/productIngredients';
-import { calcDiscountPercent, getSellingPrice } from '../data/business';
-import PriceDisplay from '../components/ui/PriceDisplay';
+                <p className="mt-2 text-[15px] text-soft-text">
+                  Suitable for: <span className="text-text font-semibold">{product.skinType}</span>
+                </p>
+              )}
+              {typeof product.stock === 'number' && product.stock === 0 && (
+                <p className="mt-2 text-[14px] text-soft-text">Currently unavailable</p>
+              )}
 
-const ICONS = { Droplet, FlaskConical, Heart, Leaf, Shield, Sparkles, Sun };
+              {includedLabels.length > 0 && (
+                <div className="mt-6">
+                  <p className="mb-2 text-[12px] font-bold uppercase tracking-[0.14em] text-[#111111]">
+                    Includes
+                  </p>
+                  <ul className="space-y-1.5 text-[16px] text-[#4a5560]">
+                    {includedLabels.map((item) => (
+                      <li key={item}>• {item}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
 
-const accordionDefs = [
-  { key: 'overview', label: 'Overview' },
-  { key: 'benefits', label: 'Benefits' },
-  { key: 'highlights', label: 'Key Ingredients' },
-  { key: 'howToUse', label: 'How to Use' },
-  { key: 'ingredients', label: 'Full Ingredient List' },
-  { key: 'precautions', label: 'Precautions' },
-  { key: 'faqs', label: 'FAQs' },
-];
+              <div ref={purchaseRef} className="mt-6 inline-flex items-center border border-gray-200 rounded-full">
+                <button
+                  type="button"
+                  aria-label="Decrease quantity"
+                  onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                  className="p-3 text-soft-text hover:text-dark-teal"
+                >
+                  <Minus size={16} />
+                </button>
+                <span className="w-10 text-center text-sm font-semibold">{quantity}</span>
+                <button
+                  type="button"
+                  aria-label="Increase quantity"
+                  onClick={() => setQuantity((q) => Math.min(maxQty, q + 1))}
+                  className="p-3 text-soft-text hover:text-dark-teal"
+                >
+                  <Plus size={16} />
+                </button>
+              </div>
 
-function PdpMainImage({ src, alt, priority }) {
-  const image = getResponsiveImage(src, 'main');
-  return (
-    <picture className="block h-full w-full">
-      {image.srcSet && (
-        <source
-          type="image/webp"
-          srcSet={image.srcSet}
-          sizes="(max-width: 1024px) 100vw, 55vw"
+              <div className="mt-6 flex flex-col sm:flex-row gap-3">
+                <Button onClick={handleAddToCart} className="flex-1 gap-2" disabled={product.stock === 0}>
+                  <ShoppingBag size={16} /> Add to Cart
+                </Button>
+                <Button variant="outline" onClick={handleBuyNow} className="flex-1" disabled={product.stock === 0}>
+                  Buy Now
+                </Button>
+              </div>
+
+              <div className="mt-8 space-y-3 text-[15px] text-soft-text">
+                <p className="flex items-center gap-2">
+                  <Truck size={16} className="text-teal" /> Secure shipping across India
+                </p>
+                <p className="flex items-center gap-2">
+                  <ShieldCheck size={16} className="text-teal" /> Dermatologically inspired formulas
+                </p>
+              </div>
+
+              <div className="mt-10 border-t border-gray-100">
+                {accordionDefs.map((item) => {
+                  if (item.key === 'faqs' && !accordionContent.faqs) return null;
+                  const open = openAccordion === item.key;
+                  return (
+                    <div key={item.key} className="border-b border-gray-100">
+                      <button
+                        type="button"
+                        onClick={() => setOpenAccordion(open ? '' : item.key)}
+                        className="w-full flex items-center justify-between py-4 text-left"
+                      >
+                        <span className="text-[15px] font-semibold text-text">{item.label}</span>
+                        <span className="text-teal text-lg leading-none">{open ? '−' : '+'}</span>
+                      </button>
+                      {open && (
+                        <div className="pb-5 text-[15px] text-soft-text leading-relaxed">
+                          {accordionContent[item.key]}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </FadeUp>
+
+        <ProductRecommendCarousel
+          products={related}
+          title={
+            product.isCombo || product.category === 'Combo'
+              ? 'Pair With These Essentials'
+              : 'You May Also Like'
+          }
         />
-      )}
-      <img
-        src={image.webpSrc || image.src || src}
-        alt={alt}
-        width={1200}
-        height={1200}
-        sizes="(max-width: 1024px) 100vw, 55vw"
-        loading={priority ? 'eager' : 'lazy'}
-        decoding="async"
-        fetchPriority={priority ? 'high' : 'auto'}
-        className="w-full h-full object-contain"
+      </div>
+
+      <ImageZoomLightbox
+        open={zoomOpen}
+        src={
+          getResponsiveImage(images[activeImage] || product.imageUrl, 'main').webpSrc ||
+          images[activeImage] ||
+          product.imageUrl
+        }
+        alt={product.name}
+        onClose={() => setZoomOpen(false)}
       />
-    </picture>
+      <StickyPurchaseBar
+        targetRef={purchaseRef}
+        productName={product.name}
+        price={sellingPrice}
+        imageUrl={images[0] || product.imageUrl}
+        onAdd={handleAddToCart}
+        hidden={zoomOpen || isDrawerOpen || quickAddOpen}
+      />
+      <ProductQuickAdd
+        product={product}
+        disabled={zoomOpen || isDrawerOpen}
+        onOpenChange={setQuickAddOpen}
+      />
+    </div>
   );
 }
-
-function PdpThumbImage({ src }) {
-  const image = getResponsiveImage(src, 'thumb');
-  return (
-    <picture className="block h-full w-full">
-      {image.webpSrc && <source type="image/webp" srcSet={image.srcSet || image.webpSrc} />}
-      <img
-        src={image.webpSrc || image.src || src}
-        alt=""
-        width={160}
-        height={160}
-        loading="lazy"
-        decoding="async"
-        className="w-full h-full object-contain"
-      />
-    </picture>
-  );
-}
-
-export default function ProductDetail() {
-  const { slug } = useParams();
-  const navigate = useNavigate();
